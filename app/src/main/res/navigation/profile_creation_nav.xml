@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_creation_nav"
+    app:startDestination="@id/basicDetailsFragment">
+
+    <fragment
+        android:id="@+id/basicDetailsFragment"
+        android:name="ie.ul.fitbook.ui.profile.fragments.BasicDetailsFragment"
+        android:label="fragment_basic_details"
+        tools:layout="@layout/fragment_basic_details" >
+        <action
+            android:id="@+id/action_basicDetailsFragment_to_biographyFragment"
+            app:destination="@id/biographyFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/biographyFragment"
+        android:name="ie.ul.fitbook.ui.profile.fragments.BiographyFragment"
+        android:label="fragment_biography"
+        tools:layout="@layout/fragment_biography" >
+        <action
+            android:id="@+id/action_biographyFragment_to_athleticInformationFragment"
+            app:destination="@id/athleticInformationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/athleticInformationFragment"
+        android:name="ie.ul.fitbook.ui.profile.fragments.AthleticInformationFragment"
+        android:label="fragment_athletic_information"
+        tools:layout="@layout/fragment_athletic_information" />
+</navigation>

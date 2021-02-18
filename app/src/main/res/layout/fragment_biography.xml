@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/biographyFragmentLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.profile.fragments.BiographyFragment">
+
+    <TextView
+        android:id="@+id/biographyInfoView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="19dp"
+        android:layout_marginTop="16dp"
+        android:text="User Biography"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/detailsView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter a short biography here"
+        app:layout_constraintStart_toStartOf="@+id/biographyInfoView"
+        app:layout_constraintTop_toBottomOf="@+id/biographyInfoView" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="453dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="27dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailsView1" />
+
+    <TextView
+        android:id="@+id/biographyView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="29dp"
+        android:layout_marginBottom="7dp"
+        android:text="Biography"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintBottom_toTopOf="@+id/bioInfoView"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/bioInfoView"
+        android:layout_width="0dp"
+        android:layout_height="41dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginBottom="50dp"
+        android:text="Enter some details about yourself, for example, your favourite route, how often you exercise etc."
+        app:layout_constraintBottom_toTopOf="@+id/biographyTextField"
+        app:layout_constraintEnd_toEndOf="@+id/biographyTextField"
+        app:layout_constraintStart_toStartOf="@+id/biographyView" />
+
+    <EditText
+        android:id="@+id/biographyTextField"
+        android:layout_width="306dp"
+        android:layout_height="219dp"
+        android:layout_marginStart="29dp"
+        android:layout_marginBottom="205dp"
+        android:ems="10"
+        android:hint="Enter your biography here"
+        android:inputType="textMultiLine"
+        android:singleLine="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/cancel1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="61dp"
+        android:layout_marginBottom="61dp"
+        android:text="Cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/next1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="61dp"
+        android:layout_marginBottom="61dp"
+        android:text="Next"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
