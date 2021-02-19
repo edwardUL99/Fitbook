@@ -5,19 +5,16 @@ import android.content.SharedPreferences;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 import ie.ul.fitbook.profile.Profile;
+import ie.ul.fitbook.utils.Utils;
 
 /**
  * This class provides static utility classes for handling login
  */
 public final class Login {
-    /**
-     * The name of our shared preferences file
-     */
-    private static final String SHARED_PREFERENCES_FILE = "FitbookPrefs";
-
     /**
      * Key used for determining a saved login
      */
@@ -54,7 +51,7 @@ public final class Login {
             forcedLogin = false;
             return false;
         } else {
-            SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(Utils.SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
             return doCheckLogin(sharedPreferences);
         }
     }
@@ -79,8 +76,8 @@ public final class Login {
      */
     public static void saveLogin(Context context) {
         // we save login so that if data is cleared, checkLogin() will always return false regardless of FirebaseAuth current user nullity, therefore forcing a re-login on the next launch of MainActivity
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
-        if (checkLogin(context)) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(Utils.SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(LOGIN_SAVED_KEY, true);
             editor.apply();
@@ -92,8 +89,8 @@ public final class Login {
      * @param context the context to remove the login of
      */
     public static void deleteLogin(Context context) {
-        SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE).edit();
-        editor.putBoolean(SHARED_PREFERENCES_FILE, false);
+        SharedPreferences.Editor editor = context.getSharedPreferences(Utils.SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE).edit();
+        editor.putBoolean(LOGIN_SAVED_KEY, false);
         editor.apply();
         loggedIn = false;
     }
@@ -105,8 +102,9 @@ public final class Login {
      * @param onCompleteListener the listener to call back on when logout is complete
      */
     public static void logout(Context context, OnCompleteListener<Void> onCompleteListener) {
-        AuthUI.getInstance().signOut(context)
-                .addOnCompleteListener(onCompleteListener);
+        Task<Void> signOut = AuthUI.getInstance().signOut(context);
+        if (onCompleteListener != null)
+                signOut.addOnCompleteListener(onCompleteListener);
         deleteLogin(context);
     }
 

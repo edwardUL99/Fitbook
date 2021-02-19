@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -37,7 +38,7 @@ public class LoginActivity extends AppCompatActivity implements SignInHandler {
     /**
      * Tag used for logging
      */
-    private static final String TAG = "ie.ul.fitbook.ui.MainActivity";
+    private static final String TAG = "LoginActivity";
     /**
      * Our shared preferences instance
      */
@@ -161,8 +162,21 @@ public class LoginActivity extends AppCompatActivity implements SignInHandler {
 
         Toast.makeText(this, "An unknown error occurred during sign-in", Toast.LENGTH_SHORT).show();
 
-        setResult(-1);
+        setResult(RESULT_CANCELED);
         finish();
+    }
+
+    /**
+     * Called when the activity has detected the user's press of the back
+     * key. The {@link #getOnBackPressedDispatcher() OnBackPressedDispatcher} will be given a
+     * chance to handle the back button before the default behavior of
+     * {@link Activity#onBackPressed()} is invoked.
+     *
+     * @see #getOnBackPressedDispatcher()
+     */
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
     }
 
     /**

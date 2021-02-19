@@ -23,6 +23,11 @@ import ie.ul.fitbook.ui.MainActivity;
  * This class provides various utility methods
  */
 public final class Utils {
+    /**
+     * The name of our shared preferences file. This is where any key-value preferences will be stored
+     */
+    public static final String SHARED_PREFERENCES_FILE = "FitbookPrefs";
+
     private Utils() {
         // prevent instantiation
     }

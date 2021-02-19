@@ -1,4 +1,4 @@
-package ie.ul.fitbook.ui.profile;
+package ie.ul.fitbook.ui.profile.fragments;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -20,6 +20,7 @@ import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
+import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
 
 /**
  * Fragment for displaying profile

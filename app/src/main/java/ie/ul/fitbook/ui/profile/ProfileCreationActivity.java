@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -68,6 +69,20 @@ public class ProfileCreationActivity extends AppCompatActivity {
      * This method handles the cancellation of profile creation
      */
     public void onCancel() {
+        new AlertDialog.Builder(this) // this doesn't work with using the activity instance field for some reason
+                .setCancelable(true)
+                .setTitle("Discard Changes")
+                .setMessage("Are you sure you want to discard all changes?")
+                .setPositiveButton("Confirm", (dialog, which) -> onCancelConfirmed())
+                .setNegativeButton(android.R.string.cancel, ((dialog, which) -> dialog.dismiss()))
+                .create()
+                .show();
+    }
+
+    /**
+     * Callback for when a cancel is confirmed
+     */
+    private void onCancelConfirmed() {
         Intent intent;
 
         if (editProfile) {
