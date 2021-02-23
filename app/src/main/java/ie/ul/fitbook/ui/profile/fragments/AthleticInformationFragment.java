@@ -30,6 +30,7 @@ import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
 import ie.ul.fitbook.ui.profile.viewmodels.ProfileViewModel;
+import ie.ul.fitbook.utils.Utils;
 
 /**
  * This fragment deals with entering athletic information
@@ -194,8 +195,7 @@ public class AthleticInformationFragment extends Fragment {
         List<String> genders = new ArrayList<>();
 
         for (Profile.AthleticInformation.Gender gender : Profile.AthleticInformation.Gender.values()) {
-            String genderString = gender.toString();
-            genderString = genderString.charAt(0) + genderString.substring(1).toLowerCase();
+            String genderString = Utils.capitalise(gender.toString());
             genders.add(genderString);
         }
 
@@ -227,42 +227,44 @@ public class AthleticInformationFragment extends Fragment {
      * Handles the submit button being clicked
      */
     private void onSubmit() {
+        boolean valid = true;
+
         String dateOfBirth = dateOfBirthField.getText().toString();
 
         if (dateOfBirth.isEmpty()) {
-            Toast.makeText(activity, "You need to enter your date of birth", Toast.LENGTH_SHORT).show();
-            return;
+            dateOfBirthField.setError("Date of birth can't be empty");
+            valid = false;
         } else if (!dateOfBirth.matches(Profile.AthleticInformation.DOB_REGEX)) {
-            Toast.makeText(activity, "Invalid date format provided", Toast.LENGTH_SHORT).show();
-            return;
+            dateOfBirthField.setError("Invalid date format");
+            valid = false;
         }
 
         String gender = (String)genderField.getSelectedItem();
         if (gender.isEmpty()) {
-            Toast.makeText(activity, "You need to choose a gender", Toast.LENGTH_SHORT).show();
-            return;
+            valid = false;
         }
 
         String weightText = weightField.getText().toString();
-        double weight;
+        double weight = 0;
         if (weightText.isEmpty()) {
-            Toast.makeText(activity, "You need to provide a weight", Toast.LENGTH_SHORT).show();
-            return;
+            weightField.setError("Weight can't be empty");
+            valid = false;
         } else {
             try {
                 weight = Double.parseDouble(weightText);
 
                 if (weight <= 0) {
-                    Toast.makeText(activity, "Weight needs to be greater than 0kg", Toast.LENGTH_SHORT)
-                            .show();
-                    return;
+                    weightField.setError("Weight needs to be greater than 0");
+                    valid = false;
                 }
             } catch (NumberFormatException ex) {
-                Toast.makeText(activity, "You can only provide a number to the weight field", Toast.LENGTH_SHORT)
-                        .show();
-                return;
+                weightField.setError("You can only enter numeric values for weight");
+                valid = false;
             }
         }
+
+        if (!valid)
+            return;
 
         if (!editing) {
             Profile.AthleticInformation athleticInformation =

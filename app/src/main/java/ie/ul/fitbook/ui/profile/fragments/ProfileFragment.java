@@ -6,7 +6,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import ie.ul.fitbook.ui.HomeActivity;
@@ -21,6 +24,8 @@ import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
+import ie.ul.fitbook.utils.ProfileUtils;
+import ie.ul.fitbook.utils.Utils;
 
 /**
  * Fragment for displaying profile
@@ -30,6 +35,19 @@ public class ProfileFragment extends Fragment {
      * The activity behind this fragment
      */
     private HomeActivity activity;
+    /**
+     * A boolean variable to determine if the profile fragment is loading for whatever reason,
+     * most likely because the Login.isProfileOutOfSync() returned true
+     */
+    private boolean loading;
+    /**
+     * The progress bar for saying the profile is loading
+     */
+    private ProgressBar loadingBar;
+    /**
+     * The container containing profile items
+     */
+    private ConstraintLayout profileContainer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,7 +76,48 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         activity = (HomeActivity)requireActivity();
+        loadingBar = view.findViewById(R.id.loadingBar);
+        profileContainer = view.findViewById(R.id.profileContainer);
+
+        if (Login.isProfileOutOfSync()) {
+            setLoading(true);
+            ProfileUtils.syncProfile(this::onProfileSync, this::onProfileSyncFail);
+        } else {
+            setLoading(false);
+        }
+
+        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.profileRefresh);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            setLoading(true);
+            ProfileUtils.syncProfile(() -> {
+                this.onProfileSync();
+                swipeRefreshLayout.setRefreshing(false);
+            }, () -> {
+                this.onProfileSyncFail();
+                swipeRefreshLayout.setRefreshing(false);
+            });
+        });
+
         setHasOptionsMenu(true);
+    }
+
+    /**
+     * Handles when profile is synced
+     */
+    private void onProfileSync() {
+        // TODO set appropriate fields with synced profile here when profile fragment is fully implemented
+        setLoading(false);
+        Login.setProfileOutOfSync(false);
+    }
+
+    /**
+     * Handles when profile sync fails
+     */
+    private void onProfileSyncFail() {
+        setLoading(false);
+        Toast.makeText(activity, "Failed to load profile", Toast.LENGTH_SHORT)
+                .show();
+        activity.getNavController().navigate(R.id.navigation_home);
     }
 
     /**
@@ -97,17 +156,21 @@ public class ProfileFragment extends Fragment {
      */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
+        if (!loading) {
+            int id = item.getItemId();
 
-        if (id == R.id.edit) {
-            onEditProfileClicked();
-            return true;
-        } else if (id == R.id.signOut) {
-            onSignOutClicked();
-            return true;
+            if (id == R.id.edit) {
+                onEditProfileClicked();
+                return true;
+            } else if (id == R.id.signOut) {
+                onSignOutClicked();
+                return true;
+            }
+
+            return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
     /**
@@ -171,5 +234,19 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+    }
+
+    /**
+     * Sets this fragment to either a loading state or a non-loading state
+     * @param loading true if loading, false if not
+     */
+    private void setLoading(boolean loading) {
+        int containerVisibility = loading ? View.GONE:View.VISIBLE;
+        int loadingVisibility = loading ? View.VISIBLE:View.GONE;
+
+        profileContainer.setVisibility(containerVisibility);
+        loadingBar.setVisibility(loadingVisibility);
+
+        this.loading = loading;
     }
 }

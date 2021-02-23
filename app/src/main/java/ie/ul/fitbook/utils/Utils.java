@@ -6,12 +6,21 @@ import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import ie.ul.fitbook.database.Database;
+import ie.ul.fitbook.database.Databases;
+import ie.ul.fitbook.interfaces.ActionHandler;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.network.NetworkUtils;
 import ie.ul.fitbook.profile.Profile;
@@ -33,21 +42,6 @@ public final class Utils {
     }
 
     /**
-     * Returns the file representing where to save the profile picture
-     * @param context the context requesting this action
-     * @return the file representing the image location, null if an error occurred
-     */
-    public static File getProfileImageLocation(Context context) {
-        File file = context.getFilesDir();
-        file = new File(file, "profile-picture");
-
-        if (!file.isDirectory() && !file.mkdir())
-            return null;
-        else
-            return new File(file, "profile_pic.png");
-    }
-
-    /**
      * This gets the bitmap from the provided file
      * @param context the context requesting this conversion
      * @param imageURI the URI of the image
@@ -63,33 +57,33 @@ public final class Utils {
                 return ImageDecoder.decodeBitmap(source);
             }
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
 
     /**
-     * This method downloads the profile image in the background using the application context.
-     * It is assumed that you have network connectivity
+     * This method takes a string and capitalises the first letter, leaving the rest as lowercase
+     * @param string the string to capitalise
+     * @return capitalised string
      */
-    public static void downloadProfileImageBackground() {
-        Profile profile = Login.getProfile();
+    public static String capitalise(String string) {
+        int length = string.length();
+        if (length == 0) {
+            return string;
+        } else if (length == 1) {
+            return string.toUpperCase();
+        } else {
+            String[] split = string.split("\\s");
 
-        if (profile != null) {
-            StorageReference storageReference = Objects.requireNonNull(Storage.getInstance(Stores.USERS)).getChildFolder(Profile.PROFILE_IMAGE_PATH);
-
-            File file = Utils.getProfileImageLocation(MainActivity.APPLICATION_CONTEXT);
-
-            if (file != null && NetworkUtils.isNetworkConnected(MainActivity.APPLICATION_CONTEXT)) {
-                storageReference.getFile(file)
-                        .addOnSuccessListener(success -> {
-                            Bitmap bitmap = getBitmapFromFile(MainActivity.APPLICATION_CONTEXT, Uri.fromFile(file));
-                            Profile profile1 = Login.getProfile(); // profile may have became null by the time download finished
-
-                            if (profile1 != null)
-                                profile1.setProfileImage(bitmap);
-                        });
+            StringBuilder result = new StringBuilder();
+            for (String s : split) {
+                s = ("" + s.charAt(0)).toUpperCase() + s.substring(1).toLowerCase();
+                result.append(s).append(" ");
             }
+
+            result.deleteCharAt(result.length() - 1);
+
+            return result.toString();
         }
     }
 }

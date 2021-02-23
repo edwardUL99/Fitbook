@@ -6,29 +6,13 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Build;
 
-import ie.ul.fitbook.network.callbacks.NetworkCallBack;
-
 /**
  * Provides a utility class for checking network connectivity
  */
 public final class NetworkUtils {
-    /**
-     * Tracks if there was no internet connection since the last call to isNetworkConnected
-     */
-    private static boolean internetConnectionLost;
 
     private NetworkUtils() {
         // prevent instantiation
-    }
-
-    /**
-     * This method checks if the network is connected for the provided context, registering no callback
-     * Note that if this returns false, wasInternetLost() will return true
-     * @param context the context to check network connectivity for
-     * @return true if connected, false if not
-     */
-    public static boolean isNetworkConnected(Context context) {
-        return isNetworkConnected(context, null);
     }
 
     /**
@@ -50,40 +34,26 @@ public final class NetworkUtils {
     }
 
     /**
-     * This method checks if the network is connected for the provided context and optionally an InternetConnectivityChecker if there is no connection.
+     * This method checks if the network is connected for the provided context
      * Note that if this returns false, wasInternetLost() will return true
      * @param context the context checking network connection
-     * @param callback the callback to register with the network for if you want to check some condition related to the state of the network after this check
      * @return true if connected, false if not.
      */
-    public static boolean isNetworkConnected(Context context, NetworkCallBack callback) {
+    public static boolean isNetworkConnected(Context context) {
         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         if (isNetworkAvailable(cm)) {
             try {
                 String command = "ping -c 1 google.ie"; // check if the connection is working
                 boolean connected = (Runtime.getRuntime().exec(command).waitFor() == 0);
-                internetConnectionLost = !connected;
 
-                return connected;
+                if (connected)
+                    return true;
             } catch (Exception e) {
-                internetConnectionLost = true;
+                e.printStackTrace();
             }
-        } else {
-            internetConnectionLost = true;
         }
 
-        if (callback != null)
-            callback.enable(context);
-
         return false;
-    }
-
-    /**
-     * Returns whether since a last call to isNetworkConnected, it was found that there was no internet connection
-     * @return true if there was no internet connection since the last call to isNetworkConnected, false if it was not lost
-     */
-    public static boolean wasInternetLost() {
-        return internetConnectionLost;
     }
 }

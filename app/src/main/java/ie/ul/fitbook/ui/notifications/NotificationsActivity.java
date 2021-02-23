@@ -1,6 +1,7 @@
 package ie.ul.fitbook.ui.notifications;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -9,7 +10,7 @@ import android.view.MenuItem;
 import ie.ul.fitbook.R;
 
 /**
- * This activity provides an activity for displaying notfications
+ * This activity provides an activity for displaying notifications
  */
 public class NotificationsActivity extends AppCompatActivity {
 
@@ -18,7 +19,12 @@ public class NotificationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle("Notifications");
+        }
     }
 
     /**

@@ -19,7 +19,6 @@ public final class Login {
      * Key used for determining a saved login
      */
     private static final String LOGIN_SAVED_KEY = "user_loggedin";
-
     /**
      * The profile of the user logged in
      */
@@ -36,6 +35,11 @@ public final class Login {
      * A variable to record if we should do manual login
      */
     private static boolean manualLogin;
+    /**
+     * A flag to keep track of the profile sync status. It may be out of sync because the app was started
+     * without network and needs to be opened on the next profile launch
+     */
+    private static boolean profileOutOfSync = true;
 
     /**
      * Checks if there is a user logged in for the provided context. If you want to override this
@@ -150,5 +154,21 @@ public final class Login {
      */
     public static boolean isManualLogin() {
         return manualLogin;
+    }
+
+    /**
+     * Returns true if the profile is out of sync for whatever reason
+     * @return true if out of sync, false if not
+     */
+    public static boolean isProfileOutOfSync() {
+        return profileOutOfSync;
+    }
+
+    /**
+     * Tells Login that the profile associated with it is out of sync because it may not have been downloaded to begin with
+     * @param profileOutOfSync true if out of sync, false if not
+     */
+    public static void setProfileOutOfSync(boolean profileOutOfSync) {
+        Login.profileOutOfSync = profileOutOfSync;
     }
 }

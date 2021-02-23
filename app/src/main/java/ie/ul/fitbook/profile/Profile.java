@@ -6,12 +6,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.sports.Sport;
-
-// TODO maybe add a country field and add that field to profile creation too
+import ie.ul.fitbook.utils.Utils;
 
 /**
  * This class represents a user's profile
@@ -33,6 +33,10 @@ public class Profile {
      * The state/county the user is in
      */
     private String state;
+    /**
+     * The country the user is in
+     */
+    private String country;
     /**
      * This user's favourite sport
      */
@@ -63,6 +67,10 @@ public class Profile {
      */
     public static final String STATE_KEY = "state";
     /**
+     * The key used when mapping the country field in the data being stored in our profile document
+     */
+    public static final String COUNTRY_KEY = "country";
+    /**
      * The key used when mapping the favourite sport field in the data being stored in our profile document
      */
     public static final String FAV_SPORT_KEY = "favourite_sport";
@@ -81,16 +89,18 @@ public class Profile {
      * @param name the name of the user
      * @param city the city the user resides in
      * @param state the state they reside in
+     * @param country the country they are a citizen of
      * @param favouriteSport the user's favourite sport
      * @param bio a short biography for the user
      * @param athleticInformation the user's athletic information
      */
-    public Profile(@Nullable Bitmap profileImage, @NonNull String name, @NonNull String city, @NonNull String state, @NonNull Sport favouriteSport,
+    public Profile(@Nullable Bitmap profileImage, @NonNull String name, @NonNull String city, @NonNull String state, @NonNull String country, @NonNull Sport favouriteSport,
                    @Nullable String bio, @NonNull AthleticInformation athleticInformation) {
         this.profileImage = profileImage;
         this.name = name;
         this.city = city;
         this.state = state;
+        this.country = country;
         this.favouriteSport = favouriteSport;
         this.bio = bio;
         this.athleticInformation = athleticInformation;
@@ -100,7 +110,6 @@ public class Profile {
      * Constructs a default Profile
      */
     public Profile() {
-
     }
 
     /**
@@ -168,14 +177,27 @@ public class Profile {
     }
 
     /**
+     * Retrieves the country the user is in
+     * @return country the user is a citizen of
+     */
+    public String getCountry() {
+        return country;
+    }
+
+    /**
+     * Sets the country the user is in
+     * @param country the user is a citizen of
+     */
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    /**
      * Gets the user's favourite sport as a capitalised String with the rest of it being lowercase
      * @return the user's favourite sport as a string
      */
     public String getFavouriteSport() {
-        String sport = favouriteSport.toString();
-        sport = sport.charAt(0) + sport.substring(1).toLowerCase();
-
-        return sport;
+        return Utils.capitalise(favouriteSport.toString());
     }
 
     /**
@@ -224,7 +246,7 @@ public class Profile {
      * @throws IllegalArgumentException if not valid
      */
     private static void checkDataValidity(Map<String, Object> data) {
-        List<String> keys = Arrays.asList(NAME_KEY, CITY_KEY, STATE_KEY, FAV_SPORT_KEY, BIOGRAPHY_KEY,
+        List<String> keys = Arrays.asList(NAME_KEY, CITY_KEY, STATE_KEY, COUNTRY_KEY, FAV_SPORT_KEY, BIOGRAPHY_KEY,
                 AthleticInformation.DOB_FIELD, AthleticInformation.GENDER_FIELD, AthleticInformation.WEIGHT_FIELD);
 
         for (String key : data.keySet()) {
@@ -241,14 +263,15 @@ public class Profile {
      */
     public static Profile from(Map<String, Object> data) {
         checkDataValidity(data);
-        String name = (String)data.get(Profile.NAME_KEY);
-        String city = (String)data.get(Profile.CITY_KEY);
-        String state = (String)data.get(Profile.STATE_KEY);
-        Sport favourite = Sport.convertToSport((String)data.get(Profile.FAV_SPORT_KEY));
-        String bio = (String)data.get(Profile.BIOGRAPHY_KEY);
-        String dateOfBirth = (String)data.get(Profile.AthleticInformation.DOB_FIELD);
-        Profile.AthleticInformation.Gender gender = Profile.AthleticInformation.Gender.convertToGender((String)data.get(Profile.AthleticInformation.GENDER_FIELD));
-        Double weight = (Double)data.get(Profile.AthleticInformation.WEIGHT_FIELD);
+        String name = (String)data.get(NAME_KEY);
+        String city = (String)data.get(CITY_KEY);
+        String state = (String)data.get(STATE_KEY);
+        String country = (String)data.get(COUNTRY_KEY);
+        Sport favourite = Sport.convertToSport((String)data.get(FAV_SPORT_KEY));
+        String bio = (String)data.get(BIOGRAPHY_KEY);
+        String dateOfBirth = (String)data.get(AthleticInformation.DOB_FIELD);
+        Profile.AthleticInformation.Gender gender = AthleticInformation.Gender.convertToGender((String)data.get(AthleticInformation.GENDER_FIELD));
+        Double weight = (Double)data.get(AthleticInformation.WEIGHT_FIELD);
 
         if (weight == null)
             weight = 0.00;
@@ -256,9 +279,29 @@ public class Profile {
         if (name == null || city == null || state == null)
             throw new IllegalStateException("Mandatory profile fields are missing from the document");
 
-        Profile.AthleticInformation athleticInformation = new Profile.AthleticInformation(dateOfBirth, gender, weight);
+        AthleticInformation athleticInformation = new AthleticInformation(dateOfBirth, gender, weight);
 
-        return new Profile(null, name, city, state, favourite, bio, athleticInformation);
+        return new Profile(null, name, city, state, country, favourite, bio, athleticInformation);
+    }
+
+    /**
+     * Converts this profile to a mapping of String key to it's data
+     * @return this object in a mapped form that can be used with a FireStore document
+     */
+    public Map<String, Object> toData() {
+        Map<String, Object> data = new HashMap<>();
+
+        data.put(NAME_KEY, name);
+        data.put(CITY_KEY, city);
+        data.put(STATE_KEY, state);
+        data.put(COUNTRY_KEY, country);
+        data.put(FAV_SPORT_KEY, getFavouriteSport());
+        data.put(BIOGRAPHY_KEY, bio);
+        data.put(AthleticInformation.DOB_FIELD, athleticInformation.dateOfBirth);
+        data.put(AthleticInformation.GENDER_FIELD, athleticInformation.getGender());
+        data.put(AthleticInformation.WEIGHT_FIELD, athleticInformation.weight);
+
+        return data;
     }
 
     /**
@@ -369,10 +412,7 @@ public class Profile {
          * @return the gender as a string
          */
         public String getGender() {
-            String gender = this.gender.toString();
-            gender = gender.charAt(0) + gender.substring(1).toLowerCase();
-
-            return gender;
+            return Utils.capitalise(gender.toString());
         }
 
         /**

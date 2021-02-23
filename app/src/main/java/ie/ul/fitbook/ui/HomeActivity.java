@@ -46,8 +46,8 @@ public class HomeActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
 
         Intent intent = getIntent();
-        if (intent.hasExtra(FRAGMENT_ID)) {
-            int id = intent.getIntExtra(FRAGMENT_ID, 0);
+        if (savedInstanceState != null || intent.hasExtra(FRAGMENT_ID)) {
+            int id = savedInstanceState != null ? savedInstanceState.getInt(FRAGMENT_ID, 0):intent.getIntExtra(FRAGMENT_ID, 0);
 
             if (id != 0)
                 navController.navigate(id);

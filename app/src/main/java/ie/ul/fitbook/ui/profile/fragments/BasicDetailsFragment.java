@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
@@ -53,6 +54,7 @@ import ie.ul.fitbook.ui.profile.viewmodels.ProfileViewModel;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.storage.Storage;
 import ie.ul.fitbook.storage.Stores;
+import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
 /**
@@ -80,9 +82,9 @@ public class BasicDetailsFragment extends Fragment {
      */
     private EditText stateField;
     /**
-     * The spinner to choose favourite activity
+     * The country edit text field
      */
-    private Spinner activityField;
+    private EditText countryField;
     /**
      * A URI used for pointing to the chosen image
      */
@@ -98,7 +100,7 @@ public class BasicDetailsFragment extends Fragment {
     /**
      * The parent activity of this fragment
      */
-    private FragmentActivity activity;
+    private ProfileCreationActivity activity;
     /**
      * This flag indicates if we are editing our profile or not
      */
@@ -153,17 +155,16 @@ public class BasicDetailsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        this.activity = requireActivity();
+        FragmentActivity activity = requireActivity();
 
-        ProfileCreationActivity activity;
-
-        if (!(this.activity instanceof ProfileCreationActivity)) {
+        if (!(activity instanceof ProfileCreationActivity)) {
             throw new IllegalStateException("BasicDetailsFragment needs to be in the context of a ProfileCreationActivity");
         } else {
-            activity = (ProfileCreationActivity)this.activity;
+            this.activity = (ProfileCreationActivity)activity;
         }
 
-        editing = activity.isInEditMode(); // check if the activity was launched with a request to edit
+        editing = this.activity.isInEditMode(); // check if the activity was launched with a request to edit
+        this.activity.onFirstPage();
 
         setupProfile();
 
@@ -180,7 +181,7 @@ public class BasicDetailsFragment extends Fragment {
         }
 
         Button cancel = view.findViewById(R.id.cancel);
-        cancel.setOnClickListener(v -> activity.onCancel());
+        cancel.setOnClickListener(v -> this.activity.onCancel());
 
         Button next = view.findViewById(R.id.next);
         next.setOnClickListener(v -> onNext(view));
@@ -191,9 +192,10 @@ public class BasicDetailsFragment extends Fragment {
         setupProfilePicture(view, imageURI);
 
         nameField = view.findViewById(R.id.nameTextField);
+        nameField.clearFocus();
         cityField = view.findViewById(R.id.cityTextField);
         stateField = view.findViewById(R.id.stateTextField);
-        activityField = view.findViewById(R.id.activityDropdown);
+        countryField = view.findViewById(R.id.countryTextField);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -204,7 +206,6 @@ public class BasicDetailsFragment extends Fragment {
             nameField.setText(user.getDisplayName());
         }
 
-        setUpActivitySpinner();
         fillFieldsWithProfile();
     }
 
@@ -257,18 +258,10 @@ public class BasicDetailsFragment extends Fragment {
      */
     private void fillFieldsWithProfile() {
         if (editing) {
-            nameField.setText(profile.getName());
-            cityField.setText(profile.getCity());
-            stateField.setText(profile.getState());
-            String activity = profile.getFavouriteSport();
-            SpinnerAdapter adapter = activityField.getAdapter();
-
-            for (int i = 0; i < adapter.getCount(); i++) {
-                if (adapter.getItem(i).equals(activity)) {
-                    activityField.setSelection(i);
-                    break;
-                }
-            }
+            nameField.setText(Utils.capitalise(profile.getName()));
+            cityField.setText(Utils.capitalise(profile.getCity()));
+            stateField.setText(Utils.capitalise(profile.getState()));
+            countryField.setText(Utils.capitalise(profile.getCountry()));
         }
     }
 
@@ -288,57 +281,50 @@ public class BasicDetailsFragment extends Fragment {
     }
 
     /**
-     * This method sets up the values for the activity spinner
-     */
-    private void setUpActivitySpinner() {
-        List<String> values = new ArrayList<>();
-
-        for (Sport sport : Sport.values()) {
-            String value = sport.toString();
-            value = value.charAt(0) + value.substring(1).toLowerCase();
-
-            values.add(value);
-        }
-
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item, values);
-        activityField.setAdapter(arrayAdapter);
-    }
-
-    /**
      * Handles when the next button is clicked
      * @param view the view to navigate from
      */
     private void onNext(View view) {
+        boolean valid = true;
+
         String name = nameField.getText().toString();
         if (name.isEmpty()) {
-            Toast.makeText(activity, "You need to enter your name", Toast.LENGTH_SHORT).show();
-            return;
+            //Toast.makeText(activity, "You need to enter your name", Toast.LENGTH_SHORT).show();
+            nameField.setError("Name can't be empty");
+            valid = false;
         }
 
         String city = cityField.getText().toString();
         if (city.isEmpty()) {
-            Toast.makeText(activity, "You need to enter a city", Toast.LENGTH_SHORT).show();
-            return;
+            //Toast.makeText(activity, "You need to enter a city", Toast.LENGTH_SHORT).show();
+            cityField.setError("City can't be empty");
+            valid = false;
         }
 
         String state = stateField.getText().toString();
         if (state.isEmpty()) {
-            Toast.makeText(activity, "You need to enter a state", Toast.LENGTH_SHORT).show();
-            return;
+            //Toast.makeText(activity, "You need to enter a state", Toast.LENGTH_SHORT).show();
+            stateField.setError("Name can't be empty");
+            valid = false;
         }
 
-        String activityValue = (String)activityField.getSelectedItem();
-        if (activityValue.isEmpty()) {
-            Toast.makeText(activity, "You need to choose a favourite activity", Toast.LENGTH_SHORT).show();
-            return;
+        String country = countryField.getText().toString();
+        if (country.isEmpty()) {
+            //Toast.makeText(activity, "You need to enter a country", Toast.LENGTH_SHORT).show();
+            countryField.setError("Country can't be empty");
+            valid = false;
         }
 
-        profile.setName(name);
-        profile.setCity(city);
-        profile.setState(state);
-        profile.setFavouriteSport(Sport.convertToSport(activityValue));
+        if (!valid)
+            return;
+
+        profile.setName(Utils.capitalise(name));
+        profile.setCity(Utils.capitalise(city));
+        profile.setState(Utils.capitalise(state));
+        profile.setCountry(Utils.capitalise(country));
 
         Navigation.findNavController(view).navigate(R.id.action_basicDetailsFragment_to_biographyFragment);
+        activity.offFirstPage();
     }
 
     /**
@@ -402,7 +388,7 @@ public class BasicDetailsFragment extends Fragment {
      * This callback is called when upload is requested and upload permissions were given
      */
     private void onUploadPermissionsGranted() {
-        if (NetworkUtils.isNetworkConnected(activity)) { // we don't want a checker to see if connectivity is restored here since if the user connects to the internet and presses upload again, it will check again
+        if (NetworkUtils.isNetworkConnected(activity)) {
             Intent imageIntent = getImageIntent();
             startActivityForResult(imageIntent, PROFILE_PIC_CAPTURE);
         } else {
@@ -442,7 +428,7 @@ public class BasicDetailsFragment extends Fragment {
      * @param baos the stream to write
      */
     private void writeImageToDisk(ByteArrayOutputStream baos) {
-        File file = Utils.getProfileImageLocation(activity);
+        File file = ProfileUtils.getProfileImageLocation(activity);
 
         Toast toast = Toast.makeText(activity, "Error occurred saving profile picture to disk", Toast.LENGTH_SHORT);
         if (file == null) {
@@ -466,8 +452,6 @@ public class BasicDetailsFragment extends Fragment {
 
         if (userStorage != null) {
             profileImage.setImageBitmap(image);
-            //profileImage.setDrawingCacheEnabled(true);
-            //Bitmap bitmap = profileImage.getDrawingCache();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             writeImageToDisk(baos);

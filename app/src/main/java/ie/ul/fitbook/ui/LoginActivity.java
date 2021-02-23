@@ -40,15 +40,9 @@ public class LoginActivity extends AppCompatActivity implements SignInHandler {
      */
     private static final String TAG = "LoginActivity";
     /**
-     * Our shared preferences instance
-     */
-    private SharedPreferences sharedPreferences;
-
-    /**
      * The status check TextView
      */
     private TextView statusCheck;
-
     /**
      * The sign in button
      */
@@ -79,7 +73,6 @@ public class LoginActivity extends AppCompatActivity implements SignInHandler {
      * It may not login the user but instead realise a sign in needs to be done
      */
     private void autoLogin() {
-        setSignInComponentsVisibility(false); // default is to have status check visible
         Log.i(TAG, "onCreate: No user has been logged in successfully, forcing a re-login");
         Toast.makeText(this, "No user logged in, opening sign-in page", Toast.LENGTH_SHORT).show();
         signIn(null);
@@ -116,7 +109,6 @@ public class LoginActivity extends AppCompatActivity implements SignInHandler {
     @Override
     public void onSignInSuccessful() {
         recordLoginStatus();
-        displaySignInButton();
 
         setResult(RESULT_OK);
         finish();
@@ -156,11 +148,10 @@ public class LoginActivity extends AppCompatActivity implements SignInHandler {
 
             if (error.getErrorCode() == ErrorCodes.NO_NETWORK) {
                 Toast.makeText(this, "There is no network available to sign-in", Toast.LENGTH_SHORT).show();
-                return;
             }
+        } else {
+            Toast.makeText(this, "An unknown error occurred during sign-in", Toast.LENGTH_SHORT).show();
         }
-
-        Toast.makeText(this, "An unknown error occurred during sign-in", Toast.LENGTH_SHORT).show();
 
         setResult(RESULT_CANCELED);
         finish();

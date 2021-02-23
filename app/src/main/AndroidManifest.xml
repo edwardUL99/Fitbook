@@ -25,7 +25,7 @@
             android:name=".ui.HomeActivity"
             android:label="@string/title_activity_navigation"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+            android:theme="@style/Theme.Fitbook.NoActionBar" />
         <activity
             android:name=".ui.profile.ProfileCreationActivity"
             android:screenOrientation="portrait" />

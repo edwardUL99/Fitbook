@@ -2,9 +2,11 @@ package ie.ul.fitbook.ui.profile;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,6 +40,10 @@ public class ProfileCreationActivity extends AppCompatActivity {
      */
     private boolean editProfile;
     /**
+     * True if the user is on the first page
+     */
+    private boolean onFirstPage;
+    /**
      * Use this as an EXTRA key with a boolean value of true in the passed in intent to edit the profile
      * retrieved by Login.getProfile()
      */
@@ -55,6 +61,10 @@ public class ProfileCreationActivity extends AppCompatActivity {
         if (intent.hasExtra(EDIT_USER_PROFILE)) {
             editProfile = intent.getBooleanExtra(EDIT_USER_PROFILE, false);
         }
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setTitle((editProfile ? "Edit":"Create") + " Profile");
     }
 
     /**
@@ -77,6 +87,22 @@ public class ProfileCreationActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.cancel, ((dialog, which) -> dialog.dismiss()))
                 .create()
                 .show();
+    }
+
+    /**
+     * Called when the activity has detected the user's press of the back
+     * key. The {@link #getOnBackPressedDispatcher() OnBackPressedDispatcher} will be given a
+     * chance to handle the back button before the default behavior of
+     * {@link Activity#onBackPressed()} is invoked.
+     *
+     * @see #getOnBackPressedDispatcher()
+     */
+    @Override
+    public void onBackPressed() {
+        if (onFirstPage)
+            onCancel();
+        else
+            super.onBackPressed();
     }
 
     /**
@@ -124,8 +150,13 @@ public class ProfileCreationActivity extends AppCompatActivity {
         saveProfile(profile);
         Login.setProfile(profile);
 
+        Intent receivedIntent = getIntent();
+
         Intent intent = new Intent(this, HomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (receivedIntent.hasExtra(HomeActivity.FRAGMENT_ID))
+            intent.putExtra(HomeActivity.FRAGMENT_ID, receivedIntent.getIntExtra(HomeActivity.FRAGMENT_ID, 0));
+
         finish(); // we don't want to come back this activity on the press of the back key
         startActivity(intent);
     }
@@ -138,30 +169,8 @@ public class ProfileCreationActivity extends AppCompatActivity {
         DocumentReference documentReference = Objects.requireNonNull(Database.getInstance(Databases.USERS))
                 .getChildDocument(Profile.PROFILE_DOCUMENT);
 
-        Map<String, Object> data = new HashMap<>();
-        saveProfileInfo(profile, data);
-        saveAthleticInformation(profile.getAthleticInformation(), data);
-
+        Map<String, Object> data = profile.toData();
         documentReference.set(data); // save the data to the database
-    }
-
-    /**
-     * Saves the profile info to the data map
-     * @param profile the profile to save
-     * @param data the map where data is being stored to
-     */
-    private void saveProfileInfo(Profile profile, Map<String, Object> data) {
-        data.put(Profile.NAME_KEY, profile.getName());
-        data.put(Profile.CITY_KEY, profile.getCity());
-        data.put(Profile.STATE_KEY, profile.getState());
-        data.put(Profile.FAV_SPORT_KEY, profile.getFavouriteSport());
-        data.put(Profile.BIOGRAPHY_KEY, profile.getBio());
-    }
-
-    private void saveAthleticInformation(Profile.AthleticInformation athleticInformation, Map<String, Object> data) {
-        data.put(Profile.AthleticInformation.DOB_FIELD, athleticInformation.getDateOfBirth());
-        data.put(Profile.AthleticInformation.GENDER_FIELD, athleticInformation.getGender());
-        data.put(Profile.AthleticInformation.WEIGHT_FIELD, athleticInformation.getWeight());
     }
 
     /**
@@ -184,5 +193,19 @@ public class ProfileCreationActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+    }
+
+    /**
+     * Call this when you are on the first editing page
+     */
+    public void onFirstPage() {
+        onFirstPage = true;
+    }
+
+    /**
+     * Call this when you move away from the first editing page
+     */
+    public void offFirstPage() {
+        onFirstPage = false;
     }
 }
