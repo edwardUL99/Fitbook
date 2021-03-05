@@ -11,16 +11,14 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.util.Map;
-import java.util.Objects;
 
-import ie.ul.fitbook.database.Database;
-import ie.ul.fitbook.database.Databases;
+import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.interfaces.ActionHandler;
+import ie.ul.fitbook.interfaces.ActionHandlerConsumer;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.network.NetworkUtils;
 import ie.ul.fitbook.profile.Profile;
-import ie.ul.fitbook.storage.Storage;
-import ie.ul.fitbook.storage.Stores;
+import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.MainActivity;
 
 /**
@@ -71,7 +69,7 @@ public final class ProfileUtils {
         if (file == null)
             return;
 
-        StorageReference storageReference = Objects.requireNonNull(Storage.getInstance(Stores.USERS)).getChildFolder(Profile.PROFILE_IMAGE_PATH);
+        StorageReference storageReference = new UserStorage().getChildFolder(Profile.PROFILE_IMAGE_PATH);
 
         if (NetworkUtils.isNetworkConnected(MainActivity.APPLICATION_CONTEXT)) {
             storageReference.getFile(file)
@@ -90,12 +88,64 @@ public final class ProfileUtils {
     }
 
     /**
+     * Returns the file representing where to save the profile picture
+     * @param context the context requesting this action
+     * @param userId the user ID of the user this profile image will belong to
+     * @return the file representing the image location, null if an error occurred
+     */
+    private static File getUserProfileImageLocation(Context context, String userId) {
+        File file = context.getFilesDir();
+        file = new File(file, "profile-picture");
+
+        if (!file.isDirectory() && !file.mkdir()) {
+            return null;
+        } else {
+            return new File(file, "profile_pic_" + userId + ".png");
+        }
+    }
+
+    /**
+     * Downloads a profile image for a different profile than the logged in profile
+     * @param profile the profile to download the image for
+     * @param userId the User ID of the user to download the profile
+     * @param onSuccess the handler for when the download succeeds
+     * @param onFail the handler for when it fails
+     */
+    private static void downloadUserProfileImage(Profile profile, String userId, ActionHandlerConsumer<Profile> onSuccess, ActionHandler onFail) {
+        File file = getUserProfileImageLocation(MainActivity.APPLICATION_CONTEXT, userId);
+
+        if (file == null)
+            return;
+
+        file.deleteOnExit(); // we don't want this photo anymore when application closes
+
+        StorageReference storageReference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
+
+        if (NetworkUtils.isNetworkConnected(MainActivity.APPLICATION_CONTEXT)) {
+            storageReference.getFile(file)
+                    .addOnSuccessListener(success -> {
+                        Bitmap bitmap1 = Utils.getBitmapFromFile(MainActivity.APPLICATION_CONTEXT, Uri.fromFile(file));
+                        profile.setProfileImage(bitmap1);
+                        if (onSuccess != null)
+                            onSuccess.doAction(profile);
+                    })
+                    .addOnFailureListener(failed -> {
+                        if (onFail != null)
+                            onFail.doAction();
+                    });
+        } else {
+            if (onFail != null)
+                onFail.doAction();
+        }
+    }
+
+    /**
      * This method downloads the profile in the background.
      * It also downloads the profile picture in the background
      */
     private static void downloadProfile() {
         if (profileSnapshot == null) {
-            DocumentReference documentReference = Objects.requireNonNull(Database.getInstance(Databases.USERS))
+            DocumentReference documentReference = new UserDatabase()
                     .getChildDocument(Profile.PROFILE_DOCUMENT);
             documentReference.get()
                     .addOnCompleteListener(task -> {
@@ -114,6 +164,49 @@ public final class ProfileUtils {
         } else {
             processProfileSnapshot();
         }
+    }
+
+    /**
+     * Download the profile of a user with the specified userID
+     * @param userId the ID of the user to download
+     * @param onSuccess the handler for when the profile is downloaded successfully
+     * @param onFail the handler for when thr profile fails to be downloaded
+     */
+    public static void downloadProfile(String userId, ActionHandlerConsumer<Profile> onSuccess, ActionHandler onFail) {
+        boolean onFailNonNull = onFail != null;
+        DocumentReference documentReference = new UserDatabase(userId)
+                .getChildDocument(Profile.PROFILE_DOCUMENT);
+        documentReference.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot snapshot = task.getResult();
+
+                        if (snapshot != null) {
+                            Map<String, Object> data = snapshot.getData();
+
+                            if (data != null) {
+                                Profile profile = Profile.from(data);
+                                downloadUserProfileImage(profile, userId, onSuccess, onFail);
+                            } else if (onFailNonNull) {
+                                onFail.doAction();
+                            }
+                        } else if (onFailNonNull) {
+                            onFail.doAction();
+                        }
+                    } else {
+                        Exception exception = task.getException();
+                        if (exception != null)
+                            exception.printStackTrace();
+
+                        if (onFailNonNull)
+                            onFail.doAction();
+                    }
+                })
+                .addOnFailureListener(failed -> {
+                    failed.printStackTrace();
+                    if (onFailNonNull)
+                        onFail.doAction();
+                });
     }
 
     /**

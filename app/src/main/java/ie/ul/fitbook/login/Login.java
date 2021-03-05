@@ -171,4 +171,12 @@ public final class Login {
     public static void setProfileOutOfSync(boolean profileOutOfSync) {
         Login.profileOutOfSync = profileOutOfSync;
     }
+
+    /**
+     * Retrieves the user ID currently logged in
+     * @return user ID of logged in user
+     */
+    public static String getUserId() {
+        return FirebaseAuth.getInstance().getUid();
+    }
 }

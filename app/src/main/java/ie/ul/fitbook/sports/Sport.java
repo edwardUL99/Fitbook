@@ -20,7 +20,7 @@ public enum Sport {
     /**
      * Returns the value of the provided string as an enum value
      * @param string the string value to try and parse
-     * @return the Gender enum value if found
+     * @return the Sport enum value if found
      * @throws IllegalArgumentException if the provided string does not match any enum value
      */
     public static Sport convertToSport(String string) {

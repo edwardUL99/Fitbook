@@ -276,7 +276,7 @@ public class Profile {
         if (weight == null)
             weight = 0.00;
 
-        if (name == null || city == null || state == null)
+        if (name == null || city == null || state == null || country == null)
             throw new IllegalStateException("Mandatory profile fields are missing from the document");
 
         AthleticInformation athleticInformation = new AthleticInformation(dateOfBirth, gender, weight);

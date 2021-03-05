@@ -19,7 +19,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Fitbook">
-        <activity android:name=".ui.profiles.ProfilesActivity"></activity>
+        <activity android:name=".ui.profile.ViewProfileActivity"></activity>
+        <activity android:name=".ui.profile.posts.ProfilePostsActivity" />
+        <activity android:name=".ui.profile.statistics.StatisticsActivity" />
+        <activity android:name=".ui.profile.activities.ListActivitiesActivity" />
+        <activity android:name=".ui.profile.goals.GoalCreationActivity" />
+        <activity android:name=".ui.profile.goals.GoalsActivity" />
+        <activity android:name=".ui.profiles.ProfilesActivity" />
         <activity android:name=".ui.notifications.NotificationsActivity" />
         <activity
             android:name=".ui.HomeActivity"

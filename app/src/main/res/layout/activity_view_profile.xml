@@ -4,9 +4,7 @@
     android:id="@+id/profileRefresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="?attr/actionBarSize"
-    android:layout_marginBottom="48dp"
-    tools:context=".ui.profile.fragments.ProfileFragment"> <!-- TODO make home fragment and other appropriate ones refreshable also and make sure to add the marginTop attribute so toolbar buttons can be pressed -->
+    tools:context=".ui.profile.ViewProfileActivity">
 
     <include
         layout="@layout/profile_scroll_layout"

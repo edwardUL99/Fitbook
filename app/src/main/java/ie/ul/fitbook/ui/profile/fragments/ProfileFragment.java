@@ -16,16 +16,26 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import ie.ul.fitbook.custom.TraceableScrollView;
+import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
+import ie.ul.fitbook.ui.profile.ViewProfileActivity;
+import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
+import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
+import ie.ul.fitbook.ui.profile.posts.ProfilePostsActivity;
+import ie.ul.fitbook.ui.profile.statistics.StatisticsActivity;
+import ie.ul.fitbook.ui.profiles.ProfilesActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
-import ie.ul.fitbook.utils.Utils;
 
 /**
  * Fragment for displaying profile
@@ -47,7 +57,35 @@ public class ProfileFragment extends Fragment {
     /**
      * The container containing profile items
      */
-    private ConstraintLayout profileContainer;
+    private TraceableScrollView profileContainer;
+    /**
+     * The swipe refresh layout allowing us to refresh the profile
+     */
+    private SwipeRefreshLayout swipeRefreshLayout;
+    /**
+     * The image view for displaying the profile
+     */
+    private ImageView profileImage;
+    /**
+     * The TextView for displaying the user's name
+     */
+    private TextView nameView;
+    /**
+     * The TextView for displaying the user's address
+     */
+    private TextView addressView;
+    /**
+     * The TextView for displaying the user's favourite activity
+     */
+    private TextView favouriteActivityView;
+    /**
+     * The button for adding friends
+     */
+    private Button friendsButton;
+    /**
+     * The TextView for displaying number of friends a user has
+     */
+    private TextView friendsView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,14 +117,10 @@ public class ProfileFragment extends Fragment {
         loadingBar = view.findViewById(R.id.loadingBar);
         profileContainer = view.findViewById(R.id.profileContainer);
 
-        if (Login.isProfileOutOfSync()) {
-            setLoading(true);
-            ProfileUtils.syncProfile(this::onProfileSync, this::onProfileSyncFail);
-        } else {
-            setLoading(false);
-        }
+        swipeRefreshLayout = view.findViewById(R.id.profileRefresh);
+        profileContainer.setOnScrollDetected(this::onScrollDetected);
+        profileContainer.setOnScrollFinished(this::onScrollReleaseDetected);
 
-        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.profileRefresh);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             setLoading(true);
             ProfileUtils.syncProfile(() -> {
@@ -99,6 +133,92 @@ public class ProfileFragment extends Fragment {
         });
 
         setHasOptionsMenu(true);
+
+        profileImage = view.findViewById(R.id.profilePicture);
+        nameView = view.findViewById(R.id.name);
+        addressView = view.findViewById(R.id.address);
+        favouriteActivityView = view.findViewById(R.id.favActivityView);
+        friendsButton = view.findViewById(R.id.friendsButton);
+        friendsButton.setOnClickListener(v -> onAddFriendsClicked());
+        friendsView = view.findViewById(R.id.friends);
+        friendsView.setOnClickListener(v -> onFriendsClicked());
+
+        setupProfileOptions(view);
+
+        if (Login.isProfileOutOfSync()) {
+            setLoading(true);
+            ProfileUtils.syncProfile(this::onProfileSync, this::onProfileSyncFail);
+        } else {
+            setLoading(false);
+            onProfileSync();
+        }
+    }
+
+    /**
+     * Sets up all the options included in profile_options_layout
+     * @param view the view containing this layout
+     */
+    private void setupProfileOptions(View view) {
+        ConstraintLayout goalLayout = view.findViewById(R.id.goalsLayout);
+        goalLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(activity, GoalsActivity.class);
+            intent.putExtra(HomeActivity.FRAGMENT_ID, activity.getNavController().getCurrentDestination().getId());
+            startActivity(intent);
+        });
+
+        ConstraintLayout activitiesLayout = view.findViewById(R.id.activitiesLayout);
+        activitiesLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(activity, ListActivitiesActivity.class);
+            intent.putExtra(HomeActivity.FRAGMENT_ID, activity.getNavController().getCurrentDestination().getId());
+            startActivity(intent);
+        });
+
+        ConstraintLayout statisticsLayout = view.findViewById(R.id.statisticsLayout);
+        statisticsLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(activity, StatisticsActivity.class);
+            intent.putExtra(HomeActivity.FRAGMENT_ID, activity.getNavController().getCurrentDestination().getId());
+            startActivity(intent);
+        });
+
+        ConstraintLayout postsLayout = view.findViewById(R.id.postsLayout);
+        postsLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(activity, ProfilePostsActivity.class);
+            intent.putExtra(HomeActivity.FRAGMENT_ID, activity.getNavController().getCurrentDestination().getId());
+            startActivity(intent);
+        });
+    }
+
+    /**
+     * Handle when a scroll is detected
+     */
+    private void onScrollDetected() {
+        swipeRefreshLayout.setEnabled(false); // don't allow refreshes if we are scrolling
+    }
+
+    /**
+     * Handle when the scroll release is done
+     */
+    private void onScrollReleaseDetected() {
+        if (profileContainer.getScrollY() == 0)
+            swipeRefreshLayout.setEnabled(true); // we are back to scroll 0 so allow refreshes again
+    }
+
+    /**
+     * Handles the click of the add friends button
+     */
+    private void onAddFriendsClicked() {
+        Intent intent = new Intent(activity, ProfilesActivity.class);
+        // TODO may need to add a new extra for an id to return to which will override any Last ID passed into the intent
+        startActivity(intent);
+    }
+
+    /**
+     * Handles the clicking of the number of friends to view a friends list
+     */
+    private void onFriendsClicked() {
+        // TODO show friends list here
+        Toast.makeText(activity, "Friends list will display when done", Toast.LENGTH_SHORT)
+                .show();
     }
 
     /**
@@ -108,6 +228,17 @@ public class ProfileFragment extends Fragment {
         // TODO set appropriate fields with synced profile here when profile fragment is fully implemented
         setLoading(false);
         Login.setProfileOutOfSync(false);
+        Profile profile = Login.getProfile();
+
+        if (profile == null)
+            throw new IllegalStateException("A profile cannot be null when displaying the ProfileFragment");
+
+        profileImage.setImageBitmap(profile.getProfileImage());
+        nameView.setText(profile.getName());
+        String address = profile.getCity() + ", " + profile.getState();
+        addressView.setText(address);
+        favouriteActivityView.setText(profile.getFavouriteSport());
+        // TODO calculate number of friends here and set the text view
     }
 
     /**

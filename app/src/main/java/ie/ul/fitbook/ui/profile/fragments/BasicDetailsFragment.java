@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
@@ -24,12 +23,9 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,11 +45,10 @@ import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.network.NetworkUtils;
 import ie.ul.fitbook.profile.Profile;
+import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
 import ie.ul.fitbook.ui.profile.viewmodels.ProfileViewModel;
-import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.storage.Storage;
-import ie.ul.fitbook.storage.Stores;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
@@ -410,17 +405,13 @@ public class BasicDetailsFragment extends Fragment {
      * @param imageURI the uri of the chosen photo
      */
     private void processImageUri(Uri imageURI) {
-        Storage userStorage = Storage.getInstance(Stores.USERS);
+        Storage userStorage = new UserStorage();
 
-        if (userStorage != null) {
-            StorageReference childReference = userStorage.getChildFolder(Profile.PROFILE_IMAGE_PATH);
-            childReference.putFile(imageURI)
-                    .addOnFailureListener(activity, e -> onUploadError());
+        StorageReference childReference = userStorage.getChildFolder(Profile.PROFILE_IMAGE_PATH);
+        childReference.putFile(imageURI)
+                .addOnFailureListener(activity, e -> onUploadError());
 
-            setProfileImage(imageURI);
-        } else {
-            doImageError();
-        }
+        setProfileImage(imageURI);
     }
 
     /**
@@ -448,14 +439,14 @@ public class BasicDetailsFragment extends Fragment {
      * @param image the bitmap of the photo
      */
     private void processImageBitmap(Bitmap image) {
-        Storage userStorage = Storage.getInstance(Stores.USERS);
+        Storage userStorage = new UserStorage();
 
         if (userStorage != null) {
             profileImage.setImageBitmap(image);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             writeImageToDisk(baos);
-            byte[] data = baos.toByteArray();;
+            byte[] data = baos.toByteArray();
 
             StorageReference childReference = userStorage.getChildFolder(Profile.PROFILE_IMAGE_PATH);
             childReference.putBytes(data)
