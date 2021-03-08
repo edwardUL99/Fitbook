@@ -37,17 +37,4 @@ public abstract class Storage {
      * @return the storage reference for the folder
      */
     public abstract StorageReference getChildFolder(String childFolder);
-
-    /**
-     * Returns the storage instance matching the provided store folder
-     * @param store the store enum representing the main storage folder
-     * @return the appropriate instance
-     */
-    public static Storage getInstance(Stores store) {
-        if (store == Stores.USERS) {
-            return new UserStorage();
-        }
-
-        return null;
-    }
 }

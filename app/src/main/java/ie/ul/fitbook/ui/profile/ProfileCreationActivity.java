@@ -13,15 +13,12 @@ import android.os.Bundle;
 
 import com.google.firebase.firestore.DocumentReference;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
+import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.database.Database;
-import ie.ul.fitbook.database.Databases;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.ui.profile.viewmodels.ProfileViewModel;
@@ -166,7 +163,7 @@ public class ProfileCreationActivity extends AppCompatActivity {
      * @param profile the profile to save
      */
     private void saveProfile(Profile profile) {
-        DocumentReference documentReference = Objects.requireNonNull(Database.getInstance(Databases.USERS))
+        DocumentReference documentReference = new UserDatabase()
                 .getChildDocument(Profile.PROFILE_DOCUMENT);
 
         Map<String, Object> data = profile.toData();

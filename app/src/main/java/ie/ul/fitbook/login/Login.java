@@ -110,6 +110,7 @@ public final class Login {
         if (onCompleteListener != null)
                 signOut.addOnCompleteListener(onCompleteListener);
         deleteLogin(context);
+        profileOutOfSync = true; // after a logout (and possibly re-login), we cannot assume the profile will be in sync the next time
     }
 
     /**
@@ -126,6 +127,7 @@ public final class Login {
      */
     public static void setProfile(Profile profile) {
         Login.profile = profile;
+        Login.profile.setUserId(getUserId());
     }
 
     /**
@@ -170,5 +172,13 @@ public final class Login {
      */
     public static void setProfileOutOfSync(boolean profileOutOfSync) {
         Login.profileOutOfSync = profileOutOfSync;
+    }
+
+    /**
+     * Retrieves the user ID currently logged in
+     * @return user ID of logged in user
+     */
+    public static String getUserId() {
+        return FirebaseAuth.getInstance().getUid();
     }
 }

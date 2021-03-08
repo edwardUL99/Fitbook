@@ -11,24 +11,41 @@ import com.google.firebase.firestore.DocumentReference;
 public class UserDatabase extends Database {
     /**
      * Constructs a Database object with the provided main collection and user id of the current FirebaseUser.
+     * @param userID the userID to use
      * @throws IllegalStateException if Firebase current user is null
      */
-    protected UserDatabase() {
-        super(getCollectionPath());
+    public UserDatabase(String userID) {
+        super(getCollectionPath(userID));
+    }
+
+    /**
+     * Construct a UserDatabase for the currently logged in user
+     * @throws IllegalStateException if there is no logged in user
+     */
+    public UserDatabase() {
+        super(getLoggedInConnectionPath());
     }
 
     /**
      * Retrieves the collection path to use
      * @return the main collection path
+     */
+    private static String getCollectionPath(String userID) {
+        return "/users/" + userID;
+    }
+
+    /**
+     * Gets the connection path of the logged in user
+     * @return the collection path to use
      * @throws IllegalStateException if Firebase current user is null
      */
-    private static String getCollectionPath() {
+    private static String getLoggedInConnectionPath() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null)
             throw new IllegalStateException("Cannot create a UserDatabase for a user that is not logged in");
 
-        return "/users/" + user.getUid();
+        return getCollectionPath(user.getUid());
     }
 
     /**

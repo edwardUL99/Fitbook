@@ -7,32 +7,20 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.storage.FileDownloadTask;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-
-import java.io.File;
-import java.util.List;
-import java.util.Objects;
+import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.database.Database;
-import ie.ul.fitbook.database.Databases;
+import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.network.NetworkUtils;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
-import ie.ul.fitbook.utils.Utils;
 
 /**
  * The MainActivity launching this application. It basically acts as an intermediary checking status of login,
@@ -67,13 +55,15 @@ public class MainActivity extends AppCompatActivity {
         } else {
             checkProfileStatus();
         }
+
+        AndroidThreeTen.init(APPLICATION_CONTEXT); // need to initialise for date time and duration functionality
     }
 
     /**
      * Checks if the user has a profile or not and if not, opens the ProfileCreationActivity
      */
     private void checkProfileStatus() {
-        DocumentReference documentReference = Objects.requireNonNull(Database.getInstance(Databases.USERS))
+        DocumentReference documentReference = new UserDatabase()
                 .getChildDocument(Profile.PROFILE_DOCUMENT);
         documentReference.get()
                 .addOnCompleteListener(task -> {
@@ -101,8 +91,6 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                     } else {
-                        Exception exception = task.getException();
-
                         Toast.makeText(this, "An unknown error occurred launching the application, exiting...", Toast.LENGTH_SHORT)
                                 .show();
                         System.exit(1);

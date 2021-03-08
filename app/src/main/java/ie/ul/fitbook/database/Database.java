@@ -48,17 +48,4 @@ public abstract class Database {
      * @return the collection reference representing the database
      */
     public abstract CollectionReference getDatabase();
-
-    /**
-     * Retrieves an instance of the Database implementation matching the provided Databases enum
-     * @param database the database to instantiate
-     * @return the database instance for the provided enum
-     */
-    public static Database getInstance(Databases database) {
-        if (database == Databases.USERS) {
-            return new UserDatabase();
-        }
-
-        return null;
-    }
 }

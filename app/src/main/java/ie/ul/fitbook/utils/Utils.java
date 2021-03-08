@@ -6,27 +6,10 @@ import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
-import android.util.Log;
-import android.widget.Toast;
 
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.storage.StorageReference;
+import org.threeten.bp.Duration;
 
-import java.io.File;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import ie.ul.fitbook.database.Database;
-import ie.ul.fitbook.database.Databases;
-import ie.ul.fitbook.interfaces.ActionHandler;
-import ie.ul.fitbook.login.Login;
-import ie.ul.fitbook.network.NetworkUtils;
-import ie.ul.fitbook.profile.Profile;
-import ie.ul.fitbook.storage.Storage;
-import ie.ul.fitbook.storage.Stores;
-import ie.ul.fitbook.ui.MainActivity;
+import java.util.Locale;
 
 /**
  * This class provides various utility methods
@@ -85,5 +68,31 @@ public final class Utils {
 
             return result.toString();
         }
+    }
+
+    /**
+     * Converts the provided hours and minutes to a Duration object.
+     * This method does not check if the values are valid.
+     * @param hours the hours for the duration
+     * @param minutes the minutes for the duration
+     * @return duration representing the hours and minutes
+     */
+    public static Duration hoursMinutesToDuration(int hours, int minutes) {
+        int hoursInMins = hours * 60;
+        minutes += hoursInMins;
+        long millis = minutes * 60000;
+
+        return Duration.ofMillis(millis);
+    }
+
+    /**
+     * Converts duration to hours minutes string in format Xh YYm
+     * @param duration duration to convert
+     * @return duration in hours minutes
+     */
+    public static String durationToHoursMinutes(Duration duration) {
+        long seconds = Math.abs(duration.getSeconds());
+
+        return String.format(Locale.getDefault(),"%dh %02dm", seconds / 3600, (seconds % 3600) / 60);
     }
 }

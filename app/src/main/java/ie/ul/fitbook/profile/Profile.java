@@ -1,6 +1,8 @@
 package ie.ul.fitbook.profile;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,7 +18,11 @@ import ie.ul.fitbook.utils.Utils;
 /**
  * This class represents a user's profile
  */
-public class Profile {
+public class Profile implements Parcelable {
+    /**
+     * The firebase user ID for this user
+     */
+    private String userId;
     /**
      * The Bitmap representing the profile image for this user
      */
@@ -84,6 +90,21 @@ public class Profile {
     public static final String PROFILE_IMAGE_PATH = "images/profile_image.png";
 
     /**
+     * The Creator for making parcelable profiles
+     */
+    public static final Creator<Profile> CREATOR = new Creator<Profile>() {
+        @Override
+        public Profile createFromParcel(Parcel in) {
+            return new Profile(in);
+        }
+
+        @Override
+        public Profile[] newArray(int size) {
+            return new Profile[size];
+        }
+    };
+
+    /**
      * Constructs a Profile instance
      * @param profileImage the image for this profile
      * @param name the name of the user
@@ -110,6 +131,38 @@ public class Profile {
      * Constructs a default Profile
      */
     public Profile() {
+    }
+
+    /**
+     * Set the firebase user ID for this user
+     * @param userId the user ID to use
+     */
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * User ID for this user
+     * @return the user's UID
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * Constructs a profile from the the provided parcel
+     * @param in the parcel to read from
+     */
+    public Profile(Parcel in) {
+        userId = in.readString();
+        profileImage = in.readParcelable(Bitmap.class.getClassLoader());
+        name = in.readString();
+        city = in.readString();
+        state = in.readString();
+        country = in.readString();
+        favouriteSport = Sport.convertToSport(in.readString());
+        bio = in.readString();
+        athleticInformation = in.readParcelable(AthleticInformation.class.getClassLoader());
     }
 
     /**
@@ -276,7 +329,7 @@ public class Profile {
         if (weight == null)
             weight = 0.00;
 
-        if (name == null || city == null || state == null)
+        if (name == null || city == null || state == null || country == null)
             throw new IllegalStateException("Mandatory profile fields are missing from the document");
 
         AthleticInformation athleticInformation = new AthleticInformation(dateOfBirth, gender, weight);
@@ -305,9 +358,44 @@ public class Profile {
     }
 
     /**
+     * Describe the kinds of special objects contained in this Parcelable
+     * instance's marshaled representation. For example, if the object will
+     * include a file descriptor in the output of {@link #writeToParcel(Parcel, int)},
+     * the return value of this method must include the
+     * {@link #CONTENTS_FILE_DESCRIPTOR} bit.
+     *
+     * @return a bitmask indicating the set of special object types marshaled
+     * by this Parcelable object instance.
+     */
+    @Override
+    public int describeContents() {
+        return hashCode();
+    }
+
+    /**
+     * Flatten this object in to a Parcel.
+     *
+     * @param dest  The Parcel in which the object should be written.
+     * @param flags Additional flags about how the object should be written.
+     *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
+     */
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(userId);
+        dest.writeParcelable(profileImage, flags);
+        dest.writeString(name);
+        dest.writeString(city);
+        dest.writeString(state);
+        dest.writeString(country);
+        dest.writeString(favouriteSport.toString());
+        dest.writeString(bio);
+        dest.writeParcelable(athleticInformation, flags);
+    }
+
+    /**
      * This class represents information required for calculating athlete info
      */
-    public static class AthleticInformation {
+    public static class AthleticInformation implements Parcelable {
         /**
          * The athlete's date of birth in dd/MM/yyyy
          */
@@ -320,6 +408,21 @@ public class Profile {
          * The weight of the user in kg
          */
         private double weight;
+
+        /**
+         * The creator for making a parceled Profile
+         */
+        public static final Creator<AthleticInformation> CREATOR = new Creator<AthleticInformation>() {
+            @Override
+            public AthleticInformation createFromParcel(Parcel in) {
+                return new AthleticInformation(in);
+            }
+
+            @Override
+            public AthleticInformation[] newArray(int size) {
+                return new AthleticInformation[size];
+            }
+        };
 
         /**
          * An enum providing the available genders to choose from
@@ -389,6 +492,16 @@ public class Profile {
         }
 
         /**
+         * Constructs an AthleticInformation from the provided parcel
+         * @param in the parcel to construct from
+         */
+        public AthleticInformation(Parcel in) {
+            dateOfBirth = in.readString();
+            gender = Gender.convertToGender(in.readString());
+            weight = in.readDouble();
+        }
+
+        /**
          * Retrieves the date of birth of this user
          * @return the date of birth String
          */
@@ -437,6 +550,35 @@ public class Profile {
          */
         public void setWeight(double weight) {
             this.weight = weight;
+        }
+
+        /**
+         * Describe the kinds of special objects contained in this Parcelable
+         * instance's marshaled representation. For example, if the object will
+         * include a file descriptor in the output of {@link #writeToParcel(Parcel, int)},
+         * the return value of this method must include the
+         * {@link #CONTENTS_FILE_DESCRIPTOR} bit.
+         *
+         * @return a bitmask indicating the set of special object types marshaled
+         * by this Parcelable object instance.
+         */
+        @Override
+        public int describeContents() {
+            return hashCode();
+        }
+
+        /**
+         * Flatten this object in to a Parcel.
+         *
+         * @param dest  The Parcel in which the object should be written.
+         * @param flags Additional flags about how the object should be written.
+         *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
+         */
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(dateOfBirth);
+            dest.writeString(gender.toString());
+            dest.writeDouble(weight);
         }
     }
 }

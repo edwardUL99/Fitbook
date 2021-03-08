@@ -9,11 +9,19 @@ import com.google.firebase.storage.StorageReference;
  */
 public class UserStorage extends Storage {
     /**
+     * Constructs a UserStorage object for the provided user ID
+     * @param userId the user ID of the user
+     */
+    public UserStorage(String userId) {
+        super(getStoragePath(userId));
+    }
+
+    /**
      * Constructs an UserStorage instance
      * @throws IllegalStateException if Firebase current user is null
      */
-    protected UserStorage() {
-        super(getStoragePath());
+    public UserStorage() {
+        super(getLoggedInStoragePath());
     }
 
     /**
@@ -21,13 +29,22 @@ public class UserStorage extends Storage {
      * @return the main storage path
      * @throws IllegalStateException if Firebase current user is null
      */
-    private static String getStoragePath() {
+    private static String getLoggedInStoragePath() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null)
             throw new IllegalStateException("Cannot create a UserStorage for a user that is not logged in");
 
-        return "users/" + user.getUid();
+        return getStoragePath(user.getUid());
+    }
+
+    /**
+     * Retrieves the storage path for the provided user ID
+     * @param userId the id of the User
+     * @return the storage path to use
+     */
+    private static String getStoragePath(String userId) {
+        return "users/" + userId;
     }
 
     /**
