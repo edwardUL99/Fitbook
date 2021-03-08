@@ -11,7 +11,6 @@ import ie.ul.fitbook.login.Login;
 
 /**
  * This class displays statistics for a specified user
- * TODO may need a statistics collection for each cycle type in firestore and related classes, so when saving activities, these get updated
  */
 public class StatisticsActivity extends AppCompatActivity {
     /**

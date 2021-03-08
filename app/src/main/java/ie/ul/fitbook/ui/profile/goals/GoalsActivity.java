@@ -3,6 +3,7 @@ package ie.ul.fitbook.ui.profile.goals;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.custom.LoadingBar;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.goals.DistanceGoal;
 import ie.ul.fitbook.goals.ElevationGoal;
@@ -66,6 +68,14 @@ public class GoalsActivity extends AppCompatActivity {
      * This boolean tracks if goals can be modified (created, deleted etc.) or if they can be just viewed
      */
     private boolean canModifyGoals;
+    /**
+     * The progress bar to display on loading
+     */
+    private LoadingBar progressBar;
+    /**
+     * Our swipe refresh layout
+     */
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,10 +116,15 @@ public class GoalsActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(goalsAdapter);
 
-        SwipeRefreshLayout goalsRefresh = findViewById(R.id.goalsRefresh);
-        goalsRefresh.setOnRefreshListener(() -> {
+        ConstraintLayout goalsContainer = findViewById(R.id.goalsContainer);
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setLoadedLayout(goalsContainer);
+
+        swipeRefreshLayout = findViewById(R.id.goalsRefresh);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            progressBar.show();
             getGoals();
-            goalsRefresh.setRefreshing(false);
+            swipeRefreshLayout.setRefreshing(false);
         });
     }
 
@@ -121,6 +136,7 @@ public class GoalsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        progressBar.show();
         getGoals();
     }
 
@@ -135,6 +151,7 @@ public class GoalsActivity extends AppCompatActivity {
 
                     if (documentSnapshots.size() == 0) {
                         noGoalsMessage.setVisibility(View.VISIBLE);
+                        progressBar.hide();
                     } else {
                         noGoalsMessage.setVisibility(View.INVISIBLE);
                         for (DocumentSnapshot documentSnapshot : documentSnapshots) {
@@ -161,12 +178,14 @@ public class GoalsActivity extends AppCompatActivity {
                             }
                         }
                     }
+
+                    progressBar.hide();
                 })
                 .addOnFailureListener(failure -> {
                     failure.printStackTrace();
                     Toast.makeText(this, "An error occurred retrieving goals", Toast.LENGTH_SHORT)
                             .show();
-                    noGoalsMessage.setVisibility(View.VISIBLE);
+                    progressBar.hideBoth();
                 });
     }
 

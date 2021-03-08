@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- This layout provides the main scroll view of the profile inside the outer swipe refresh layout -->
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:isScrollContainer="true">
 
     <!-- Put everything except for the progress bar inside in the second constraint layout -->
-    <ProgressBar
+    <ie.ul.fitbook.custom.LoadingBar
         android:id="@+id/loadingBar"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
@@ -21,8 +21,8 @@
 
     <ie.ul.fitbook.custom.TraceableScrollView
         android:id="@+id/profileContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -42,38 +42,34 @@
                 layout="@layout/profile_header_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <FrameLayout
-                android:id="@+id/weeklyStatLayout"
-                android:layout_width="338dp"
-                android:layout_height="248dp"
-                android:layout_marginStart="11dp"
-                android:layout_marginTop="23dp"
-                android:layout_marginEnd="11dp"
-                android:background="#D1CDCD"
-                app:layout_constraintEnd_toEndOf="parent"
+            <include
+                android:id="@+id/biographyLayout"
+                layout="@layout/profile_bio_layout"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/profile_bio_height"
+                android:layout_marginTop="16dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/include">
+                app:layout_constraintTop_toBottomOf="@+id/include" />
 
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="Weekly Stats here.." />
-            </FrameLayout>
+            <include
+                android:id="@+id/include2"
+                layout="@layout/profile_weekly_stats"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/profile_stats_height"
+                android:layout_marginTop="18dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/biographyLayout" />
 
             <include
                 layout="@layout/profile_options_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="22dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/weeklyStatLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/include2" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ie.ul.fitbook.custom.TraceableScrollView>

@@ -186,6 +186,7 @@ public final class ProfileUtils {
 
                             if (data != null) {
                                 Profile profile = Profile.from(data);
+                                profile.setUserId(userId);
                                 downloadUserProfileImage(profile, userId, onSuccess, onFail);
                             } else if (onFailNonNull) {
                                 onFail.doAction();

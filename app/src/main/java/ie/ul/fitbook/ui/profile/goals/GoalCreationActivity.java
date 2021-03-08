@@ -35,8 +35,6 @@ import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.utils.Utils;
 
-// TODO test this thoroughly
-
 /**
  * This activity provides the ability to create a new goal
  */

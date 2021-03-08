@@ -117,4 +117,18 @@ public class TraceableScrollView extends ScrollView {
 
         return handled;
     }
+
+    /**
+     * Disables scrolling. Useful if children need to be scrolled
+     */
+    public void disableScrolling() {
+        requestDisallowInterceptTouchEvent(true);
+    }
+
+    /**
+     * Enables scrolling. Useful if children no longer need to be scrolled
+     */
+    public void enableScrolling() {
+        requestDisallowInterceptTouchEvent(false);
+    }
 }

@@ -1,34 +1,46 @@
 package ie.ul.fitbook.ui.profile.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+
+import java.util.Locale;
+import java.util.Map;
+
+import ie.ul.fitbook.custom.LoadingBar;
 import ie.ul.fitbook.custom.TraceableScrollView;
 import ie.ul.fitbook.profile.Profile;
+import ie.ul.fitbook.sports.Sport;
+import ie.ul.fitbook.statistics.WeeklyStat;
+import ie.ul.fitbook.statistics.WeeklyStatistics;
 import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
-import ie.ul.fitbook.ui.profile.ViewProfileActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
@@ -36,6 +48,7 @@ import ie.ul.fitbook.ui.profile.posts.ProfilePostsActivity;
 import ie.ul.fitbook.ui.profile.statistics.StatisticsActivity;
 import ie.ul.fitbook.ui.profiles.ProfilesActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
+import ie.ul.fitbook.utils.Utils;
 
 /**
  * Fragment for displaying profile
@@ -46,18 +59,22 @@ public class ProfileFragment extends Fragment {
      */
     private HomeActivity activity;
     /**
-     * A boolean variable to determine if the profile fragment is loading for whatever reason,
-     * most likely because the Login.isProfileOutOfSync() returned true
-     */
-    private boolean loading;
-    /**
      * The progress bar for saying the profile is loading
      */
-    private ProgressBar loadingBar;
+    private LoadingBar loadingBar;
+    /**
+     * If loaded already once, don't display the progress bar, just refresh while still allowing
+     * profile to be viewed
+     */
+    private static boolean LOADED_ONCE;
     /**
      * The container containing profile items
      */
     private TraceableScrollView profileContainer;
+    /**
+     * The CardView holding the biography
+     */
+    private CardView profileBio;
     /**
      * The swipe refresh layout allowing us to refresh the profile
      */
@@ -116,13 +133,18 @@ public class ProfileFragment extends Fragment {
         activity = (HomeActivity)requireActivity();
         loadingBar = view.findViewById(R.id.loadingBar);
         profileContainer = view.findViewById(R.id.profileContainer);
+        loadingBar.setLoadedLayout(profileContainer);
+        profileBio = view.findViewById(R.id.biographyLayout);
 
         swipeRefreshLayout = view.findViewById(R.id.profileRefresh);
         profileContainer.setOnScrollDetected(this::onScrollDetected);
         profileContainer.setOnScrollFinished(this::onScrollReleaseDetected);
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            setLoading(true);
+            if (!LOADED_ONCE)
+                loadingBar.show();
+
+            refreshWeeklyStats(view);
             ProfileUtils.syncProfile(() -> {
                 this.onProfileSync();
                 swipeRefreshLayout.setRefreshing(false);
@@ -142,16 +164,104 @@ public class ProfileFragment extends Fragment {
         friendsButton.setOnClickListener(v -> onAddFriendsClicked());
         friendsView = view.findViewById(R.id.friends);
         friendsView.setOnClickListener(v -> onFriendsClicked());
-
         setupProfileOptions(view);
 
         if (Login.isProfileOutOfSync()) {
-            setLoading(true);
+            LOADED_ONCE = false;
+            loadingBar.show();
             ProfileUtils.syncProfile(this::onProfileSync, this::onProfileSyncFail);
+            refreshWeeklyStats(view);
         } else {
-            setLoading(false);
+            loadingBar.hide();
             onProfileSync();
         }
+    }
+
+    /**
+     * Refreshes the weekly stats for this profile
+     * @param view the view containing the stats layout
+     */
+    private void refreshWeeklyStats(View view) {
+        TextView weekView = view.findViewById(R.id.weekView);
+        weekView.setText(WeeklyStatistics.getWeek());
+
+        String userId = Login.getUserId();
+        DocumentReference cycleReference = WeeklyStatistics.getSportWeeklyStat(userId, Sport.CYCLING);
+        DocumentReference runReference = WeeklyStatistics.getSportWeeklyStat(userId, Sport.RUNNING);
+        DocumentReference walkReference = WeeklyStatistics.getSportWeeklyStat(userId, Sport.WALKING);
+
+        setCycleStats(view, cycleReference);
+        setRunStats(view, runReference);
+        setWalkStats(view, walkReference);
+    }
+
+    /**
+     * Sets the cycling stats
+     * @param view the view for the layout
+     * @param cycleReference the document reference for the cycle stats
+     */
+    private void setCycleStats(View view, DocumentReference cycleReference) {
+        cycleReference.get()
+                .addOnCompleteListener(task -> {
+                    DocumentSnapshot snapshot = task.getResult();
+                    Map<String, Object> data;
+                    if (snapshot != null && (data = snapshot.getData()) != null) {
+                        WeeklyStat weeklyStat = WeeklyStat.from(data);
+                        TextView distance = view.findViewById(R.id.cycleDistance);
+                        distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
+                        TextView time = view.findViewById(R.id.cycleTime);
+                        time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
+                        TextView elevation = view.findViewById(R.id.cycleElevation);
+                        elevation.setText(weeklyStat.getElevation());
+                    }
+                })
+                .addOnFailureListener(failure -> Toast.makeText(activity, "Failed to load cycling statistics", Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * Sets the running stats
+     * @param view the view for the layout
+     * @param runReference the document reference for the run stats
+     */
+    private void setRunStats(View view, DocumentReference runReference) {
+        runReference.get()
+                .addOnCompleteListener(task -> {
+                    DocumentSnapshot snapshot = task.getResult();
+                    Map<String, Object> data;
+                    if (snapshot != null && (data = snapshot.getData()) != null) {
+                        WeeklyStat weeklyStat = WeeklyStat.from(data);
+                        TextView distance = view.findViewById(R.id.runDistance);
+                        distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
+                        TextView time = view.findViewById(R.id.runTime);
+                        time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
+                        TextView elevation = view.findViewById(R.id.runElevation);
+                        elevation.setText(weeklyStat.getElevation());
+                    }
+                })
+                .addOnFailureListener(failure -> Toast.makeText(activity, "Failed to load running statistics", Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * Sets the walking stats
+     * @param view the view for the layout
+     * @param walkReference the document reference for the cycle stats
+     */
+    private void setWalkStats(View view, DocumentReference walkReference) {
+        walkReference.get()
+                .addOnCompleteListener(task -> {
+                    DocumentSnapshot snapshot = task.getResult();
+                    Map<String, Object> data;
+                    if (snapshot != null && (data = snapshot.getData()) != null) {
+                        WeeklyStat weeklyStat = WeeklyStat.from(data);
+                        TextView distance = view.findViewById(R.id.walkDistance);
+                        distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
+                        TextView time = view.findViewById(R.id.walkTime);
+                        time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
+                        TextView elevation = view.findViewById(R.id.walkElevation);
+                        elevation.setText(weeklyStat.getElevation());
+                    }
+                })
+                .addOnFailureListener(failure -> Toast.makeText(activity, "Failed to load walking statistics", Toast.LENGTH_SHORT).show());
     }
 
     /**
@@ -225,8 +335,8 @@ public class ProfileFragment extends Fragment {
      * Handles when profile is synced
      */
     private void onProfileSync() {
-        // TODO set appropriate fields with synced profile here when profile fragment is fully implemented
-        setLoading(false);
+        loadingBar.hide();
+        LOADED_ONCE = true;
         Login.setProfileOutOfSync(false);
         Profile profile = Login.getProfile();
 
@@ -238,14 +348,46 @@ public class ProfileFragment extends Fragment {
         String address = profile.getCity() + ", " + profile.getState();
         addressView.setText(address);
         favouriteActivityView.setText(profile.getFavouriteSport());
+
+        setupBioTextView(profile);
         // TODO calculate number of friends here and set the text view
+    }
+
+    /**
+     * Sets up the biography text view
+     * @param profile profile which the bio belongs to
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupBioTextView(Profile profile) {
+        String bio = profile.getBio();
+
+        if (bio != null && !bio.isEmpty()) {
+            profileBio.setVisibility(View.VISIBLE);
+            TextView textView = profileBio.findViewById(R.id.biographyTextView);
+            textView.setText(bio);
+
+            textView.setMovementMethod(new ScrollingMovementMethod());
+
+            textView.setOnTouchListener((v, event) -> {
+                swipeRefreshLayout.setEnabled(false);
+                profileContainer.disableScrolling();
+                if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+                    profileContainer.enableScrolling();
+                    swipeRefreshLayout.setEnabled(true);
+                }
+
+                return false;
+            });
+        } else {
+            profileBio.setVisibility(View.GONE);
+        }
     }
 
     /**
      * Handles when profile sync fails
      */
     private void onProfileSyncFail() {
-        setLoading(false);
+        loadingBar.hide();
         Toast.makeText(activity, "Failed to load profile", Toast.LENGTH_SHORT)
                 .show();
         activity.getNavController().navigate(R.id.navigation_home);
@@ -287,7 +429,7 @@ public class ProfileFragment extends Fragment {
      */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (!loading) {
+        if (!loadingBar.isLoading()) {
             int id = item.getItemId();
 
             if (id == R.id.edit) {
@@ -365,19 +507,5 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-    }
-
-    /**
-     * Sets this fragment to either a loading state or a non-loading state
-     * @param loading true if loading, false if not
-     */
-    private void setLoading(boolean loading) {
-        int containerVisibility = loading ? View.GONE:View.VISIBLE;
-        int loadingVisibility = loading ? View.VISIBLE:View.GONE;
-
-        profileContainer.setVisibility(containerVisibility);
-        loadingBar.setVisibility(loadingVisibility);
-
-        this.loading = loading;
     }
 }

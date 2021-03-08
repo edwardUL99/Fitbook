@@ -95,5 +95,4 @@ public final class Utils {
 
         return String.format(Locale.getDefault(),"%dh %02dm", seconds / 3600, (seconds % 3600) / 60);
     }
-
 }

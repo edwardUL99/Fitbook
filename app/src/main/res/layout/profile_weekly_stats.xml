@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This layout provides the weekly stat view -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/profile_stats_height">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="@+id/textView26"
+        app:layout_constraintTop_toBottomOf="@+id/textView26">
+
+        <TextView
+            android:id="@+id/walkTime"
+            android:layout_width="101dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="5dp"
+            android:text="0h 00m"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toEndOf="@+id/view8"
+            app:layout_constraintTop_toBottomOf="@+id/textView32" />
+
+        <TextView
+            android:id="@+id/textView29"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:text="Distance"
+            android:textSize="10sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView27" />
+
+        <TextView
+            android:id="@+id/textView32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="66dp"
+            android:layout_marginTop="34dp"
+            android:text="Time"
+            android:textSize="10sp"
+            app:layout_constraintStart_toEndOf="@+id/textView29"
+            app:layout_constraintTop_toBottomOf="@+id/runTime" />
+
+        <TextView
+            android:id="@+id/walkDistance"
+            android:layout_width="91dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="16dp"
+            android:text="0.0km"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView29" />
+
+        <TextView
+            android:id="@+id/walkElevation"
+            android:layout_width="101dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="4dp"
+            android:text="0m"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toEndOf="@+id/view9"
+            app:layout_constraintTop_toBottomOf="@+id/textView36" />
+
+        <TextView
+            android:id="@+id/textView36"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="92dp"
+            android:layout_marginTop="34dp"
+            android:text="Elevation"
+            android:textSize="10sp"
+            app:layout_constraintStart_toEndOf="@+id/textView32"
+            app:layout_constraintTop_toBottomOf="@+id/runElevation" />
+
+        <View
+            android:id="@+id/view8"
+            android:layout_width="2dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="222dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintStart_toEndOf="@+id/walkDistance"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/view9"
+            android:layout_width="2dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="225dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintStart_toEndOf="@+id/walkTime"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/runTime"
+            android:layout_width="101dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="4dp"
+            android:text="0h 00m"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toEndOf="@+id/view4"
+            app:layout_constraintTop_toBottomOf="@+id/textView34" />
+
+        <TextView
+            android:id="@+id/runDistance"
+            android:layout_width="91dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="16dp"
+            android:text="0.0km"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView33" />
+
+        <TextView
+            android:id="@+id/textView33"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:text="Distance"
+            android:textSize="10sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView26" />
+
+        <TextView
+            android:id="@+id/textView34"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="39dp"
+            android:text="Time"
+            android:textSize="10sp"
+            app:layout_constraintStart_toEndOf="@+id/runDistance"
+            app:layout_constraintTop_toBottomOf="@+id/cycleTime" />
+
+        <TextView
+            android:id="@+id/runElevation"
+            android:layout_width="101dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="4dp"
+            android:text="0m"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toEndOf="@+id/view5"
+            app:layout_constraintTop_toBottomOf="@+id/textView35" />
+
+        <TextView
+            android:id="@+id/textView35"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="92dp"
+            android:layout_marginTop="39dp"
+            android:text="Elevation"
+            android:textSize="10sp"
+            app:layout_constraintStart_toEndOf="@+id/textView34"
+            app:layout_constraintTop_toBottomOf="@+id/cycleElevation" />
+
+        <View
+            android:id="@+id/view4"
+            android:layout_width="2dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="153dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintStart_toEndOf="@+id/runDistance"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView27"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="13dp"
+            android:text="Walk"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/runDistance" />
+
+        <View
+            android:id="@+id/view5"
+            android:layout_width="2dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="155dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintStart_toEndOf="@+id/runTime"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/weekView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView44"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Cycle"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/weekView" />
+
+        <TextView
+            android:id="@+id/textView26"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="11dp"
+            android:text="Run"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cycleDistance" />
+
+        <View
+            android:id="@+id/view3"
+            android:layout_width="2dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="79dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintStart_toEndOf="@+id/cycleDistance"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/view2"
+            android:layout_width="2dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="81dp"
+            android:layout_marginEnd="5dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toStartOf="@+id/cycleElevation"
+            app:layout_constraintStart_toEndOf="@+id/cycleTime"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView28"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="11dp"
+            android:text="Distance"
+            android:textSize="10sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView44" />
+
+        <TextView
+            android:id="@+id/textView30"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="66dp"
+            android:layout_marginTop="46dp"
+            android:text="Time"
+            android:textSize="10sp"
+            app:layout_constraintStart_toEndOf="@+id/textView28"
+            app:layout_constraintTop_toBottomOf="@+id/weekView" />
+
+        <TextView
+            android:id="@+id/textView31"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="92dp"
+            android:layout_marginTop="64dp"
+            android:text="Elevation"
+            android:textSize="10sp"
+            app:layout_constraintStart_toEndOf="@+id/textView30"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/cycleDistance"
+            android:layout_width="91dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="16dp"
+            android:text="0.0km"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView28" />
+
+        <TextView
+            android:id="@+id/cycleTime"
+            android:layout_width="101dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="5dp"
+            android:text="0h 00m"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toEndOf="@+id/view3"
+            app:layout_constraintTop_toBottomOf="@+id/textView30" />
+
+        <TextView
+            android:id="@+id/cycleElevation"
+            android:layout_width="101dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="5dp"
+            android:text="0m"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toEndOf="@+id/view2"
+            app:layout_constraintTop_toBottomOf="@+id/textView31" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
