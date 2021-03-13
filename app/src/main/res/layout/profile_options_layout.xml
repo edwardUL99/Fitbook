@@ -3,6 +3,7 @@
 items -->
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/profileOptions"
     android:layout_width="match_parent"
     android:layout_height="210dp"
     android:layout_marginStart="3dp"
@@ -26,7 +27,6 @@ items -->
             app:layout_constraintTop_toBottomOf="@+id/activitiesLayout">
 
             <ImageView
-                android:id="@+id/imageView9"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center|end"
@@ -38,7 +38,6 @@ items -->
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/textView23"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="bottom|center|start"
@@ -74,7 +73,6 @@ items -->
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/textView7"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="bottom|center|start"
@@ -88,7 +86,6 @@ items -->
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
-                android:id="@+id/imageView2"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center|end"
@@ -124,7 +121,6 @@ items -->
             app:layout_constraintTop_toBottomOf="@+id/goalsLayout">
 
             <ImageView
-                android:id="@+id/imageView6"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center|end"
@@ -136,7 +132,6 @@ items -->
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/textView22"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="bottom|center|start"
@@ -173,7 +168,6 @@ items -->
             app:layout_constraintTop_toBottomOf="@+id/statisticsLayout">
 
             <ImageView
-                android:id="@+id/imageView10"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center|end"
@@ -185,7 +179,6 @@ items -->
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/textView24"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="bottom|center|start"

@@ -1,5 +1,6 @@
 package ie.ul.fitbook.ui.profile;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -10,6 +11,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.util.Locale;
 import java.util.Map;
@@ -26,15 +29,18 @@ import java.util.Map;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.custom.LoadingBar;
 import ie.ul.fitbook.custom.TraceableScrollView;
+import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
+import ie.ul.fitbook.ui.profile.cache.ProfileCache;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.ui.profile.posts.ProfilePostsActivity;
 import ie.ul.fitbook.ui.profile.statistics.StatisticsActivity;
+import ie.ul.fitbook.ui.profiles.ProfilesActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
@@ -100,6 +106,10 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     private CardView profileBio;
     /**
+     * The profile option buttons to view different user data
+     */
+    private CardView profileOptions;
+    /**
      * The userId this profile view is for
      */
     private String userId;
@@ -107,6 +117,10 @@ public class ViewProfileActivity extends AppCompatActivity {
      * The profile passed in
      */
     private Profile profile;
+    /**
+     * Use this flag to determine if cache should be used
+     */
+    private boolean useCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +155,29 @@ public class ViewProfileActivity extends AppCompatActivity {
     }
 
     /**
+     * Retrieves the source appropriate for the cached values for this profile
+     * @return the source to use in queries
+     */
+    private Source getCacheSource() {
+        if (useCache) {
+            if (ProfileCache.hasUserBeenCached(getUserId()))
+                return Source.CACHE;
+            else
+                return Source.SERVER;
+        } else {
+            return Source.SERVER;
+        }
+    }
+
+    /**
+     * Retrieves the User ID represented by this profile activity
+     * @return the user ID of the profile
+     */
+    private String getUserId() {
+        return profile == null ? this.userId:profile.getUserId();
+    }
+
+    /**
      * This method sets up and initialises the activity
      */
     private void setupActivity() {
@@ -153,8 +190,10 @@ public class ViewProfileActivity extends AppCompatActivity {
         profileContainer.setOnScrollFinished(this::onScrollReleaseDetected);
 
         profileBio = findViewById(R.id.biographyLayout);
+        profileOptions = findViewById(R.id.profileOptions);
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
+            useCache = false;
             loadingBar.show();
             refreshProfile();
         });
@@ -163,9 +202,10 @@ public class ViewProfileActivity extends AppCompatActivity {
         nameView = findViewById(R.id.name);
         addressView = findViewById(R.id.address);
         favouriteActivityView = findViewById(R.id.favActivityView);
-        friendsButton = findViewById(R.id.friendsButton); // TODO need to display add friend or remove friend if this is a different user
+        friendsButton = findViewById(R.id.friendsButton);
         friendsView = findViewById(R.id.friends);
 
+        useCache = true;
         setupProfileOptions();
         refreshProfile();
     }
@@ -192,21 +232,24 @@ public class ViewProfileActivity extends AppCompatActivity {
      * @param cycleReference the document reference for the cycle stats
      */
     private void setCycleStats(DocumentReference cycleReference) {
-        cycleReference.get()
+        cycleReference.get(getCacheSource())
                 .addOnCompleteListener(task -> {
-                    DocumentSnapshot snapshot = task.getResult();
-                    Map<String, Object> data;
-                    if (snapshot != null && (data = snapshot.getData()) != null) {
-                        WeeklyStat weeklyStat = WeeklyStat.from(data);
-                        TextView distance = findViewById(R.id.cycleDistance);
-                        distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
-                        TextView time = findViewById(R.id.cycleTime);
-                        time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
-                        TextView elevation = findViewById(R.id.cycleElevation);
-                        elevation.setText(weeklyStat.getElevation());
+                    try {
+                        DocumentSnapshot snapshot = task.getResult();
+                        Map<String, Object> data;
+                        if (snapshot != null && (data = snapshot.getData()) != null) {
+                            WeeklyStat weeklyStat = WeeklyStat.from(data);
+                            TextView distance = findViewById(R.id.cycleDistance);
+                            distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
+                            TextView time = findViewById(R.id.cycleTime);
+                            time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
+                            TextView elevation = findViewById(R.id.cycleElevation);
+                            elevation.setText(weeklyStat.getElevation());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                })
-                .addOnFailureListener(failure -> Toast.makeText(this, "Failed to load cycling statistics", Toast.LENGTH_SHORT).show());
+                });
     }
 
     /**
@@ -214,21 +257,24 @@ public class ViewProfileActivity extends AppCompatActivity {
      * @param runReference the document reference for the run stats
      */
     private void setRunStats(DocumentReference runReference) {
-        runReference.get()
+        runReference.get(getCacheSource())
                 .addOnCompleteListener(task -> {
-                    DocumentSnapshot snapshot = task.getResult();
-                    Map<String, Object> data;
-                    if (snapshot != null && (data = snapshot.getData()) != null) {
-                        WeeklyStat weeklyStat = WeeklyStat.from(data);
-                        TextView distance = findViewById(R.id.runDistance);
-                        distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
-                        TextView time = findViewById(R.id.runTime);
-                        time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
-                        TextView elevation = findViewById(R.id.runElevation);
-                        elevation.setText(weeklyStat.getElevation());
+                    try {
+                        DocumentSnapshot snapshot = task.getResult();
+                        Map<String, Object> data;
+                        if (snapshot != null && (data = snapshot.getData()) != null) {
+                            WeeklyStat weeklyStat = WeeklyStat.from(data);
+                            TextView distance = findViewById(R.id.runDistance);
+                            distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
+                            TextView time = findViewById(R.id.runTime);
+                            time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
+                            TextView elevation = findViewById(R.id.runElevation);
+                            elevation.setText(weeklyStat.getElevation());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                })
-                .addOnFailureListener(failure -> Toast.makeText(this, "Failed to load running statistics", Toast.LENGTH_SHORT).show());
+                });
     }
 
     /**
@@ -236,21 +282,24 @@ public class ViewProfileActivity extends AppCompatActivity {
      * @param walkReference the document reference for the cycle stats
      */
     private void setWalkStats(DocumentReference walkReference) {
-        walkReference.get()
+        walkReference.get(getCacheSource())
                 .addOnCompleteListener(task -> {
-                    DocumentSnapshot snapshot = task.getResult();
-                    Map<String, Object> data;
-                    if (snapshot != null && (data = snapshot.getData()) != null) {
-                        WeeklyStat weeklyStat = WeeklyStat.from(data);
-                        TextView distance = findViewById(R.id.walkDistance);
-                        distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
-                        TextView time = findViewById(R.id.walkTime);
-                        time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
-                        TextView elevation = findViewById(R.id.walkElevation);
-                        elevation.setText(weeklyStat.getElevation());
+                    try {
+                        DocumentSnapshot snapshot = task.getResult();
+                        Map<String, Object> data;
+                        if (snapshot != null && (data = snapshot.getData()) != null) {
+                            WeeklyStat weeklyStat = WeeklyStat.from(data);
+                            TextView distance = findViewById(R.id.walkDistance);
+                            distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
+                            TextView time = findViewById(R.id.walkTime);
+                            time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
+                            TextView elevation = findViewById(R.id.walkElevation);
+                            elevation.setText(weeklyStat.getElevation());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                })
-                .addOnFailureListener(failure -> Toast.makeText(this, "Failed to load walking statistics", Toast.LENGTH_SHORT).show());
+                });
     }
 
     /**
@@ -258,8 +307,13 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     private void refreshProfile() {
         if (profile == null) {
-            loadingBar.show();
-            ProfileUtils.downloadProfile(userId, this::onProfileRefresh, this::onProfileRefreshFail);
+            Source source = getCacheSource();
+            boolean useCache = source == Source.CACHE;
+            if (!useCache)
+                loadingBar.show();
+
+            ProfileUtils.downloadProfile(userId, this::onProfileRefresh, this::onProfileRefreshFail,
+                    profileImage, useCache);
         } else {
             onProfileRefresh(profile);
             profile = null; // subsequent loads should refresh the profile
@@ -273,8 +327,6 @@ public class ViewProfileActivity extends AppCompatActivity {
      * @param profile the profile that has been downloaded by ProfileUtils.downloadProfile
      */
     private void onProfileRefresh(Profile profile) {
-        loadingBar.hide();
-
         if (profile == null)
             throw new IllegalStateException("A profile cannot be null on successful profile refresh");
 
@@ -283,11 +335,70 @@ public class ViewProfileActivity extends AppCompatActivity {
         String address = profile.getCity() + ", " + profile.getState();
         addressView.setText(address);
         favouriteActivityView.setText(profile.getFavouriteSport());
-        // TODO calculate number of friends here and set the text view and refresh the add friends button to the approriate value
-
         setupBioTextView(profile);
 
-        swipeRefreshLayout.setRefreshing(false);
+        onFriendsSync(profile);
+    }
+
+    /**
+     * This method is called when friends has been retrieved successfully and the user's friend status has been checked
+     * @param profile the profile object representing the profile being displayed here
+     */
+    private void onFriendsSync(Profile profile) {
+        String userId = profile.getUserId();
+        String ownId = Login.getUserId();
+
+        Source source = useCache ? Source.CACHE:Source.SERVER;
+        UserDatabase userDb = new UserDatabase(userId);
+        userDb.getChildCollection("friends")
+                .whereEqualTo("id", ownId)
+                .get(source)
+                .addOnSuccessListener(query -> {
+                    boolean friends = query.size() > 0;
+
+                    if (friends) {
+                        friendsButton.setText("Remove Friend");
+                        friendsButton.setOnClickListener(view -> removeFriend());
+                        profileOptions.setVisibility(View.VISIBLE);
+                    } else {
+                        friendsButton.setText("Add Friend");
+                        friendsButton.setOnClickListener(view -> {
+                            Intent intent = new Intent(this, ProfilesActivity.class);
+                            startActivity(intent);
+                        });
+                        profileOptions.setVisibility(View.GONE);
+                    }
+
+                    loadingBar.hide();
+                    swipeRefreshLayout.setRefreshing(false);
+
+                    userDb.getDatabase()
+                            .get(source)
+                            .addOnSuccessListener(success -> {
+                                Map<String, Object> data = success.getData();
+
+                                if (data != null) {
+                                    Long friendsNum = (Long)data.get("friends-count");
+                                    friendsNum = friendsNum == null ? 0:friendsNum;
+                                    String numberFriends = "" + friendsNum;
+                                    friendsView.setText(numberFriends);
+                                } else {
+                                    String zero = "" + 0;
+                                    friendsView.setText(zero);
+                                }
+
+                                ProfileCache.setUserCached(getUserId(), true);
+                            })
+                            .addOnFailureListener(fail -> onProfileRefreshFail());
+                })
+                .addOnFailureListener(fail -> onProfileRefreshFail());
+    }
+
+    /**
+     * This method removes the profile being viewed by the current user as a friend
+     */
+    private void removeFriend() {
+        // TODO this logic will remove the friend
     }
 
     /**
@@ -329,6 +440,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 .show();
 
         swipeRefreshLayout.setRefreshing(false);
+        ProfileCache.setUserCached(getUserId(), false);
     }
 
     /**
@@ -392,5 +504,31 @@ public class ViewProfileActivity extends AppCompatActivity {
     private void onScrollReleaseDetected() {
         if (profileContainer.getScrollY() == 0)
             swipeRefreshLayout.setEnabled(true); // we are back to scroll 0 so allow refreshes again
+    }
+
+    /**
+     * This hook is called whenever an item in your options menu is selected.
+     * The default implementation simply returns false to have the normal
+     * processing happen (calling the item's Runnable or sending a message to
+     * its Handler as appropriate).  You can use this method for any items
+     * for which you would like to do processing without those other
+     * facilities.
+     *
+     * <p>Derived classes should call through to the base class for it to
+     * perform the default menu handling.</p>
+     *
+     * @param item The menu item that was selected.
+     * @return boolean Return false to allow normal menu processing to
+     * proceed, true to consume it here.
+     * @see #onCreateOptionsMenu
+     */
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

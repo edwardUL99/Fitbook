@@ -44,8 +44,9 @@ public abstract class Database {
     public abstract DocumentReference getChildDocument(String documentName);
 
     /**
-     * Returns the collection reference referring to this database
-     * @return the collection reference representing the database
+     * Returns the reference referring to the directory referred to by this database.
+     * This may be a collection or document depending on the database in Firestore we are representing
+     * @return the reference representing the database
      */
-    public abstract CollectionReference getDatabase();
+    public abstract Object getDatabase();
 }
