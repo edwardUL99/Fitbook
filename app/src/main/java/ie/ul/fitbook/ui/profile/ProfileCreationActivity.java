@@ -21,6 +21,7 @@ import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
+import ie.ul.fitbook.ui.profile.fragments.PersistentEditFragment;
 import ie.ul.fitbook.ui.profile.viewmodels.ProfileViewModel;
 
 /**
@@ -40,6 +41,10 @@ public class ProfileCreationActivity extends AppCompatActivity {
      * True if the user is on the first page
      */
     private boolean onFirstPage;
+    /**
+     * The current fragment being edited
+     */
+    private PersistentEditFragment currentFragment;
     /**
      * Use this as an EXTRA key with a boolean value of true in the passed in intent to edit the profile
      * retrieved by Login.getProfile()
@@ -62,6 +67,23 @@ public class ProfileCreationActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
             actionBar.setTitle((editProfile ? "Edit":"Create") + " Profile");
+
+        setupProfile();
+    }
+
+    /**
+     * Set up the profile view model based on the edit flags passed in
+     */
+    private void setupProfile() {
+        if (editProfile) {
+            Profile loggedIn = Login.getProfile();
+            if (loggedIn == null)
+                throw new IllegalStateException("Login.getProfile() returned null, has the logged in user's profile been set?");
+
+            profileViewModel.selectProfile(Profile.copy(loggedIn));
+        } else {
+            profileViewModel.selectProfile(new Profile());
+        }
     }
 
     /**
@@ -100,6 +122,9 @@ public class ProfileCreationActivity extends AppCompatActivity {
             onCancel();
         else
             super.onBackPressed();
+
+        if (currentFragment != null)
+            currentFragment.saveEditState(profileViewModel.getSelectedProfile().getValue());
     }
 
     /**
@@ -133,16 +158,10 @@ public class ProfileCreationActivity extends AppCompatActivity {
      * This method handles a successful profile creation
      */
     public void onSubmit() {
-        Profile profile;
+        Profile profile = profileViewModel.getSelectedProfile().getValue();
 
-        if (!editProfile) {
-            profile = profileViewModel.getSelectedProfile().getValue();
-
-            if (profile == null)
-                throw new IllegalStateException("Cannot submit ProfileCreationActivity without a profile");
-        } else {
-            profile = Login.getProfile();
-        }
+        if (profile == null)
+            throw new IllegalStateException("Cannot submit ProfileCreationActivity without a profile");
 
         saveProfile(profile);
         Login.setProfile(profile);
@@ -204,5 +223,13 @@ public class ProfileCreationActivity extends AppCompatActivity {
      */
     public void offFirstPage() {
         onFirstPage = false;
+    }
+
+    /**
+     * Set the current fragment the user is on
+     * @param currentFragment the current fragment
+     */
+    public void setCurrentFragment(PersistentEditFragment currentFragment) {
+        this.currentFragment = currentFragment;
     }
 }

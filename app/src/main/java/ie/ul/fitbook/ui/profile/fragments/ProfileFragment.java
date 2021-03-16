@@ -33,6 +33,7 @@ import java.util.Map;
 
 import ie.ul.fitbook.custom.LoadingBar;
 import ie.ul.fitbook.custom.TraceableScrollView;
+import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
@@ -145,13 +146,13 @@ public class ProfileFragment extends Fragment {
                 loadingBar.show();
 
             refreshWeeklyStats(view);
-            ProfileUtils.syncProfile(() -> {
-                this.onProfileSync();
+            ProfileUtils.syncProfile(activity, () -> {
+                this.onProfileSync(view);
                 swipeRefreshLayout.setRefreshing(false);
             }, () -> {
                 this.onProfileSyncFail();
                 swipeRefreshLayout.setRefreshing(false);
-            });
+            }, profileImage);
         });
 
         setHasOptionsMenu(true);
@@ -169,11 +170,10 @@ public class ProfileFragment extends Fragment {
         if (Login.isProfileOutOfSync()) {
             LOADED_ONCE = false;
             loadingBar.show();
-            ProfileUtils.syncProfile(this::onProfileSync, this::onProfileSyncFail);
-            refreshWeeklyStats(view);
+            ProfileUtils.syncProfile(activity, () -> onProfileSync(view), this::onProfileSyncFail, profileImage);
         } else {
-            loadingBar.hide();
-            onProfileSync();
+            loadingBar.show();
+            onProfileSync(view);
         }
     }
 
@@ -203,19 +203,22 @@ public class ProfileFragment extends Fragment {
     private void setCycleStats(View view, DocumentReference cycleReference) {
         cycleReference.get()
                 .addOnCompleteListener(task -> {
-                    DocumentSnapshot snapshot = task.getResult();
-                    Map<String, Object> data;
-                    if (snapshot != null && (data = snapshot.getData()) != null) {
-                        WeeklyStat weeklyStat = WeeklyStat.from(data);
-                        TextView distance = view.findViewById(R.id.cycleDistance);
-                        distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
-                        TextView time = view.findViewById(R.id.cycleTime);
-                        time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
-                        TextView elevation = view.findViewById(R.id.cycleElevation);
-                        elevation.setText(weeklyStat.getElevation());
+                    try {
+                        DocumentSnapshot snapshot = task.getResult();
+                        Map<String, Object> data;
+                        if (snapshot != null && (data = snapshot.getData()) != null) {
+                            WeeklyStat weeklyStat = WeeklyStat.from(data);
+                            TextView distance = view.findViewById(R.id.cycleDistance);
+                            distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
+                            TextView time = view.findViewById(R.id.cycleTime);
+                            time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
+                            TextView elevation = view.findViewById(R.id.cycleElevation);
+                            elevation.setText(weeklyStat.getElevation());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                })
-                .addOnFailureListener(failure -> Toast.makeText(activity, "Failed to load cycling statistics", Toast.LENGTH_SHORT).show());
+                });
     }
 
     /**
@@ -226,19 +229,22 @@ public class ProfileFragment extends Fragment {
     private void setRunStats(View view, DocumentReference runReference) {
         runReference.get()
                 .addOnCompleteListener(task -> {
-                    DocumentSnapshot snapshot = task.getResult();
-                    Map<String, Object> data;
-                    if (snapshot != null && (data = snapshot.getData()) != null) {
-                        WeeklyStat weeklyStat = WeeklyStat.from(data);
-                        TextView distance = view.findViewById(R.id.runDistance);
-                        distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
-                        TextView time = view.findViewById(R.id.runTime);
-                        time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
-                        TextView elevation = view.findViewById(R.id.runElevation);
-                        elevation.setText(weeklyStat.getElevation());
+                    try {
+                        DocumentSnapshot snapshot = task.getResult();
+                        Map<String, Object> data;
+                        if (snapshot != null && (data = snapshot.getData()) != null) {
+                            WeeklyStat weeklyStat = WeeklyStat.from(data);
+                            TextView distance = view.findViewById(R.id.runDistance);
+                            distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
+                            TextView time = view.findViewById(R.id.runTime);
+                            time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
+                            TextView elevation = view.findViewById(R.id.runElevation);
+                            elevation.setText(weeklyStat.getElevation());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                })
-                .addOnFailureListener(failure -> Toast.makeText(activity, "Failed to load running statistics", Toast.LENGTH_SHORT).show());
+                });
     }
 
     /**
@@ -249,19 +255,22 @@ public class ProfileFragment extends Fragment {
     private void setWalkStats(View view, DocumentReference walkReference) {
         walkReference.get()
                 .addOnCompleteListener(task -> {
-                    DocumentSnapshot snapshot = task.getResult();
-                    Map<String, Object> data;
-                    if (snapshot != null && (data = snapshot.getData()) != null) {
-                        WeeklyStat weeklyStat = WeeklyStat.from(data);
-                        TextView distance = view.findViewById(R.id.walkDistance);
-                        distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
-                        TextView time = view.findViewById(R.id.walkTime);
-                        time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
-                        TextView elevation = view.findViewById(R.id.walkElevation);
-                        elevation.setText(weeklyStat.getElevation());
+                    try {
+                        DocumentSnapshot snapshot = task.getResult();
+                        Map<String, Object> data;
+                        if (snapshot != null && (data = snapshot.getData()) != null) {
+                            WeeklyStat weeklyStat = WeeklyStat.from(data);
+                            TextView distance = view.findViewById(R.id.walkDistance);
+                            distance.setText(String.format(Locale.getDefault(), "%,.01fkm", weeklyStat.getDistance()));
+                            TextView time = view.findViewById(R.id.walkTime);
+                            time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
+                            TextView elevation = view.findViewById(R.id.walkElevation);
+                            elevation.setText(weeklyStat.getElevation());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                })
-                .addOnFailureListener(failure -> Toast.makeText(activity, "Failed to load walking statistics", Toast.LENGTH_SHORT).show());
+                });
     }
 
     /**
@@ -333,11 +342,9 @@ public class ProfileFragment extends Fragment {
 
     /**
      * Handles when profile is synced
+     * @param view the view for this profile fragment
      */
-    private void onProfileSync() {
-        loadingBar.hide();
-        LOADED_ONCE = true;
-        Login.setProfileOutOfSync(false);
+    private void onProfileSync(View view) {
         Profile profile = Login.getProfile();
 
         if (profile == null)
@@ -350,7 +357,38 @@ public class ProfileFragment extends Fragment {
         favouriteActivityView.setText(profile.getFavouriteSport());
 
         setupBioTextView(profile);
-        // TODO calculate number of friends here and set the text view
+        onFriendsSync();
+        loadingBar.hide();
+        refreshWeeklyStats(view);
+    }
+
+    /**
+     * Syncs the number of friends this user has
+     */
+    private void onFriendsSync() {
+        new UserDatabase()
+                .getDatabase()
+                .get()
+                .addOnSuccessListener(success -> {
+                    Map<String, Object> data = success.getData();
+
+                    if (data != null) {
+                        Long friendsNum = (Long)data.get("friends-count");
+                        friendsNum = friendsNum == null ? 0:friendsNum;
+                        String friendsNumber = "" + friendsNum;
+                        friendsView.setText(friendsNumber);
+                        loadingBar.hide();
+                        LOADED_ONCE = true;
+                        Login.setProfileOutOfSync(false); // we have now fully synced our profile
+                    } else {
+                        String zero = "" + 0;
+                        friendsView.setText(zero);
+                    }
+
+                    LOADED_ONCE = true;
+                    Login.setProfileOutOfSync(false); // we have now fully synced our profile
+                })
+                .addOnFailureListener(fail -> onProfileSyncFail());
     }
 
     /**
@@ -387,10 +425,9 @@ public class ProfileFragment extends Fragment {
      * Handles when profile sync fails
      */
     private void onProfileSyncFail() {
-        loadingBar.hide();
+        loadingBar.hideBoth();
         Toast.makeText(activity, "Failed to load profile", Toast.LENGTH_SHORT)
                 .show();
-        activity.getNavController().navigate(R.id.navigation_home);
     }
 
     /**

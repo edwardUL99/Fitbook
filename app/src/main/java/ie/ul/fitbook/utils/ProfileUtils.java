@@ -4,9 +4,12 @@ package ie.ul.fitbook.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.util.Log;
+import android.widget.ImageView;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Source;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -19,7 +22,6 @@ import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.network.NetworkUtils;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
-import ie.ul.fitbook.ui.MainActivity;
 
 /**
  * This class provides various utility methods for managing profiles throughout the
@@ -49,6 +51,8 @@ public final class ProfileUtils {
      * @return the file representing the image location, null if an error occurred
      */
     public static File getProfileImageLocation(Context context) {
+        Log.i("Fitbook" ,"getProfileImageLocation: reached get profile image location");
+
         File file = context.getFilesDir();
         file = new File(file, "profile-picture");
 
@@ -62,24 +66,29 @@ public final class ProfileUtils {
     /**
      * This method downloads the profile image in the background using the application context.
      * It is assumed that you have network connectivity
+     * @param context the context to download the profile image with
+     * @param imageView the image view to download into
      */
-    private static void downloadProfileImage() {
-        File file = getProfileImageLocation(MainActivity.APPLICATION_CONTEXT);
+    private static void downloadProfileImage(Context context, ImageView imageView) {
+        File file = getProfileImageLocation(context);
 
         if (file == null)
             return;
 
         StorageReference storageReference = new UserStorage().getChildFolder(Profile.PROFILE_IMAGE_PATH);
 
-        if (NetworkUtils.isNetworkConnected(MainActivity.APPLICATION_CONTEXT)) {
+        if (NetworkUtils.isNetworkConnected(context)) {
             storageReference.getFile(file)
                     .addOnSuccessListener(success -> {
-                        Bitmap bitmap1 = Utils.getBitmapFromFile(MainActivity.APPLICATION_CONTEXT, Uri.fromFile(file));
-                        Profile profile1 = Login.getProfile(); // profile may have became null by the time download finished
+                        Bitmap bitmap = Utils.getBitmapFromFile(context, Uri.fromFile(file));
+                        Profile profile = Login.getProfile(); // profile may have became null by the time download finished
 
-                        if (profile1 != null)
-                            profile1.setProfileImage(bitmap1);
-                        onSucceededProfileSync();
+                        if (profile != null)
+                            profile.setProfileImage(bitmap);
+
+                        if (imageView != null) {
+                            imageView.setImageBitmap(bitmap);
+                        }
                     })
                     .addOnFailureListener(failed -> onFailedProfileSync());
         } else {
@@ -108,42 +117,52 @@ public final class ProfileUtils {
      * Downloads a profile image for a different profile than the logged in profile
      * @param profile the profile to download the image for
      * @param userId the User ID of the user to download the profile
-     * @param onSuccess the handler for when the download succeeds
+     * @param imageView the ImageView to download the profile image into
      * @param onFail the handler for when it fails
+     * @param useCache true to use a previously downloaded image if available, false if not
+     * @param context the context to download profile image with
      */
-    private static void downloadUserProfileImage(Profile profile, String userId, ActionHandlerConsumer<Profile> onSuccess, ActionHandler onFail) {
-        File file = getUserProfileImageLocation(MainActivity.APPLICATION_CONTEXT, userId);
+    private static void downloadUserProfileImage(Profile profile, String userId, ImageView imageView,
+                                                 ActionHandler onFail, boolean useCache, Context context) {
+        File file = getUserProfileImageLocation(context, userId);
 
         if (file == null)
             return;
 
         file.deleteOnExit(); // we don't want this photo anymore when application closes
 
-        StorageReference storageReference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
-
-        if (NetworkUtils.isNetworkConnected(MainActivity.APPLICATION_CONTEXT)) {
-            storageReference.getFile(file)
-                    .addOnSuccessListener(success -> {
-                        Bitmap bitmap1 = Utils.getBitmapFromFile(MainActivity.APPLICATION_CONTEXT, Uri.fromFile(file));
-                        profile.setProfileImage(bitmap1);
-                        if (onSuccess != null)
-                            onSuccess.doAction(profile);
-                    })
-                    .addOnFailureListener(failed -> {
-                        if (onFail != null)
-                            onFail.doAction();
-                    });
+        if (useCache && file.exists()) {
+            Bitmap bitmap = Utils.getBitmapFromFile(context, Uri.fromFile(file));
+            profile.setProfileImage(bitmap);
+            imageView.setImageBitmap(bitmap);
         } else {
-            if (onFail != null)
-                onFail.doAction();
+            StorageReference storageReference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
+
+            if (NetworkUtils.isNetworkConnected(context)) {
+                storageReference.getFile(file)
+                        .addOnSuccessListener(success -> {
+                            Bitmap bitmap = Utils.getBitmapFromFile(context, Uri.fromFile(file));
+                            profile.setProfileImage(bitmap);
+                            imageView.setImageBitmap(bitmap);
+                        })
+                        .addOnFailureListener(failed -> {
+                            if (onFail != null)
+                                onFail.doAction();
+                        });
+            } else {
+                if (onFail != null)
+                    onFail.doAction();
+            }
         }
     }
 
     /**
      * This method downloads the profile in the background.
      * It also downloads the profile picture in the background
+     * @param context the context to download the profile with
+     * @param imageView image view to download profile picture into
      */
-    private static void downloadProfile() {
+    private static void downloadProfile(Context context, ImageView imageView) {
         if (profileSnapshot == null) {
             DocumentReference documentReference = new UserDatabase()
                     .getChildDocument(Profile.PROFILE_DOCUMENT);
@@ -151,7 +170,7 @@ public final class ProfileUtils {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             profileSnapshot = task.getResult();
-                            processProfileSnapshot();
+                            processProfileSnapshot(context, imageView);
                         } else {
                             Exception exception = task.getException();
                             if (exception != null)
@@ -162,7 +181,7 @@ public final class ProfileUtils {
                     })
                     .addOnFailureListener(task -> onFailedProfileSync());
         } else {
-            processProfileSnapshot();
+            processProfileSnapshot(context, imageView);
         }
     }
 
@@ -171,12 +190,18 @@ public final class ProfileUtils {
      * @param userId the ID of the user to download
      * @param onSuccess the handler for when the profile is downloaded successfully
      * @param onFail the handler for when thr profile fails to be downloaded
+     * @param imageView the Image view we want to set the profile image of
+     * @param useCache true to use cache, false if not
+     * @param context the context to download the profile with
      */
-    public static void downloadProfile(String userId, ActionHandlerConsumer<Profile> onSuccess, ActionHandler onFail) {
+    public static void downloadProfile(String userId, ActionHandlerConsumer<Profile> onSuccess,
+                                       ActionHandler onFail, ImageView imageView, boolean useCache, Context context) {
         boolean onFailNonNull = onFail != null;
         DocumentReference documentReference = new UserDatabase(userId)
                 .getChildDocument(Profile.PROFILE_DOCUMENT);
-        documentReference.get()
+
+        Source source = useCache ? Source.CACHE:Source.SERVER;
+        documentReference.get(source)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot snapshot = task.getResult();
@@ -187,7 +212,9 @@ public final class ProfileUtils {
                             if (data != null) {
                                 Profile profile = Profile.from(data);
                                 profile.setUserId(userId);
-                                downloadUserProfileImage(profile, userId, onSuccess, onFail);
+                                downloadUserProfileImage(profile, userId, imageView, onFail, useCache, context); // TODO quicker to call onSuccess here and maybe find a way to update profile picture after
+                                if (onSuccess != null)
+                                    onSuccess.doAction(profile);
                             } else if (onFailNonNull) {
                                 onFail.doAction();
                             }
@@ -213,8 +240,10 @@ public final class ProfileUtils {
     /**
      * Processes the profileSnapshot variable. To work on the snapshot, set the variable before calling
      * this method
+     * @param context the context to process the snapshot with
+     * @param imageView the image view to download a profile picture into
      */
-    private static void processProfileSnapshot() {
+    private static void processProfileSnapshot(Context context, ImageView imageView) {
         if (profileSnapshot != null) {
             Map<String, Object> data = profileSnapshot.getData();
 
@@ -222,7 +251,8 @@ public final class ProfileUtils {
                 Login.setProfile(Profile.from(data));
             }
 
-            downloadProfileImage();
+            downloadProfileImage(context, imageView);
+            onSucceededProfileSync();
         }
     }
 
@@ -246,13 +276,15 @@ public final class ProfileUtils {
      * This method syncs the profile from the firebase database and calls the appropriate handler if not null.
      * If you have a DocumentSnapshot already retrieved that you don't want to download again from Firebase, call setProfileSnapshot.
      * Note that after a call to this method, the profileSnapshot is set to null, so for subsequent calls, it will need to be set again.
+     * @param context the context to sync the profile with
      * @param onSuccess the handler to call when successfully completed
      * @param onFail the handler to call on a failure
+     * @param imageView an image view to insert the image into. Can be null
      */
-    public static void syncProfile(ActionHandler onSuccess, ActionHandler onFail) {
+    public static void syncProfile(Context context, ActionHandler onSuccess, ActionHandler onFail, ImageView imageView) {
         successProfileDownloadHandler = onSuccess;
         failProfileDownloadHandler = onFail;
-        downloadProfile();
+        downloadProfile(context, imageView);
         profileSnapshot = null;
     }
 
@@ -264,5 +296,13 @@ public final class ProfileUtils {
      */
     public static void setProfileSnapshot(DocumentSnapshot profileSnapshot) {
         ProfileUtils.profileSnapshot = profileSnapshot;
+    }
+
+    /**
+     * Retrieve a pre-loaded document snapshot if set and a call to syncProfile has not been made.
+     * @return document snapshot representing user's profile, null if not set
+     */
+    public static DocumentSnapshot getProfileSnapshot() {
+        return profileSnapshot;
     }
 }

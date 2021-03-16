@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
@@ -32,7 +31,7 @@ import ie.ul.fitbook.utils.Utils;
 /**
  * The fragment for entering user's biography
  */
-public class BiographyFragment extends Fragment {
+public class BiographyFragment extends Fragment implements PersistentEditFragment {
     /**
      * The profile being edited
      */
@@ -48,11 +47,11 @@ public class BiographyFragment extends Fragment {
     /**
      * The activity behind this fragment
      */
-    private FragmentActivity activity;
+    private ProfileCreationActivity activity;
     /**
-     * A flag to keep track of if we're editing
+     * A flag to determine if entered fields are valid
      */
-    private boolean editing;
+    private boolean valid;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,8 +88,8 @@ public class BiographyFragment extends Fragment {
             activity = (ProfileCreationActivity)fragmentActivity;
         }
 
-        this.activity = fragmentActivity;
-        editing = activity.isInEditMode();
+        this.activity = activity;
+        this.activity.setCurrentFragment(this);
 
         setupProfile();
 
@@ -126,31 +125,20 @@ public class BiographyFragment extends Fragment {
      * Set up the profile instance being edited
      */
     private void setupProfile() {
-        if (!editing) {
-            ProfileViewModel profileViewModel = new ViewModelProvider(this.activity).get(ProfileViewModel.class);
-
-            Profile profile = profileViewModel.getSelectedProfile().getValue();
-            if (profile == null)
-                throw new IllegalStateException("On the BiographyFragment stage of ProfileCreationActivity, you should have a profile being edited");
-
-            this.profile = profile;
-        } else {
-            Profile loggedIn = Login.getProfile();
-
-            if (loggedIn == null)
-                throw new IllegalStateException("Login.getProfile() returned null, has the logged in user's profile been set?");
-
-            this.profile = loggedIn;
-        }
+        ProfileViewModel profileViewModel = new ViewModelProvider(this.activity).get(ProfileViewModel.class);
+        this.profile = profileViewModel.getSelectedProfile().getValue();
     }
 
     /**
      * This method fills the fields with information from the logged in profile
      */
     private void fillFieldsWithProfile() {
-        if (editing) {
-            biographyField.setText(profile.getBio());
-            String activity = profile.getFavouriteSport();
+        String bio = profile.getBio();
+        bio = bio == null ? "":bio;
+        biographyField.setText(bio);
+        String activity = profile.getFavouriteSport();
+
+        if (activity != null) {
             SpinnerAdapter adapter = activityField.getAdapter();
 
             for (int i = 0; i < adapter.getCount(); i++) {
@@ -167,7 +155,22 @@ public class BiographyFragment extends Fragment {
      * @param view the view for the fragment (not the button on click listener)
      */
     private void onNext(View view) {
-        boolean valid = true;
+        saveEditState(profile);
+
+        if (valid)
+            Navigation.findNavController(view).navigate(R.id.action_biographyFragment_to_athleticInformationFragment);
+    }
+
+    /**
+     * This method is used to save the edit state of the current editing page to the provided profile
+     * object.
+     *
+     * @param profile the profile that any edits should be saved to
+     */
+    @Override
+    public void saveEditState(Profile profile) {
+        valid = true;
+
         String biography = biographyField.getText().toString();
         profile.setBio(biography);
 
@@ -176,11 +179,6 @@ public class BiographyFragment extends Fragment {
             valid = false;
         }
 
-        if (!valid)
-            return;
-
         profile.setFavouriteSport(Sport.convertToSport(activityValue));
-
-        Navigation.findNavController(view).navigate(R.id.action_biographyFragment_to_athleticInformationFragment);
     }
 }

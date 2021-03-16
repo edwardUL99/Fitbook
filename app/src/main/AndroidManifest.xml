@@ -8,25 +8,48 @@
         </intent>
     </queries>
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Fitbook">
-        <activity android:name=".ui.profile.ViewProfileActivity"></activity>
-        <activity android:name=".ui.profile.posts.ProfilePostsActivity" />
-        <activity android:name=".ui.profile.statistics.StatisticsActivity" />
-        <activity android:name=".ui.profile.activities.ListActivitiesActivity" />
-        <activity android:name=".ui.profile.goals.GoalCreationActivity" />
-        <activity android:name=".ui.profile.goals.GoalsActivity" />
-        <activity android:name=".ui.profiles.ProfilesActivity" />
-        <activity android:name=".ui.notifications.NotificationsActivity" />
+
+        <activity
+            android:name=".ui.recording.StartRecordingActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.profile.ViewProfileActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.profile.posts.ProfilePostsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.profile.statistics.StatisticsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.profile.activities.ListActivitiesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.profile.goals.GoalCreationActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.profile.goals.GoalsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.profiles.ProfilesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.notifications.NotificationsActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.HomeActivity"
             android:label="@string/title_activity_navigation"
@@ -45,6 +68,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
     </application>
 
 </manifest>

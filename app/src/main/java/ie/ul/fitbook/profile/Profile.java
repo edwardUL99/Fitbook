@@ -250,7 +250,10 @@ public class Profile implements Parcelable {
      * @return the user's favourite sport as a string
      */
     public String getFavouriteSport() {
-        return Utils.capitalise(favouriteSport.toString());
+        if (favouriteSport != null)
+            return Utils.capitalise(favouriteSport.toString());
+        else
+            return null;
     }
 
     /**
@@ -282,7 +285,7 @@ public class Profile implements Parcelable {
      * @return athletic information instance
      */
     public AthleticInformation getAthleticInformation() {
-        return  athleticInformation;
+        return athleticInformation;
     }
 
     /**
@@ -390,6 +393,26 @@ public class Profile implements Parcelable {
         dest.writeString(favouriteSport.toString());
         dest.writeString(bio);
         dest.writeParcelable(athleticInformation, flags);
+    }
+
+    /**
+     * Copy the provided profile
+     * @param profile the profile to copy
+     * @return the copied object
+     */
+    public static Profile copy(Profile profile) {
+        Profile copy = new Profile();
+        copy.userId = profile.userId;
+        copy.name = profile.name;
+        copy.profileImage = profile.profileImage;
+        copy.city = profile.city;
+        copy.state = profile.state;
+        copy.country = profile.country;
+        copy.bio = profile.bio;
+        copy.favouriteSport = profile.favouriteSport;
+        copy.athleticInformation = AthleticInformation.copy(profile.athleticInformation);
+
+        return copy;
     }
 
     /**
@@ -525,7 +548,10 @@ public class Profile implements Parcelable {
          * @return the gender as a string
          */
         public String getGender() {
-            return Utils.capitalise(gender.toString());
+            if (gender != null)
+                return Utils.capitalise(gender.toString());
+            else
+                return null;
         }
 
         /**
@@ -579,6 +605,16 @@ public class Profile implements Parcelable {
             dest.writeString(dateOfBirth);
             dest.writeString(gender.toString());
             dest.writeDouble(weight);
+        }
+
+        /**
+         * Copies the provided athletic information object
+         * @param athleticInformation the object to copy
+         * @return the copied object
+         */
+        public static AthleticInformation copy(AthleticInformation athleticInformation) {
+            return new AthleticInformation(athleticInformation.dateOfBirth,
+                    athleticInformation.gender, athleticInformation.weight);
         }
     }
 }

@@ -73,12 +73,13 @@ public class UserDatabase extends Database {
     }
 
     /**
-     * Returns the collection reference referring to this database
+     * Returns the reference referring to the directory referred to by this database.
+     * This may be a collection or document depending on the database in Firestore we are representing
      *
-     * @return the collection reference representing the database
+     * @return the reference representing the database
      */
     @Override
-    public CollectionReference getDatabase() {
-        return database.collection(mainCollection);
+    public DocumentReference getDatabase() {
+        return database.document(mainCollection);
     }
 }
