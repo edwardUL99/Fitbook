@@ -313,7 +313,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 loadingBar.show();
 
             ProfileUtils.downloadProfile(userId, this::onProfileRefresh, this::onProfileRefreshFail,
-                    profileImage, useCache);
+                    profileImage, useCache, this);
         } else {
             onProfileRefresh(profile);
             profile = null; // subsequent loads should refresh the profile

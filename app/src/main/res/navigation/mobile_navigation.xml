@@ -11,10 +11,10 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="ie.ul.fitbook.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_new_activity"
+        android:name="ie.ul.fitbook.ui.newactivity.NewActivityFragment"
+        android:label="@string/title_new_activity"
+        tools:layout="@layout/fragment_new_activity" />
 
     <fragment
         android:id="@+id/navigation_messages"

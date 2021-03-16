@@ -5,14 +5,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
@@ -31,10 +29,6 @@ public class MainActivity extends AppCompatActivity {
      * A code for logging in
      */
     private static final int RC_LOGIN = 123;
-    /**
-     * The application context that has a lifecycle for the entire program
-     */
-    public static Context APPLICATION_CONTEXT;
 
     /**
      * Handles the creation of the MainActivity
@@ -44,9 +38,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (APPLICATION_CONTEXT == null)
-            APPLICATION_CONTEXT = getApplicationContext();
-
         setContentView(R.layout.activity_main);
 
         if (!Login.checkLogin(this)) {
@@ -55,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             checkProfileStatus();
         }
-
-        AndroidThreeTen.init(APPLICATION_CONTEXT); // need to initialise for date time and duration functionality
     }
 
     /**

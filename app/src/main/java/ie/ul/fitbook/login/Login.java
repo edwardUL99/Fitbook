@@ -163,7 +163,7 @@ public final class Login {
      * @return true if out of sync, false if not
      */
     public static boolean isProfileOutOfSync() {
-        return profileOutOfSync;
+        return profileOutOfSync || profile == null;
     }
 
     /**

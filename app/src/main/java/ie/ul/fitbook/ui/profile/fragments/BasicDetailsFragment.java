@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.network.NetworkUtils;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
@@ -55,7 +54,7 @@ import ie.ul.fitbook.utils.Utils;
 /**
  * The fragment for entering basic user details into
  */
-public class BasicDetailsFragment extends Fragment {
+public class BasicDetailsFragment extends Fragment implements PersistentEditFragment {
     /**
      * The profile being edited
      */
@@ -100,6 +99,11 @@ public class BasicDetailsFragment extends Fragment {
      * This flag indicates if we are editing our profile or not
      */
     private boolean editing;
+    /**
+     * A flag to determine if entered fields are valid
+     */
+    private boolean valid;
+
     /**
      * Request code for capturing profile picture
      */
@@ -155,11 +159,12 @@ public class BasicDetailsFragment extends Fragment {
         if (!(activity instanceof ProfileCreationActivity)) {
             throw new IllegalStateException("BasicDetailsFragment needs to be in the context of a ProfileCreationActivity");
         } else {
-            this.activity = (ProfileCreationActivity)activity;
+            this.activity = (ProfileCreationActivity) activity;
         }
 
         editing = this.activity.isInEditMode(); // check if the activity was launched with a request to edit
         this.activity.onFirstPage();
+        this.activity.setCurrentFragment(this);
 
         setupProfile();
 
@@ -208,29 +213,14 @@ public class BasicDetailsFragment extends Fragment {
      * Set up the profile instance being edited
      */
     private void setupProfile() {
-        if (!editing) {
-            ProfileViewModel profileViewModel = new ViewModelProvider(this.activity).get(ProfileViewModel.class);
-
-            Profile profile = profileViewModel.getSelectedProfile().getValue();
-            if (profile == null) {
-                profile = new Profile();
-                profileViewModel.selectProfile(profile);
-            }
-
-            this.profile = profile;
-        } else {
-            Profile loggedIn = Login.getProfile();
-
-            if (loggedIn == null)
-                throw new IllegalStateException("Login.getProfile() returned null, has the logged in user's profile been set?");
-
-            this.profile = loggedIn;
-        }
+        ProfileViewModel profileViewModel = new ViewModelProvider(this.activity).get(ProfileViewModel.class);
+        this.profile = profileViewModel.getSelectedProfile().getValue();
     }
 
     /**
      * This method sets up the displayed profile picture in this fragment
-     * @param view the view passed in to onViewCreated
+     *
+     * @param view     the view passed in to onViewCreated
      * @param imageURI an Image URI that wa saved in the savedInstanceState
      */
     private void setupProfilePicture(View view, String imageURI) {
@@ -252,17 +242,20 @@ public class BasicDetailsFragment extends Fragment {
      * This method fills the fields with information from the logged in profile
      */
     private void fillFieldsWithProfile() {
-        if (editing) {
-            nameField.setText(Utils.capitalise(profile.getName()));
-            cityField.setText(Utils.capitalise(profile.getCity()));
-            stateField.setText(Utils.capitalise(profile.getState()));
-            countryField.setText(Utils.capitalise(profile.getCountry()));
-        }
+        String name = profile.getName();
+        nameField.setText(Utils.capitalise(name == null ? "" : name));
+        String city = profile.getCity();
+        cityField.setText(Utils.capitalise(city == null ? "" : city));
+        String state = profile.getState();
+        stateField.setText(Utils.capitalise(state == null ? "" : state));
+        String country = profile.getCountry();
+        countryField.setText(Utils.capitalise(country == null ? "" : country));
     }
 
 
     /**
      * Restores any uploads that were in progress
+     *
      * @param uploadRef the upload URI string
      */
     private void restoreUploads(String uploadRef) {
@@ -277,49 +270,16 @@ public class BasicDetailsFragment extends Fragment {
 
     /**
      * Handles when the next button is clicked
+     *
      * @param view the view to navigate from
      */
     private void onNext(View view) {
-        boolean valid = true;
+        saveEditState(profile);
 
-        String name = nameField.getText().toString();
-        if (name.isEmpty()) {
-            //Toast.makeText(activity, "You need to enter your name", Toast.LENGTH_SHORT).show();
-            nameField.setError("Name can't be empty");
-            valid = false;
+        if (valid) {
+            Navigation.findNavController(view).navigate(R.id.action_basicDetailsFragment_to_biographyFragment);
+            activity.offFirstPage();
         }
-
-        String city = cityField.getText().toString();
-        if (city.isEmpty()) {
-            //Toast.makeText(activity, "You need to enter a city", Toast.LENGTH_SHORT).show();
-            cityField.setError("City can't be empty");
-            valid = false;
-        }
-
-        String state = stateField.getText().toString();
-        if (state.isEmpty()) {
-            //Toast.makeText(activity, "You need to enter a state", Toast.LENGTH_SHORT).show();
-            stateField.setError("Name can't be empty");
-            valid = false;
-        }
-
-        String country = countryField.getText().toString();
-        if (country.isEmpty()) {
-            //Toast.makeText(activity, "You need to enter a country", Toast.LENGTH_SHORT).show();
-            countryField.setError("Country can't be empty");
-            valid = false;
-        }
-
-        if (!valid)
-            return;
-
-        profile.setName(Utils.capitalise(name));
-        profile.setCity(Utils.capitalise(city));
-        profile.setState(Utils.capitalise(state));
-        profile.setCountry(Utils.capitalise(country));
-
-        Navigation.findNavController(view).navigate(R.id.action_basicDetailsFragment_to_biographyFragment);
-        activity.offFirstPage();
     }
 
     /**
@@ -332,6 +292,7 @@ public class BasicDetailsFragment extends Fragment {
 
     /**
      * Retrieve the list of intents for choosing a camera
+     *
      * @return the camera to use
      */
     private List<Intent> getCameraIntents() {
@@ -353,6 +314,7 @@ public class BasicDetailsFragment extends Fragment {
 
     /**
      * Creates an intent for choosing an image from camera or filesystem
+     *
      * @return the intent to launch
      */
     private Intent getImageIntent() {
@@ -402,6 +364,7 @@ public class BasicDetailsFragment extends Fragment {
 
     /**
      * Uploads the image uri for profile photo
+     *
      * @param imageURI the uri of the chosen photo
      */
     private void processImageUri(Uri imageURI) {
@@ -416,6 +379,7 @@ public class BasicDetailsFragment extends Fragment {
 
     /**
      * Writes the byte array stream to disk
+     *
      * @param baos the stream to write
      */
     private void writeImageToDisk(ByteArrayOutputStream baos) {
@@ -436,6 +400,7 @@ public class BasicDetailsFragment extends Fragment {
 
     /**
      * Uploads the image by bitmap as profile photo
+     *
      * @param image the bitmap of the photo
      */
     private void processImageBitmap(Bitmap image) {
@@ -458,6 +423,7 @@ public class BasicDetailsFragment extends Fragment {
 
     /**
      * Sets the profile image from the URI
+     *
      * @param imageURI the URI of the image
      */
     private void setProfileImage(Uri imageURI) {
@@ -471,6 +437,7 @@ public class BasicDetailsFragment extends Fragment {
 
     /**
      * Sets the profile image from the bitmap
+     *
      * @param bitmap the bitmap to save profile photo as
      */
     private void setProfileImage(Bitmap bitmap) {
@@ -504,7 +471,7 @@ public class BasicDetailsFragment extends Fragment {
 
                 Uri selectedImageUri;
                 if (isCamera) {
-                    Bitmap image = (Bitmap)data.getExtras().get("data");
+                    Bitmap image = (Bitmap) data.getExtras().get("data");
                     profile.setProfileImage(image);
                     processImageBitmap(image);
                 } else {
@@ -555,6 +522,7 @@ public class BasicDetailsFragment extends Fragment {
 
     /**
      * Checks storage and camera permissions as this activity requires them
+     *
      * @return true if permission granted, false if not
      */
     private boolean checkPermissions() {
@@ -611,5 +579,45 @@ public class BasicDetailsFragment extends Fragment {
 
             Toast.makeText(activity, "Permissions denied", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * This method is used to save the edit state of the current editing page to the provided profile
+     * object.
+     *
+     * @param profile the profile that any edits should be saved to
+     */
+    @Override
+    public void saveEditState(Profile profile) {
+        valid = true;
+
+        String name = nameField.getText().toString();
+        if (name.isEmpty()) {
+            nameField.setError("Name can't be empty");
+            valid = false;
+        }
+
+        String city = cityField.getText().toString();
+        if (city.isEmpty()) {
+            cityField.setError("City can't be empty");
+            valid = false;
+        }
+
+        String state = stateField.getText().toString();
+        if (state.isEmpty()) {
+            stateField.setError("Name can't be empty");
+            valid = false;
+        }
+
+        String country = countryField.getText().toString();
+        if (country.isEmpty()) {
+            countryField.setError("Country can't be empty");
+            valid = false;
+        }
+
+        profile.setName(Utils.capitalise(name));
+        profile.setCity(Utils.capitalise(city));
+        profile.setState(Utils.capitalise(state));
+        profile.setCountry(Utils.capitalise(country));
     }
 }

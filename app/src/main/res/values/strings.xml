@@ -2,7 +2,7 @@
     <string name="app_name">Fitbook</string>
     <string name="title_activity_navigation">MainActivity</string>
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_new_activity">Activity</string>
     <string name="title_messages">Messages</string>
     <string name="title_profile">Profile</string>
     <!-- Strings used for fragments for navigation -->

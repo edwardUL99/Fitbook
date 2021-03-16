@@ -25,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -43,7 +42,6 @@ import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
-import ie.ul.fitbook.ui.profile.ViewProfileActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
@@ -148,8 +146,8 @@ public class ProfileFragment extends Fragment {
                 loadingBar.show();
 
             refreshWeeklyStats(view);
-            ProfileUtils.syncProfile(() -> {
-                this.onProfileSync();
+            ProfileUtils.syncProfile(activity, () -> {
+                this.onProfileSync(view);
                 swipeRefreshLayout.setRefreshing(false);
             }, () -> {
                 this.onProfileSyncFail();
@@ -172,10 +170,10 @@ public class ProfileFragment extends Fragment {
         if (Login.isProfileOutOfSync()) {
             LOADED_ONCE = false;
             loadingBar.show();
-            ProfileUtils.syncProfile(this::onProfileSync, this::onProfileSyncFail, profileImage);
+            ProfileUtils.syncProfile(activity, () -> onProfileSync(view), this::onProfileSyncFail, profileImage);
         } else {
             loadingBar.show();
-            onProfileSync();
+            onProfileSync(view);
         }
     }
 
@@ -344,8 +342,9 @@ public class ProfileFragment extends Fragment {
 
     /**
      * Handles when profile is synced
+     * @param view the view for this profile fragment
      */
-    private void onProfileSync() {
+    private void onProfileSync(View view) {
         Profile profile = Login.getProfile();
 
         if (profile == null)
@@ -360,7 +359,7 @@ public class ProfileFragment extends Fragment {
         setupBioTextView(profile);
         onFriendsSync();
         loadingBar.hide();
-        refreshWeeklyStats(getView());
+        refreshWeeklyStats(view);
     }
 
     /**

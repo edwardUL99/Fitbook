@@ -27,6 +27,14 @@ public class HomeActivity extends AppCompatActivity {
      * This is used as a means to identify the last used fragment id
      */
     public static final String FRAGMENT_ID = "ie.ul.fitbook.FRAG_ID";
+    /**
+     * The current destination ID
+     */
+    private int currentDestination;
+    /**
+     * Keeps track of the current destination id just before navigating to different destination
+     */
+    private int lastNavigationId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +47,7 @@ public class HomeActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_messages, R.id.navigation_profile)
+                R.id.navigation_home, R.id.navigation_new_activity, R.id.navigation_messages, R.id.navigation_profile)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -52,6 +60,22 @@ public class HomeActivity extends AppCompatActivity {
             if (id != 0)
                 navController.navigate(id);
         }
+
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            lastNavigationId = currentDestination; /* before we change our current destination,
+                                                      set lastNavigationId to the old value
+                                                      so that it will have the value of the navigation
+                                                      before the one we have changed to now */
+            currentDestination = destination.getId();
+        });
+    }
+
+    /**
+     * Gets the last navigation ID before navigating to the one currently selected
+     * @return the ID of the last navigation, before navigating to the current one. 0 if no navigation has taken place
+     */
+    public int getLastNavigationId() {
+        return lastNavigationId;
     }
 
     /**

@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
 import ie.ul.fitbook.ui.profile.viewmodels.ProfileViewModel;
@@ -34,7 +33,7 @@ import ie.ul.fitbook.utils.Utils;
 /**
  * This fragment deals with entering athletic information
  */
-public class AthleticInformationFragment extends Fragment {
+public class AthleticInformationFragment extends Fragment implements PersistentEditFragment {
     /**
      * The profile being edited
      */
@@ -54,11 +53,15 @@ public class AthleticInformationFragment extends Fragment {
     /**
      * The activity this fragment is part of
      */
-    private FragmentActivity activity;
+    private ProfileCreationActivity activity;
     /**
      * A flag to keep track of if we are editing or not
      */
     private boolean editing;
+    /**
+     * A flag to determine if entered fields are valid
+     */
+    private boolean valid;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -85,22 +88,19 @@ public class AthleticInformationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        activity = requireActivity();
+        FragmentActivity activity = requireActivity();
 
-        ProfileCreationActivity activity;
-
-        if (!(this.activity instanceof ProfileCreationActivity)) {
+        if (!(activity instanceof ProfileCreationActivity)) {
             throw new IllegalStateException("AthleticInformationFragment needs to be in the context of a ProfileCreationActivity");
         } else {
-            activity = (ProfileCreationActivity)this.activity;
+            this.activity = (ProfileCreationActivity)activity;
         }
 
-        editing = activity.isInEditMode();
-
-        setupProfile();
+        editing = this.activity.isInEditMode();
+        this.activity.setCurrentFragment(this);
 
         Button cancel = view.findViewById(R.id.cancel2);
-        cancel.setOnClickListener(v -> activity.onCancel());
+        cancel.setOnClickListener(v -> this.activity.onCancel());
 
         Button next = view.findViewById(R.id.submit);
         next.setOnClickListener(v -> onSubmit());
@@ -109,6 +109,7 @@ public class AthleticInformationFragment extends Fragment {
         genderField = view.findViewById(R.id.genderDropdown);
         weightField = view.findViewById(R.id.weightTextField);
 
+        setupProfile();
         setUpGenderSpinner();
         fillFieldsWithProfile();
         setupDateOfBirthField();
@@ -169,20 +170,8 @@ public class AthleticInformationFragment extends Fragment {
      * Set up the profile instance being edited
      */
     private void setupProfile() {
-        if (!editing) {
-            ProfileViewModel profileViewModel = new ViewModelProvider(activity).get(ProfileViewModel.class);
-
-            profile = profileViewModel.getSelectedProfile().getValue();
-            if (profile == null)
-                throw new IllegalStateException("On the AthleticInformationFragment stage of ProfileCreationActivity, you should have a profile being edited");
-        } else {
-            Profile loggedIn = Login.getProfile();
-
-            if (loggedIn == null)
-                throw new IllegalStateException("Login.getProfile() returned null, has the logged in user's profile been set?");
-
-            this.profile = loggedIn;
-        }
+        ProfileViewModel profileViewModel = new ViewModelProvider(this.activity).get(ProfileViewModel.class);
+        this.profile = profileViewModel.getSelectedProfile().getValue();
     }
 
     /**
@@ -224,7 +213,21 @@ public class AthleticInformationFragment extends Fragment {
      * Handles the submit button being clicked
      */
     private void onSubmit() {
-        boolean valid = true;
+        saveEditState(profile);
+
+        if (valid)
+            activity.onSubmit(); // we are finished creating the profile and we want to submit
+    }
+
+    /**
+     * This method is used to save the edit state of the current editing page to the provided profile
+     * object.
+     *
+     * @param profile the profile that any edits should be saved to
+     */
+    @Override
+    public void saveEditState(Profile profile) {
+        valid = true;
 
         String dateOfBirth = dateOfBirthField.getText().toString();
 
@@ -237,9 +240,7 @@ public class AthleticInformationFragment extends Fragment {
         }
 
         String gender = (String)genderField.getSelectedItem();
-        if (gender.isEmpty()) {
-            valid = false;
-        }
+        valid = gender != null || !gender.isEmpty();
 
         String weightText = weightField.getText().toString();
         double weight = 0;
@@ -260,9 +261,6 @@ public class AthleticInformationFragment extends Fragment {
             }
         }
 
-        if (!valid)
-            return;
-
         if (!editing) {
             Profile.AthleticInformation athleticInformation =
                     new Profile.AthleticInformation(dateOfBirth, Profile.AthleticInformation.Gender.convertToGender(gender), weight);
@@ -273,7 +271,5 @@ public class AthleticInformationFragment extends Fragment {
             athleticInformation.setGender(Profile.AthleticInformation.Gender.convertToGender(gender));
             athleticInformation.setWeight(weight);
         }
-
-        ((ProfileCreationActivity)activity).onSubmit(); // we are finished creating the profile and we want to submit
     }
 }
