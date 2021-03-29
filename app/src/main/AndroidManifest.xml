@@ -22,7 +22,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Fitbook">
+        <service
+            android:name=".ui.recording.RecordingService"
+            android:enabled="true"
+            android:exported="true"></service>
 
+        <activity
+            android:name=".ui.recording.RecordingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Fitbook.NoActionBar" />
         <activity
             android:name=".ui.recording.StartRecordingActivity"
             android:screenOrientation="portrait" />

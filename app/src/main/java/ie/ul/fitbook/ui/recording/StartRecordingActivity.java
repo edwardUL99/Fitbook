@@ -62,10 +62,6 @@ public class StartRecordingActivity extends AppCompatActivity implements
      */
     private String[] activitySpinnerItems;
     /**
-     * The container displaying our google maps
-     */
-    private FrameLayout mapsContainer;
-    /**
      * A flag to check whether permissions have been denied or not
      */
     private boolean permissionDenied;
@@ -77,10 +73,6 @@ public class StartRecordingActivity extends AppCompatActivity implements
      * Our fused location client
      */
     private FusedLocationProviderClient fusedLocationClient;
-    /**
-     * Boolean flag to determine if the location updates are running
-     */
-    private boolean isRunning;
     /**
      * The button to start recording
      */
@@ -97,17 +89,7 @@ public class StartRecordingActivity extends AppCompatActivity implements
      * This variable stores the map's camera position that has been saved in onSaveInstanceState
      */
     private CameraPosition cameraPosition;
-    /**
-     * The callback being used for location updates
-     */
-    private LocationUpdateCallback locationCallback;
 
-    /**
-     * Our location request for location updates
-     */
-    private static final LocationRequest locationRequest = LocationRequest.create()
-                                                                        .setInterval(1000)
-                                                                        .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     /**
      * The request code for requesting permissions
      */
@@ -116,10 +98,6 @@ public class StartRecordingActivity extends AppCompatActivity implements
      * Permissions required for location
      */
     private static final String[] PERMISSIONS_REQUIRED = {Manifest.permission.ACCESS_FINE_LOCATION};
-    /**
-     * A key used to retain the state of location updates
-     */
-    private static final String LOCATION_UPDATES = "ie.ul.fitbook.LOCATION_UPDATES";
     /**
      * A key used to retain the same chosen activity
      */
@@ -150,16 +128,9 @@ public class StartRecordingActivity extends AppCompatActivity implements
         }
 
         activitySpinner = findViewById(R.id.activitySpinner);
-        mapsContainer = findViewById(R.id.startRecordMapContainer);
+
         startButton = findViewById(R.id.startButton);
-        startButton.setOnClickListener(view -> {
-            if (isRunning) {
-                stopLocationUpdates();
-                isRunning = false;
-            } else {
-                startLocationUpdates();
-            }
-        });
+        startButton.setOnClickListener(view -> startRecordingActivity());
 
         trafficEnabled = findViewById(R.id.trafficSwitch);
         trafficEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> onTrafficEnabled(isChecked));
@@ -177,17 +148,19 @@ public class StartRecordingActivity extends AppCompatActivity implements
     }
 
     /**
+     * Start the recording activity
+     */
+    private void startRecordingActivity() {
+        Intent intent = new Intent(this, RecordingActivity.class);
+        intent.putExtra(RecordingActivity.ACTIVITY_TO_RECORD, (String)activitySpinner.getSelectedItem());
+        startActivity(intent);
+    }
+
+    /**
      * Update the UI's state from the saved instance state
      * @param savedInstanceState the state to update the UI from
      */
     private void updateUI(@NonNull Bundle savedInstanceState) {
-        if (savedInstanceState.containsKey(LOCATION_UPDATES)) {
-            isRunning = savedInstanceState.getBoolean(LOCATION_UPDATES);
-        }
-
-        if (isRunning)
-            startLocationUpdates();
-
         if (savedInstanceState.containsKey(CHOSEN_ACTIVITY)) {
             String chosen = savedInstanceState.getString(CHOSEN_ACTIVITY);
 
@@ -210,7 +183,6 @@ public class StartRecordingActivity extends AppCompatActivity implements
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putBoolean(LOCATION_UPDATES, isRunning);
         outState.putString(CHOSEN_ACTIVITY, (String)activitySpinner.getSelectedItem());
         outState.putBoolean(TRAFFIC_ENABLED, trafficEnabled.isChecked());
         outState.putBoolean(TERRAIN_ENABLED, terrainEnabled.isChecked());
@@ -251,55 +223,6 @@ public class StartRecordingActivity extends AppCompatActivity implements
     }
 
     /**
-     * Start location updates if requested
-     */
-    private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            locationCallback = LocationUpdateCallback.getInstance(this);
-            locationCallback.setLocationHandler(location -> Toast.makeText(this, "New location: (" + location.getLatitude() + "," + location.getLongitude() + ") + speed: " + (location.getSpeed() * 3.6), Toast.LENGTH_SHORT).show());
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-            isRunning = true;
-            startButton.setText("Stop");
-        } else {
-            Toast.makeText(this, "Necessary permissions not granted", Toast.LENGTH_SHORT)
-                    .show();
-        }
-    }
-
-    /**
-     * Stop location updates
-     */
-    private void stopLocationUpdates() {
-        if (locationCallback != null) {
-            startButton.setText("Start");
-            fusedLocationClient.removeLocationUpdates(locationCallback);
-            locationCallback.stopListening();
-        }
-    }
-
-    /**
-     * Dispatch onResume() to fragments.  Note that for better inter-operation
-     * with older versions of the platform, at the point of this call the
-     * fragments attached to the activity are <em>not</em> resumed.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (isRunning)
-            startLocationUpdates();
-    }
-
-    /**
-     * Dispatch onPause() to fragments.
-     */
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopLocationUpdates();
-    }
-
-    /**
      * Enables the my location button in the map
      */
     private void enableMyLocation() {
@@ -307,7 +230,7 @@ public class StartRecordingActivity extends AppCompatActivity implements
                 == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(true);
 
-            if (cameraPosition == null) { // we don't want to reset out camera position that was saved
+            if (cameraPosition == null) { // we don't want to reset our camera position that was saved
                 fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(success -> {
                             if (success != null) {
@@ -407,7 +330,7 @@ public class StartRecordingActivity extends AppCompatActivity implements
                 new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, activitySpinnerItems);
 
         activitySpinner.setAdapter(spinnerAdapter);
-        activitySpinner.setSelection(sportIndex); // TODO test if this works by selecting the favourite activity as default
+        activitySpinner.setSelection(sportIndex);
     }
 
     /**
