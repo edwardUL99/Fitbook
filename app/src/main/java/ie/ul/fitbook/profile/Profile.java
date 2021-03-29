@@ -16,7 +16,8 @@ import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.utils.Utils;
 
 /**
- * This class represents a user's profile
+ * This class represents a user's profile.
+ * It is parcelable but to reduce size you need to pass the profile image to an activity in an other way
  */
 public class Profile implements Parcelable {
     /**
@@ -134,6 +135,21 @@ public class Profile implements Parcelable {
     }
 
     /**
+     * Constructs a profile from the the provided parcel
+     * @param in the parcel to read from
+     */
+    public Profile(Parcel in) {
+        userId = in.readString();
+        name = in.readString();
+        city = in.readString();
+        state = in.readString();
+        country = in.readString();
+        favouriteSport = Sport.convertToSport(in.readString());
+        bio = in.readString();
+        athleticInformation = in.readParcelable(AthleticInformation.class.getClassLoader());
+    }
+
+    /**
      * Set the firebase user ID for this user
      * @param userId the user ID to use
      */
@@ -147,22 +163,6 @@ public class Profile implements Parcelable {
      */
     public String getUserId() {
         return userId;
-    }
-
-    /**
-     * Constructs a profile from the the provided parcel
-     * @param in the parcel to read from
-     */
-    public Profile(Parcel in) {
-        userId = in.readString();
-        profileImage = in.readParcelable(Bitmap.class.getClassLoader());
-        name = in.readString();
-        city = in.readString();
-        state = in.readString();
-        country = in.readString();
-        favouriteSport = Sport.convertToSport(in.readString());
-        bio = in.readString();
-        athleticInformation = in.readParcelable(AthleticInformation.class.getClassLoader());
     }
 
     /**
@@ -385,7 +385,6 @@ public class Profile implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(userId);
-        dest.writeParcelable(profileImage, flags);
         dest.writeString(name);
         dest.writeString(city);
         dest.writeString(state);
