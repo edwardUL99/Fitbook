@@ -9,6 +9,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.MenuItem;
@@ -121,6 +122,19 @@ public class ViewProfileActivity extends AppCompatActivity {
      * Use this flag to determine if cache should be used
      */
     private boolean useCache;
+    /**
+     * The profile image to load when the activity is launched
+     */
+    private static Bitmap imageToLoad;
+
+    /**
+     * Sets the profile image of the user to load. This should be called along with the USER_PROFILE_EXTRA
+     * since a profile image is too large to pass in a bundle
+     * @param bitmap the bitmap to load
+     */
+    public static void setProfileImage(Bitmap bitmap) {
+        imageToLoad = bitmap;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,6 +151,10 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         if (received.hasExtra(USER_PROFILE_EXTRA)) {
             profile = received.getParcelableExtra(USER_PROFILE_EXTRA);
+            if (imageToLoad != null) {
+                profile.setProfileImage(imageToLoad);
+                imageToLoad = null;
+            }
 
             if (profile == null)
                 throw new IllegalStateException("USER_PROFILE_EXTRA used but null profile has been passed to this Activity");
@@ -362,10 +380,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                         profileOptions.setVisibility(View.VISIBLE);
                     } else {
                         friendsButton.setText("Add Friend");
-                        friendsButton.setOnClickListener(view -> {
-                            Intent intent = new Intent(this, ProfilesActivity.class);
-                            startActivity(intent);
-                        });
+                        friendsButton.setOnClickListener(view -> addFriend());
                         profileOptions.setVisibility(View.GONE);
                     }
 
@@ -399,6 +414,13 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     private void removeFriend() {
         // TODO this logic will remove the friend
+    }
+
+    /**
+     * Adds the profile being viewed as a friend
+     */
+    private void addFriend() {
+        // TODO this logic will add this user as a friend
     }
 
     /**
