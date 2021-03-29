@@ -1,5 +1,7 @@
 package ie.ul.fitbook.ui.home;
 
+import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,12 +10,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.profiles.ProfilesActivity;
 import ie.ul.fitbook.ui.notifications.NotificationsActivity;
 
@@ -38,6 +44,16 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
+        Button addPost = view.findViewById(R.id.addPost);
+        //EditText textView = view.findViewById(R.id.textView5);
+        addPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AddPost.class);
+                startActivity(intent);
+                ((Activity) getActivity()).overridePendingTransition(0, 0);
+            }
+        });
     }
 
     /**
@@ -92,4 +108,5 @@ public class HomeFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
