@@ -51,19 +51,6 @@ public class HomeFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_home, container, false);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     /**
@@ -180,13 +167,7 @@ public class HomeFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                         for(DocumentSnapshot doc: task.getResult()){
-
-                            String s = doc.getString("userId").toString();
-                            String t = doc.getString("post").toString();
-
                             Model model = new Model(doc.getString("userId"),doc.getString("post"));
-                            Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
-                            System.out.println("Check here" +s + t);
                             modelList.add(model);
                         }
                         adapter = new CustomAdapter(HomeFragment.this, modelList);
