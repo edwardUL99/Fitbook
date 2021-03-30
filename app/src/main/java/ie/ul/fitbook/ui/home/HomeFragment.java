@@ -18,6 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.profiles.ProfilesActivity;
@@ -44,9 +46,11 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
-        Button addPost = view.findViewById(R.id.addPost);
+
+
+        FloatingActionButton ab = view.findViewById(R.id.add_fab);
         //EditText textView = view.findViewById(R.id.textView5);
-        addPost.setOnClickListener(new View.OnClickListener() {
+        ab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), AddPost.class);
