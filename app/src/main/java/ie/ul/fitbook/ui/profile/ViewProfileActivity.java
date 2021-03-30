@@ -8,10 +8,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,6 +38,8 @@ import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
+import ie.ul.fitbook.ui.HomeActivity;
+import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.ui.profile.cache.ProfileCache;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
@@ -359,6 +363,57 @@ public class ViewProfileActivity extends AppCompatActivity {
     }
 
     /**
+     * Initialize the contents of the Activity's standard options menu.  You
+     * should place your menu items in to <var>menu</var>.
+     *
+     * <p>This is only called once, the first time the options menu is
+     * displayed.  To update the menu every time it is displayed, see
+     * {@link #onPrepareOptionsMenu}.
+     *
+     * <p>The default implementation populates the menu with standard system
+     * menu items.  These are placed in the {@link Menu#CATEGORY_SYSTEM} group so that
+     * they will be correctly ordered with application-defined menu items.
+     * Deriving classes should always call through to the base implementation.
+     *
+     * <p>You can safely hold on to <var>menu</var> (and any items created
+     * from it), making modifications to it as desired, until the next
+     * time onCreateOptionsMenu() is called.
+     *
+     * <p>When you add items to the menu, you can implement the Activity's
+     * {@link #onOptionsItemSelected} method to handle them there.
+     *
+     * @param menu The options menu in which you place your items.
+     * @return You must return true for the menu to be displayed;
+     * if you return false it will not be shown.
+     * @see #onPrepareOptionsMenu
+     * @see #onOptionsItemSelected
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.action_bar_profile, menu);
+        return true;
+    }
+
+    /**
+     * This method is called when the edit profile button is pressed
+     */
+    private void onEditProfileClicked() {
+        Intent intent = new Intent(this, ProfileCreationActivity.class);
+        intent.putExtra(ProfileCreationActivity.EDIT_USER_PROFILE, true);
+        intent.putExtra(ProfileCreationActivity.RETURN_TO_PREVIOUS, true); // we want to return to here, not HomeActivity on cancel or submit
+        startActivity(intent);
+    }
+
+    /**
+     * Handles the clicking of the number of friends to view a friends list
+     */
+    private void onFriendsClicked() {
+        // TODO show friends list here
+        Toast.makeText(this, "Friends list will display when done", Toast.LENGTH_SHORT)
+                .show();
+    }
+
+    /**
      * This method is called when friends has been retrieved successfully and the user's friend status has been checked
      * @param profile the profile object representing the profile being displayed here
      */
@@ -373,11 +428,17 @@ public class ViewProfileActivity extends AppCompatActivity {
                 .get(source)
                 .addOnSuccessListener(query -> {
                     boolean friends = query.size() > 0;
+                    boolean ownProfile = userId.equals(Login.getUserId());
 
-                    if (friends) {
+                    if (friends && !ownProfile) {
                         friendsButton.setText("Remove Friend");
                         friendsButton.setOnClickListener(view -> removeFriend());
                         profileOptions.setVisibility(View.VISIBLE);
+                    } else if (ownProfile) {
+                        friendsButton.setText("Add Friend");
+                        friendsButton.setOnClickListener(view -> launchProfilesActivity());
+                        profileOptions.setVisibility(View.VISIBLE);
+                        friendsView.setOnClickListener(view -> onFriendsClicked());
                     } else {
                         friendsButton.setText("Add Friend");
                         friendsButton.setOnClickListener(view -> addFriend());
@@ -421,6 +482,14 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     private void addFriend() {
         // TODO this logic will add this user as a friend
+    }
+
+    /**
+     * Launches the profile activity
+     */
+    private void launchProfilesActivity() {
+        Intent intent = new Intent(this, ProfilesActivity.class);
+        startActivity(intent);
     }
 
     /**
@@ -546,11 +615,48 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
             finish();
+            return true;
+        } else if (itemId == R.id.edit) {
+            onEditProfileClicked();
+            return true;
+        } else if (itemId == R.id.signOut) {
+            onSignOutClicked();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Handles when the sign out button is clicked
+     */
+    private void onSignOutClicked() {
+        new AlertDialog.Builder(this) // this doesn't work with using the activity instance field for some reason
+                .setCancelable(true)
+                .setTitle("Sign Out")
+                .setMessage("Are you sure you want to sign out?")
+                .setPositiveButton("Confirm", (dialog, which) -> onSignOutConfirmed())
+                .setNegativeButton(android.R.string.cancel, ((dialog, which) -> dialog.dismiss()))
+                .create()
+                .show();
+    }
+
+    /**
+     * This method handles when sign out is confirmed
+     */
+    private void onSignOutConfirmed() {
+        Login.logout(this, e -> {
+            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+        });
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // add this flag so that we return to an existing MainActivity if it exists rather than creating a new one
+        Login.setManualLogin(true);
+        Login.forceLogin(); // force re-login so that when we sign-out we are brought to the login screen. Login.logout() occurs asynchronously so without calling this, we may not go to the login screen
+
+        startActivity(intent);
     }
 }
