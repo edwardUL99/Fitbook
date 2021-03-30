@@ -1,7 +1,6 @@
 package ie.ul.fitbook.ui.home;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,12 +12,24 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.ui.HomeActivity;
@@ -27,9 +38,32 @@ import ie.ul.fitbook.ui.notifications.NotificationsActivity;
 
 public class HomeFragment extends Fragment {
 
+
+
+
+    List<Model> modelList;
+    RecyclerView mRecyclerView;
+    RecyclerView.LayoutManager layoutManager;
+    FirebaseFirestore db;
+    CustomAdapter adapter;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_home, container, false);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     /**
@@ -58,6 +92,29 @@ public class HomeFragment extends Fragment {
                 ((Activity) getActivity()).overridePendingTransition(0, 0);
             }
         });
+
+        mRecyclerView = view.findViewById(R.id.recyclerView);
+        mRecyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(layoutManager);
+        db = FirebaseFirestore.getInstance();
+        modelList = new ArrayList<>();
+
+
+        showData();
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     /**
@@ -111,6 +168,42 @@ public class HomeFragment extends Fragment {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    private void showData(){
+
+        db.collection("posts")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                        for(DocumentSnapshot doc: task.getResult()){
+
+                            String s = doc.getString("userId").toString();
+                            String t = doc.getString("post").toString();
+
+                            Model model = new Model(doc.getString("userId"),doc.getString("post"));
+                            Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
+                            System.out.println("Check here" +s + t);
+                            modelList.add(model);
+                        }
+                        adapter = new CustomAdapter(HomeFragment.this, modelList);
+                        mRecyclerView.setAdapter(adapter);
+
+                    }
+
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+
+
+
     }
 
 }
