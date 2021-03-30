@@ -9,12 +9,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
 import android.widget.Chronometer;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -26,6 +28,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class RecordingService extends Service {
     /**
@@ -39,7 +42,7 @@ public class RecordingService extends Service {
     /**
      * The chronometer counting our duration
      */
-    private final Chronometer chronometer = new Chronometer(this);
+    private Chronometer chronometer;
     /**
      * Our location client
      */
@@ -52,6 +55,18 @@ public class RecordingService extends Service {
      * A flag to track whether the service is running or not
      */
     private boolean running;
+    /**
+     * The distance being added up
+     */
+    private float distance;
+    /**
+     * The current speed the user is moving at
+     */
+    private float speed;
+    /**
+     * The last location to calculate distance against
+     */
+    private Location lastLocation;
 
     /**
      * Our location request object for requesting location updates
@@ -71,6 +86,18 @@ public class RecordingService extends Service {
      * The notification channel name
      */
     private static final String CHANNEL_NAME = "Fitbook Recording";
+    /**
+     * The minimum speed required to add distance
+     */
+    private static final float MINIMUM_SPEED_REQUIRED = 1.0f;
+    /**
+     * The maximum accuracy allowed
+     */
+    private static final int MAXIMUM_ACCURACY = 20;
+    /**
+     * The factor to multiply m/s by to convert it to km/h
+     */
+    private static final float MPS_TO_KMH = 3.6f;
 
     /**
      * Called by the system when the service is first created.  Do not call this method directly.
@@ -78,6 +105,41 @@ public class RecordingService extends Service {
     @Override
     public void onCreate() {
         startForeground(SERVICE_CODE, getNotification());
+        chronometer = new Chronometer(this);
+        locations = new ArrayList<>();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                for (Location location : locationResult.getLocations()) {
+                    if (location.getAccuracy() <= MAXIMUM_ACCURACY) {
+                        locations.add(location);
+                        speed = location.getSpeed();
+                        speed *= MPS_TO_KMH;
+
+                        if (speed >= MINIMUM_SPEED_REQUIRED) {
+                            distance += lastLocation.distanceTo(location); // add the distance from our last location onto this one
+                            lastLocation = location; // this location now becomes the next "step" to add distance from
+                        }
+                    }
+                }
+            }
+        };
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(success -> {
+                        if (success != null) {
+                            locations.add(0, success);
+                            lastLocation = success;
+                            startLocationUpdates();
+                            chronometer.start();
+                        }
+                    });
+        } else {
+            throw new IllegalStateException("Necessary permissions are not granted");
+        }
     }
 
     /**
@@ -111,30 +173,7 @@ public class RecordingService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        locations = new ArrayList<>();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(@NonNull LocationResult locationResult) {
-                locations.addAll(locationResult.getLocations());
-            }
-        };
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(success -> {
-                        if (success != null) {
-                            locations.add(0, success);
-                        }
-                    });
-        } else {
-            throw new IllegalStateException("Necessary permissions are not granted");
-        }
-
-        startLocationUpdates();
-        chronometer.start();
-
-        return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     /**
@@ -144,7 +183,8 @@ public class RecordingService extends Service {
         if (running)
             stopLocationUpdates();
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper());
             running = true;
         } else {
@@ -200,6 +240,22 @@ public class RecordingService extends Service {
                     .setAutoCancel(true);
             return builder.build();
         }
+    }
+
+    /**
+     * Retrieve the distance currently totalled by this recording service
+     * @return the distance currently achieved
+     */
+    public float getDistance() {
+        return distance;
+    }
+
+    /**
+     * Retrieve the current speed the service has recorded at the time of this call
+     * @return the speed recorded at the time of this call
+     */
+    public float getSpeed() {
+        return speed;
     }
 
     /**
