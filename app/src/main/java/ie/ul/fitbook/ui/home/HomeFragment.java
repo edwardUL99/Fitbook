@@ -167,7 +167,7 @@ public class HomeFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                         for(DocumentSnapshot doc: task.getResult()){
-                            Model model = new Model(doc.getString("userId"),doc.getString("post"));
+                            Model model = new Model(doc.getId(), doc.getString("userId"),doc.getString("post"));
                             modelList.add(model);
                         }
                         adapter = new CustomAdapter(HomeFragment.this, modelList);

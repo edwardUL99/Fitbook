@@ -1,15 +1,20 @@
 package ie.ul.fitbook.ui.home;
 
+import android.widget.ImageView;
+
 public class Model {
 
-    String tile, post;
+    String id, tile, post;
+    //ImageView profileImage;
 
     public Model(){
 }
-    public Model(String tile, String post){
+    public Model(String id, String tile, String post){
 
+        this.id = id;
         this.tile = tile;
         this.post = post;
+        //this.profileImage = profileImage;
 
     }
 
@@ -20,6 +25,10 @@ public class Model {
 //    public void setId(String id) {
 //        this.id = id;
 //    }
+    public String getId() {
+    return id;
+}
+
 
     public String getTile() {
         return tile;
