@@ -20,10 +20,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -36,6 +42,7 @@ import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
+import ie.ul.fitbook.ui.home.FriendModel;
 import ie.ul.fitbook.ui.profile.cache.ProfileCache;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
@@ -223,6 +230,12 @@ public class ViewProfileActivity extends AppCompatActivity {
         friendsButton = findViewById(R.id.friendsButton);
         friendsView = findViewById(R.id.friends);
 
+
+
+
+
+
+
         useCache = true;
         setupProfileOptions();
         refreshProfile();
@@ -353,6 +366,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         String address = profile.getCity() + ", " + profile.getState();
         addressView.setText(address);
         favouriteActivityView.setText(profile.getFavouriteSport());
+
         setupBioTextView(profile);
 
         onFriendsSync(profile);
@@ -553,4 +567,6 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }

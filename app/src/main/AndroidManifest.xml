@@ -31,6 +31,9 @@
             android:name=".ui.home.AddPost"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".ui.home.FriendsList"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".ui.recording.RecordingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Fitbook.NoActionBar" />

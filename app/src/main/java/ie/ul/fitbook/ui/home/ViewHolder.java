@@ -13,7 +13,7 @@ import ie.ul.fitbook.R;
 
 public class ViewHolder extends RecyclerView.ViewHolder {
 
-    TextView userId, postContent;
+    TextView userId, postContent, createdAt;
     ImageView postsPic;
     ImageView profilePic;
     View mView;
@@ -44,6 +44,8 @@ public class ViewHolder extends RecyclerView.ViewHolder {
 
         userId = itemView.findViewById(R.id.post_userId);
         postContent = itemView.findViewById(R.id.post_userPost);
+        createdAt = itemView.findViewById(R.id.post_createdAt);
+
         postsPic = itemView.findViewById(R.id.postsPic);
         profilePic = itemView.findViewById(R.id.profilePic);
 

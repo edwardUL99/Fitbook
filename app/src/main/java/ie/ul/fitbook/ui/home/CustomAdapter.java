@@ -18,6 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,8 @@ import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.PostsStorage;
 import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.profile.ViewProfileActivity;
+
+import static java.lang.Integer.parseInt;
 
 
 public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
@@ -105,12 +108,15 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                         Profile profile = Profile.from(data);
                         holder.userId.setText(profile.getName());
                         holder.postContent.setText(modelList.get(position).getPost());
-                        //holder.postsPic.setImageBitmap(profile.getProfileImage());
+                        holder.createdAt.setText(modelList.get(position).getDate());
+
+
+
 
                         StorageReference reference = new UserStorage(userId[0]).getChildFolder(Profile.PROFILE_IMAGE_PATH);
 
                         StorageReference reference2 = new PostsStorage(id).getChildFolder("jpg");
-                        System.out.println("hereherehere" +reference2);
+
 
                         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
                         {

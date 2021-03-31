@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import java.sql.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -34,8 +35,11 @@ import com.squareup.picasso.Picasso;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -58,6 +62,13 @@ public class AddPost extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_post);
+
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setTitle("Add Post");
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         EditText t3 = findViewById(R.id.textView3);
         Button b2 = findViewById(R.id.button2);
@@ -119,9 +130,17 @@ public class AddPost extends AppCompatActivity {
 
     private void uploadData(String userId, String postText) {
 
+        //Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+
+
+
+        Date mDate = new Date();
+        long timeInMilliseconds = mDate.getTime();
+
         Map<String, Object> post = new HashMap<>();
         post.put("userId", userId);
         post.put("post", postText);
+        post.put("createdAt", timeInMilliseconds);
 
         db.collection("posts")
                 .add(post)

@@ -29,6 +29,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ie.ul.fitbook.R;
@@ -167,9 +168,12 @@ public class HomeFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                         for(DocumentSnapshot doc: task.getResult()){
-                            Model model = new Model(doc.getId(), doc.getString("userId"),doc.getString("post"));
+                            Model model = new Model(doc.getId(), doc.getString("userId"),doc.getString("post"), String.valueOf(doc.get("createdAt")));
                             modelList.add(model);
                         }
+
+                        Collections.sort(modelList);
+                        Collections.reverse(modelList);
                         adapter = new CustomAdapter(HomeFragment.this, modelList);
                         mRecyclerView.setAdapter(adapter);
 

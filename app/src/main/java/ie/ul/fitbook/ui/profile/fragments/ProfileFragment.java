@@ -1,6 +1,7 @@
 package ie.ul.fitbook.ui.profile.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,6 +43,8 @@ import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
+import ie.ul.fitbook.ui.home.AddPost;
+import ie.ul.fitbook.ui.home.FriendsList;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
@@ -338,6 +341,10 @@ public class ProfileFragment extends Fragment {
         // TODO show friends list here
         Toast.makeText(activity, "Friends list will display when done", Toast.LENGTH_SHORT)
                 .show();
+
+        Intent intent = new Intent(getActivity(), FriendsList.class);
+        startActivity(intent);
+        ((Activity) getActivity()).overridePendingTransition(0, 0);
     }
 
     /**
