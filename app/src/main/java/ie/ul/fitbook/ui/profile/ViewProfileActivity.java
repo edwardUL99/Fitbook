@@ -390,8 +390,12 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.action_bar_profile, menu);
-        return true;
+        if (Login.getUserId().equals(getUserId())) {
+            getMenuInflater().inflate(R.menu.action_bar_profile, menu);
+            return true;
+        }
+
+        return false;
     }
 
     /**
