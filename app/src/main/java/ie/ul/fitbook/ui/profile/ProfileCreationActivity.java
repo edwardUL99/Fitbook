@@ -13,6 +13,7 @@ import android.os.Bundle;
 
 import com.google.firebase.firestore.DocumentReference;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import ie.ul.fitbook.database.UserDatabase;
@@ -203,6 +204,30 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
         Map<String, Object> data = profile.toData();
         documentReference.set(data); // save the data to the database
+        createUserDocumentIfNotInitialised();
+    }
+
+    /**
+     * Saves the user's document if not initialised by setting fields so the document will no longer be virtual
+     */
+    private void createUserDocumentIfNotInitialised() {
+        if (!editProfile) {
+            DocumentReference userRef = new UserDatabase().getDatabase();
+            userRef.get().addOnSuccessListener(success -> {
+                        if (success != null) {
+                            Map<String, Object> data = success.getData();
+
+                            if (data == null) {
+                                data = new HashMap<>();
+                                data.put("friends-count", 0);
+                            } else if (!data.containsKey("friends-key")) {
+                                data.put("friends-count", 0);
+                            }
+
+                            userRef.set(data);
+                        }
+                    });
+        }
     }
 
     /**
