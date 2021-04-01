@@ -79,6 +79,8 @@ public class FriendsList extends AppCompatActivity {
 
                         adapter = new FriendsListCustomAdapter(FriendsList.this, friendModelList);
                         mRecyclerView.setAdapter(adapter);
+                        System.out.println("herehere" + friendModelList.size());
+
 
                     }
 
@@ -89,7 +91,7 @@ public class FriendsList extends AppCompatActivity {
 
                     }
                 });
-
+                System.out.println("herehere" + friendModelList.size());
 
 
     }

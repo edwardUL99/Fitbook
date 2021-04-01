@@ -43,14 +43,13 @@ import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
-import ie.ul.fitbook.ui.home.AddPost;
 import ie.ul.fitbook.ui.home.FriendsList;
+import ie.ul.fitbook.ui.home.ProfilesActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
 import ie.ul.fitbook.ui.profile.posts.ProfilePostsActivity;
 import ie.ul.fitbook.ui.profile.statistics.StatisticsActivity;
-import ie.ul.fitbook.ui.profiles.ProfilesActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
@@ -167,6 +166,12 @@ public class ProfileFragment extends Fragment {
         friendsButton = view.findViewById(R.id.friendsButton);
         friendsButton.setOnClickListener(v -> onAddFriendsClicked());
         friendsView = view.findViewById(R.id.friends);
+
+
+
+
+
+
         friendsView.setOnClickListener(v -> onFriendsClicked());
         setupProfileOptions(view);
 
@@ -339,8 +344,8 @@ public class ProfileFragment extends Fragment {
      */
     private void onFriendsClicked() {
         // TODO show friends list here
-        Toast.makeText(activity, "Friends list will display when done", Toast.LENGTH_SHORT)
-                .show();
+        //Toast.makeText(activity, "Friends list will display when done", Toast.LENGTH_SHORT)
+             //   .show();
 
         Intent intent = new Intent(getActivity(), FriendsList.class);
         startActivity(intent);
@@ -552,4 +557,6 @@ public class ProfileFragment extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
     }
+
+
 }

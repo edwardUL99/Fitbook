@@ -9,10 +9,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,8 +29,6 @@ import java.util.Collections;
 import java.util.List;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.ui.HomeActivity;
-import ie.ul.fitbook.ui.profiles.ProfilesActivity;
 import ie.ul.fitbook.ui.notifications.NotificationsActivity;
 
 public class HomeFragment extends Fragment {

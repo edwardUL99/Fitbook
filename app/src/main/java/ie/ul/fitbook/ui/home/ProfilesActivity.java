@@ -1,4 +1,4 @@
-package ie.ul.fitbook.ui.profiles;
+package ie.ul.fitbook.ui.home;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -13,10 +13,17 @@ import android.widget.SearchView.OnQueryTextListener;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.database.UserDatabase;
+import ie.ul.fitbook.profile.Profile;
 
 /**
  * This activity provides an activity for displaying and sarching profiles
@@ -25,6 +32,7 @@ public class ProfilesActivity extends AppCompatActivity {
 
     SearchView searchView;
     FirebaseFirestore db;
+    List<FriendModel> friendModelList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +48,7 @@ public class ProfilesActivity extends AppCompatActivity {
 
         searchView = findViewById(R.id.searchView);
         db = FirebaseFirestore.getInstance();
+        friendModelList = new ArrayList<>();
 
 
 
@@ -88,19 +97,29 @@ public class ProfilesActivity extends AppCompatActivity {
 
     private void searchData(String s){
 
-        db.collection("users").whereEqualTo("name", s)
-
+        db.collection("users")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
-                    }
-                });
+                        for(DocumentSnapshot doc: task.getResult()){
 
+                            new UserDatabase(doc.getId()).getChildDocument(Profile.PROFILE_DOCUMENT)
+                                    .get()
+                                    .addOnCompleteListener(innerTask -> {
+                                        if (innerTask.isSuccessful()) {
 
+                                            DocumentSnapshot snapshot = innerTask.getResult();
+                                            Map<String, Object> data = snapshot.getData();
+                                            Profile profile = Profile.from(data);
+                                            String substring = profile.getName().substring(0,s.length());
+                                            if(substring.equals(s)){
 
+                                                FriendModel model = new FriendModel(doc.getId());
+                                                friendModelList.add(model);
 
-
+                                            }} });
+                        }}});
     }
 }
