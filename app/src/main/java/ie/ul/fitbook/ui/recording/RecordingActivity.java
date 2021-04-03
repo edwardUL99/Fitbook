@@ -169,6 +169,8 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
             application.startService(serviceIntent);
         }
 
+        application.bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
+
         setupChosenActivity();
     }
 
@@ -305,16 +307,15 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Application application = getApplication();
-
-        application.bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
+    protected void onResume() {
+        super.onResume();
+        if (recordingService != null)
+            recordingService.addRecordedLocationReceiver(this);
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         recordingService.removeRecordedLocationReceiver(this);
     }
 }
