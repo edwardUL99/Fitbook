@@ -23,7 +23,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Fitbook">
-        <activity android:name=".ui.profile.activities.ViewRecordedActivity"></activity>
 
         <service
             android:name=".recording.services.RecordingService"
@@ -31,6 +30,9 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
+        <activity
+            android:name=".ui.profile.activities.ViewRecordedActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.recording.SaveRecordingActivity"
             android:screenOrientation="portrait" />
