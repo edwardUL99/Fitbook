@@ -3,6 +3,8 @@ package ie.ul.fitbook.ui.home;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -23,6 +25,7 @@ import java.util.Map;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
+import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 
 /**
@@ -33,6 +36,10 @@ public class ProfilesActivity extends AppCompatActivity {
     SearchView searchView;
     FirebaseFirestore db;
     List<FriendModel> friendModelList;
+    SearchAdapter adapter;
+    RecyclerView mRecyclerView;
+    RecyclerView.LayoutManager layoutManager;
+    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +56,11 @@ public class ProfilesActivity extends AppCompatActivity {
         searchView = findViewById(R.id.searchView);
         db = FirebaseFirestore.getInstance();
         friendModelList = new ArrayList<>();
+
+        mRecyclerView = findViewById(R.id.recyclerView3);
+        mRecyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(ProfilesActivity.this);
+        mRecyclerView.setLayoutManager(layoutManager);
 
 
 
@@ -113,13 +125,14 @@ public class ProfilesActivity extends AppCompatActivity {
                                             DocumentSnapshot snapshot = innerTask.getResult();
                                             Map<String, Object> data = snapshot.getData();
                                             Profile profile = Profile.from(data);
-                                            String substring = profile.getName().substring(0,s.length());
-                                            if(substring.equals(s)){
+                                            String substring = profile.getName().substring(0,s.length()).toLowerCase();
+                                            if(substring.equals(s.toLowerCase()) && !doc.getId().equals(Login.getUserId())){
 
                                                 FriendModel model = new FriendModel(doc.getId());
                                                 friendModelList.add(model);
-
+                                                adapter = new SearchAdapter(ProfilesActivity.this, friendModelList);
+                                                mRecyclerView.setAdapter(adapter);
                                             }} });
-                        }}});
-    }
-}
+                        }
+                        friendModelList.clear();
+                    }});}}

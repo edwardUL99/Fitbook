@@ -33,6 +33,7 @@ public class FriendsList extends AppCompatActivity {
     FirebaseFirestore db;
     FriendsListCustomAdapter adapter;
 
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +80,7 @@ public class FriendsList extends AppCompatActivity {
 
                         adapter = new FriendsListCustomAdapter(FriendsList.this, friendModelList);
                         mRecyclerView.setAdapter(adapter);
-                        System.out.println("herehere" + friendModelList.size());
+
 
 
                     }
@@ -91,7 +92,7 @@ public class FriendsList extends AppCompatActivity {
 
                     }
                 });
-                System.out.println("herehere" + friendModelList.size());
+
 
 
     }
