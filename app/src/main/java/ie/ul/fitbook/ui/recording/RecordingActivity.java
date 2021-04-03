@@ -36,6 +36,15 @@ import ie.ul.fitbook.recording.services.RecordingService;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.Chronometer;
+import android.widget.TextView;
+
+import ie.ul.fitbook.R;
+import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.utils.Utils;
 
 /**
@@ -166,6 +175,8 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
         } else {
             application.startService(serviceIntent);
         }
+
+        setupChosenActivity();
     }
 
     /**

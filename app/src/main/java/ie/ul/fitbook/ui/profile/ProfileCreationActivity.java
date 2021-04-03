@@ -13,6 +13,7 @@ import android.os.Bundle;
 
 import com.google.firebase.firestore.DocumentReference;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import ie.ul.fitbook.database.UserDatabase;
@@ -46,10 +47,18 @@ public class ProfileCreationActivity extends AppCompatActivity {
      */
     private PersistentEditFragment currentFragment;
     /**
+     * The flag containing the value of return to previous
+     */
+    private boolean returnToPrevious;
+    /**
      * Use this as an EXTRA key with a boolean value of true in the passed in intent to edit the profile
      * retrieved by Login.getProfile()
      */
     public static final String EDIT_USER_PROFILE = "ie.ul.fitbook.profile.EDIT_USER_PROFILE";
+    /**
+     * Use this to return to the previous activity instead of HomeActivity when EDIT_USER_PROFILE is used
+     */
+    public static final String RETURN_TO_PREVIOUS = "ie.ul.fitbook.profile.RETURN_TO_PREVIOUS;";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +71,10 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
         if (intent.hasExtra(EDIT_USER_PROFILE)) {
             editProfile = intent.getBooleanExtra(EDIT_USER_PROFILE, false);
+        }
+
+        if (intent.hasExtra(RETURN_TO_PREVIOUS)) {
+            returnToPrevious = intent.getBooleanExtra(RETURN_TO_PREVIOUS, false);
         }
 
         ActionBar actionBar = getSupportActionBar();
@@ -151,7 +164,9 @@ public class ProfileCreationActivity extends AppCompatActivity {
         }
 
         finish(); // we don't want to come back this activity on the press of the back key
-        startActivity(intent);
+
+        if (!returnToPrevious)
+            startActivity(intent);
     }
 
     /**
@@ -174,7 +189,9 @@ public class ProfileCreationActivity extends AppCompatActivity {
             intent.putExtra(HomeActivity.FRAGMENT_ID, receivedIntent.getIntExtra(HomeActivity.FRAGMENT_ID, 0));
 
         finish(); // we don't want to come back this activity on the press of the back key
-        startActivity(intent);
+
+        if (!returnToPrevious)
+            startActivity(intent);
     }
 
     /**
@@ -187,6 +204,30 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
         Map<String, Object> data = profile.toData();
         documentReference.set(data); // save the data to the database
+        createUserDocumentIfNotInitialised();
+    }
+
+    /**
+     * Saves the user's document if not initialised by setting fields so the document will no longer be virtual
+     */
+    private void createUserDocumentIfNotInitialised() {
+        if (!editProfile) {
+            DocumentReference userRef = new UserDatabase().getDatabase();
+            userRef.get().addOnSuccessListener(success -> {
+                        if (success != null) {
+                            Map<String, Object> data = success.getData();
+
+                            if (data == null) {
+                                data = new HashMap<>();
+                                data.put("friends-count", 0);
+                            } else if (!data.containsKey("friends-key")) {
+                                data.put("friends-count", 0);
+                            }
+
+                            userRef.set(data);
+                        }
+                    });
+        }
     }
 
     /**
