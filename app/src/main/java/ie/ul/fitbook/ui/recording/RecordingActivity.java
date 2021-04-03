@@ -4,17 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Application;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.view.View;
-import android.widget.Button;
-import android.widget.Chronometer;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -24,7 +19,6 @@ import org.threeten.bp.Duration;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.CalorieCalculator;
@@ -33,7 +27,6 @@ import ie.ul.fitbook.recording.RecordingUtils;
 import ie.ul.fitbook.recording.services.RecordedLocation;
 import ie.ul.fitbook.recording.services.RecordedLocationReceiver;
 import ie.ul.fitbook.recording.services.RecordingService;
-import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 

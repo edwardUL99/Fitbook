@@ -38,13 +38,13 @@ import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
-import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.MainActivity;
 import ie.ul.fitbook.ui.profile.cache.ProfileCache;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.ui.profile.posts.ProfilePostsActivity;
 import ie.ul.fitbook.ui.profile.statistics.StatisticsActivity;
+import ie.ul.fitbook.ui.profiles.ProfilesActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
