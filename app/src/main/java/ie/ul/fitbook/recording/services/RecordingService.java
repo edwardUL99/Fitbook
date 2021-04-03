@@ -1,4 +1,4 @@
-package ie.ul.fitbook.ui.recording;
+package ie.ul.fitbook.recording.services;
 
 import android.Manifest;
 import android.app.Notification;
@@ -9,14 +9,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
-import android.widget.Chronometer;
-import android.widget.Toast;
+import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -26,23 +24,38 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
+import ie.ul.fitbook.R;
+import ie.ul.fitbook.sports.Sport;
+
+/**
+ * This service provides the recording functionality which is intended to be run in the foreground.
+ */
 public class RecordingService extends Service {
     /**
      * The binder to return in onBind
      */
     private final LocationServiceBinder binder = new LocationServiceBinder();
     /**
+     * The id of the notification icon
+     */
+    private int iconId;
+    /**
+     * The sport as a Utils.capitalised String this service is recording
+     */
+    private String sport;
+    /**
      * The list of locations being recorded
      */
     private ArrayList<Location> locations;
     /**
-     * The chronometer counting our duration
+     * The time used to record how long the service was running for. This is needed so that we can "pause" it.
+     * Use this variable to set any activity time from
      */
-    private Chronometer chronometer;
+    private long stopWatchTime;
     /**
      * Our location client
      */
@@ -56,6 +69,10 @@ public class RecordingService extends Service {
      */
     private boolean running;
     /**
+     * A flag to say that the service has been resumed after a pause.
+     */
+    private boolean resumed;
+    /**
      * The distance being added up
      */
     private float distance;
@@ -64,9 +81,22 @@ public class RecordingService extends Service {
      */
     private float speed;
     /**
+     * The total speed being recorded
+     */
+    private float totalSpeed;
+    /**
      * The last location to calculate distance against
      */
     private Location lastLocation;
+    /**
+     * An ArrayList of receivers capable of receiving the RecordedLocation objects.
+     */
+    private ArrayList<RecordedLocationReceiver> recordedLocationReceivers;
+    /**
+     * Pass a String in as an extra of the sport passed through Utils.capitalise(sport.toString()).
+     * If this is not passed in, "Recording an Activity" is used in the notifications
+     */
+    public static final String SPORT_STRING = "ie.ul.fitbook.SPORT_STRING";
 
     /**
      * Our location request object for requesting location updates
@@ -89,7 +119,7 @@ public class RecordingService extends Service {
     /**
      * The minimum speed required to add distance
      */
-    private static final float MINIMUM_SPEED_REQUIRED = 1.0f;
+    private static final float MINIMUM_SPEED_REQUIRED = 0.5f;
     /**
      * The maximum accuracy allowed
      */
@@ -104,41 +134,66 @@ public class RecordingService extends Service {
      */
     @Override
     public void onCreate() {
-        startForeground(SERVICE_CODE, getNotification());
-        chronometer = new Chronometer(this);
         locations = new ArrayList<>();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        recordedLocationReceivers = new ArrayList<>();
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
                     if (location.getAccuracy() <= MAXIMUM_ACCURACY) {
-                        locations.add(location);
                         speed = location.getSpeed();
                         speed *= MPS_TO_KMH;
+                        LatLng latLng;
 
                         if (speed >= MINIMUM_SPEED_REQUIRED) {
+                            totalSpeed += speed;
+                            locations.add(location);
                             distance += lastLocation.distanceTo(location); // add the distance from our last location onto this one
                             lastLocation = location; // this location now becomes the next "step" to add distance from
+                            latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        } else {
+                            latLng = null;
+                        }
+
+                        RecordedLocation recordedLocation =
+                                new RecordedLocation(distance, speed, getAverageSpeed(), 0.0f, latLng);
+                        for (RecordedLocationReceiver receiver : recordedLocationReceivers) {
+                            receiver.receive(recordedLocation);
                         }
                     }
                 }
             }
         };
+    }
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(success -> {
-                        if (success != null) {
-                            locations.add(0, success);
-                            lastLocation = success;
-                            startLocationUpdates();
-                            chronometer.start();
-                        }
-                    });
-        } else {
-            throw new IllegalStateException("Necessary permissions are not granted");
+    /**
+     * Determine the sport type and sport type from the given intent
+     * @param intent the intent to retrieve sport from
+     */
+    private void getSportNotificationType(Intent intent) {
+        if (sport == null && intent != null) {
+            if (intent.hasExtra(SPORT_STRING)) {
+                String sportString = intent.getStringExtra(SPORT_STRING);
+                Sport sportEnum = Sport.convertToSport(sportString);
+
+                switch (sportEnum) {
+                    case CYCLING:
+                        iconId = R.drawable.ic_recording_notification_bike;
+                        break;
+                    case RUNNING:
+                        iconId = R.drawable.ic_recording_notification_run;
+                        break;
+                    case WALKING:
+                        iconId = R.drawable.ic_recording_notification_walk;
+                        break;
+                }
+
+                sport = "a " + sportString + " activity";
+            } else {
+                iconId = R.drawable.ic_recording_notification_bike;
+                sport = "an Activity";
+            }
         }
     }
 
@@ -173,6 +228,8 @@ public class RecordingService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        getSportNotificationType(intent);
+        startForeground(SERVICE_CODE, getNotification());
         return START_STICKY;
     }
 
@@ -180,12 +237,14 @@ public class RecordingService extends Service {
      * Start location updates
      */
     private void startLocationUpdates() {
-        if (running)
-            stopLocationUpdates();
+        if (running && !resumed)
+            return;
 
+        resumed = false;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper());
+
             running = true;
         } else {
             throw new IllegalStateException("Necessary permissions are not granted");
@@ -197,7 +256,6 @@ public class RecordingService extends Service {
      */
     private void stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback);
-        running = false;
     }
 
     /**
@@ -219,6 +277,21 @@ public class RecordingService extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(success -> {
+                        if (success != null) {
+                            locations.add(0, success);
+                            lastLocation = success;
+                            startLocationUpdates();
+                            stopWatchTime = SystemClock.elapsedRealtime();
+                        }
+                    });
+        } else {
+            throw new IllegalStateException("Necessary permissions are not granted");
+        }
+
         return binder;
     }
 
@@ -232,8 +305,12 @@ public class RecordingService extends Service {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
 
+            String content = "Recording " + sport;
+
             Notification.Builder builder = new Notification.Builder(getApplicationContext(), CHANNEL_ID)
-                    .setAutoCancel(true);
+                    .setAutoCancel(true)
+                    .setSmallIcon(iconId)
+                    .setContentText(content);
             return builder.build();
         } else {
             Notification.Builder builder = new Notification.Builder(getApplicationContext())
@@ -243,8 +320,16 @@ public class RecordingService extends Service {
     }
 
     /**
+     * Get the time in milliseconds the time to base the activity duration from
+     * @return time to base service duration from
+     */
+    public long getRunningTime() {
+        return stopWatchTime == 0 ? SystemClock.elapsedRealtime():stopWatchTime;
+    }
+
+    /**
      * Retrieve the distance currently totalled by this recording service
-     * @return the distance currently achieved
+     * @return the distance currently achieved in metres
      */
     public float getDistance() {
         return distance;
@@ -256,6 +341,54 @@ public class RecordingService extends Service {
      */
     public float getSpeed() {
         return speed;
+    }
+
+    /**
+     * Retrieve the average speed calculated
+     * @return average speed in km/h
+     */
+    public float getAverageSpeed() {
+        return totalSpeed / (float)locations.size();
+    }
+
+    /**
+     * Retrieve the list of locations recorded by this service
+     * @return list of locations recorded
+     */
+    public ArrayList<Location> getLocations() {
+        return locations;
+    }
+
+    /**
+     * Adds a receiver to receive recorded locations
+     * @param recordedLocationReceiver the receiver to receive the RecordedLocation receiver
+     */
+    public void addRecordedLocationReceiver(RecordedLocationReceiver recordedLocationReceiver) {
+        recordedLocationReceivers.add(recordedLocationReceiver);
+    }
+
+    /**
+     * Removes a receiver from this service
+     * @param recordedLocationReceiver the receiver to remove
+     */
+    public void removeRecordedLocationReceiver(RecordedLocationReceiver recordedLocationReceiver) {
+        recordedLocationReceivers.remove(recordedLocationReceiver);
+    }
+
+    /**
+     * Pause this service so that it doesn't record more locations until it is resumed
+     */
+    public void pause() {
+        stopLocationUpdates();
+        stopWatchTime = SystemClock.elapsedRealtime();
+    }
+
+    /**
+     * Resume this service so it records more locations
+     */
+    public void resume() {
+        resumed = true;
+        startLocationUpdates();
     }
 
     /**

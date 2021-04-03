@@ -3,21 +3,37 @@ package ie.ul.fitbook.ui.profile.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
+
+import java.util.List;
+import java.util.Map;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.custom.LoadingBar;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.login.Login;
+import ie.ul.fitbook.profile.Profile;
+import ie.ul.fitbook.recording.RecordedActivity;
+import ie.ul.fitbook.utils.ProfileUtils;
 
 /**
  * This activity lists activities of a specified user.
  * A user ID needs to be provided either with the USER_ID_EXTRA or the currently logged in user.
- * If the user ID is null, an IllegalStateException is thrown by {@link #onCreate(Bundle)}
+ * If the user ID is null, an IllegalStateException is thrown by {@link #onCreate(Bundle)}.
  */
 public class ListActivitiesActivity extends AppCompatActivity {
     /**
@@ -26,6 +42,30 @@ public class ListActivitiesActivity extends AppCompatActivity {
      */
     public static final String USER_ID_EXTRA = "ie.ul.fitbook.ACTIVITIES_USER_ID";
 
+    /**
+     * The layout holding our recycler view
+     */
+    private SwipeRefreshLayout swipeRefreshLayout;
+    /**
+     * The progress bar to display on loading
+     */
+    private LoadingBar progressBar;
+    /**
+     * The profile downloaded for this user
+     */
+    protected Profile profile;
+    /**
+     * The userId for this activity
+     */
+    private String userId;
+    /**
+     * The activities adapter for displaying them
+     */
+    private ActivitiesAdapter activitiesAdapter;
+    /**
+     * The text view displaying that there's no activities
+     */
+    private TextView noActivitiesMessage;
     /**
      * The reference to a user's activities
      */
@@ -55,8 +95,112 @@ public class ListActivitiesActivity extends AppCompatActivity {
         if (userId == null)
             throw new IllegalStateException("No UserID has been passed to this Activity");
 
+        this.userId = userId;
+
         activitiesReference = new UserDatabase(userId)
-                .getChildCollection("activities"); // TODO when activity class is created, replace this with Activity.COLLECTION_PATH constant
+                .getChildCollection(RecordedActivity.ACTIVITIES_PATH);
+
+        noActivitiesMessage = findViewById(R.id.noActivitiesMessage);
+        noActivitiesMessage.setText("No activities found");
+
+        activitiesAdapter = new ActivitiesAdapter(null, this);
+
+        RecyclerView recyclerView = findViewById(R.id.activitiesRecycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(activitiesAdapter);
+
+        ConstraintLayout activitiesContainer = findViewById(R.id.activitiesContainer);
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setLoadedLayout(activitiesContainer);
+
+        swipeRefreshLayout = findViewById(R.id.activitiesRefresh);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            progressBar.show();
+            if (profile == null) {
+                loadProfile();
+            } else {
+                getActivities();
+            }
+            swipeRefreshLayout.setRefreshing(false);
+        });
+
+        progressBar.show();
+        if (userId.equals(Login.getUserId())) {
+            Profile profile = Login.getProfile();
+
+            if (profile != null) {
+                this.profile = profile;
+                getActivities();
+            } else {
+                loadProfile();
+            }
+        } else {
+            loadProfile();
+        }
+    }
+
+    /**
+     * Retrieve the activities for this user
+     */
+    private void getActivities() {
+        activitiesAdapter.clear();
+        activitiesReference
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(success -> {
+                    List<DocumentSnapshot> snapshots = success.getResult().getDocuments();
+
+                    if (snapshots.size() == 0) {
+                        noActivitiesMessage.setVisibility(View.VISIBLE);
+                    } else {
+                        noActivitiesMessage.setVisibility(View.GONE);
+                        for (DocumentSnapshot snapshot : success.getResult().getDocuments()) {
+                            Map<String, Object> data = snapshot.getData();
+
+                            if (data != null) {
+                                RecordedActivity activity = RecordedActivity.from(data);
+
+                                if (activity != null) {
+                                    activity.setFirestoreId(snapshot.getId());
+                                    activitiesAdapter.addActivity(activity);
+                                }
+                            }
+                        }
+                    }
+
+                    progressBar.hide();
+                })
+                .addOnFailureListener(this::onLoadFailed);
+    }
+
+    /**
+     * Handles profile load
+     * @param profile the profile to load
+     */
+    private void onProfileLoad(Profile profile) {
+        this.profile = profile;
+        getActivities();
+    }
+
+    /**
+     * Load the profile into this activity
+     */
+    private void loadProfile() {
+        ProfileUtils.downloadProfile(userId, this::onProfileLoad, () -> onLoadFailed(null),
+                null, false, this, false);
+    }
+
+    /**
+     * Handle load of activities failure
+     * @param e an exception if any
+     */
+    private void onLoadFailed(Exception e) {
+        if (e != null)
+            e.printStackTrace();
+
+        Toast.makeText(this, "An error occurred retrieving activities", Toast.LENGTH_SHORT)
+                .show();
+        progressBar.hideBoth();
     }
 
     /**

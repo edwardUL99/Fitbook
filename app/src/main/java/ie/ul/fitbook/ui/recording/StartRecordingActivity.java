@@ -13,16 +13,13 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -131,6 +128,7 @@ public class StartRecordingActivity extends AppCompatActivity implements
 
         startButton = findViewById(R.id.startButton);
         startButton.setOnClickListener(view -> startRecordingActivity());
+        startButton.setEnabled(false);
 
         trafficEnabled = findViewById(R.id.trafficSwitch);
         trafficEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> onTrafficEnabled(isChecked));
@@ -228,6 +226,7 @@ public class StartRecordingActivity extends AppCompatActivity implements
     private void enableMyLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
+            startButton.setEnabled(true);
             map.setMyLocationEnabled(true);
 
             if (cameraPosition == null) { // we don't want to reset our camera position that was saved

@@ -1,11 +1,17 @@
 package ie.ul.fitbook.utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.ImageDecoder;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+
+import androidx.core.content.ContextCompat;
 
 import org.threeten.bp.Duration;
 
@@ -86,6 +92,18 @@ public final class Utils {
     }
 
     /**
+     * Converts the hours, minutes, seconds to duration
+     * @param hours the hours for the duration
+     * @param minutes the minutes for the duration
+     * @param seconds the seconds for the duration
+     * @return duration representing the hours, minutes and seconds
+     */
+    public static Duration hoursMinutesSecondsToDuration(int hours, int minutes, int seconds) {
+        Duration duration = hoursMinutesToDuration(hours, minutes);
+        return duration.plusSeconds(seconds);
+    }
+
+    /**
      * Converts duration to hours minutes string in format Xh YYm
      * @param duration duration to convert
      * @return duration in hours minutes
@@ -94,5 +112,55 @@ public final class Utils {
         long seconds = Math.abs(duration.getSeconds());
 
         return String.format(Locale.getDefault(),"%dh %02dm", seconds / 3600, (seconds % 3600) / 60);
+    }
+
+    /**
+     * Retrieves a duration in hours:minutes:seconds
+     * @param duration the duration to convert
+     * @return formatted time string
+     */
+    public static String durationToHoursMinutesSeconds(Duration duration) {
+        long seconds = duration.getSeconds();
+        long absSeconds = Math.abs(seconds);
+        String positive = String.format(Locale.getDefault(),
+                "%02d:%02d:%02d",
+                absSeconds / 3600,
+                (absSeconds % 3600) / 60,
+                absSeconds % 60);
+        return seconds < 0 ? "-" + positive : positive;
+    }
+
+    /**
+     * Converts drawable to bitmap
+     * @param context the context to retrieve the bitmap with
+     * @param drawableId the id of the drawable
+     * @return bitmap of the drawable
+     * @throws android.content.res.Resources.NotFoundException if the drawable can't be found
+     */
+    public  static Bitmap drawableToBitmap(Context context, int drawableId) throws Resources.NotFoundException {
+        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+
+        if (drawable == null)
+            throw new Resources.NotFoundException("The drawable with id " + drawableId + " cannot be found");
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if(bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        Bitmap bitmap;
+
+        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 }

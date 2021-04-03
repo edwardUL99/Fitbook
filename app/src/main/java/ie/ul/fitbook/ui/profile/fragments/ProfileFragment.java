@@ -213,7 +213,7 @@ public class ProfileFragment extends Fragment {
                             TextView time = view.findViewById(R.id.cycleTime);
                             time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
                             TextView elevation = view.findViewById(R.id.cycleElevation);
-                            elevation.setText(weeklyStat.getElevation());
+                            elevation.setText(String.format(Locale.getDefault(), "%dm", weeklyStat.getElevation()));
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -239,7 +239,7 @@ public class ProfileFragment extends Fragment {
                             TextView time = view.findViewById(R.id.runTime);
                             time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
                             TextView elevation = view.findViewById(R.id.runElevation);
-                            elevation.setText(weeklyStat.getElevation());
+                            elevation.setText(String.format(Locale.getDefault(), "%dm", weeklyStat.getElevation()));
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -265,7 +265,7 @@ public class ProfileFragment extends Fragment {
                             TextView time = view.findViewById(R.id.walkTime);
                             time.setText(Utils.durationToHoursMinutes(weeklyStat.getTime()));
                             TextView elevation = view.findViewById(R.id.walkElevation);
-                            elevation.setText(weeklyStat.getElevation());
+                            elevation.setText(String.format(Locale.getDefault(), "%dm", weeklyStat.getElevation()));
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
