@@ -40,6 +40,16 @@
         <activity
             android:name=".ui.home.FriendsList"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.chat.CreateMessageActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.chat.NewMessageActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.chat.MessageActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.recording.RecordingActivity"
             android:screenOrientation="portrait"

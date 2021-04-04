@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This layout is used as the header of any profile page, whether it is the user's own profile page
+or viewing another's. The text and handler of friendsButton may need to be changed accordingly however -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="200dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profilePicture9"
+        android:layout_width="128dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="21dp"
+        android:layout_marginEnd="23dp"
+        android:layout_marginBottom="11dp"
+        android:src="@drawable/profile"
+        app:layout_constraintBottom_toTopOf="@+id/friendsButton"
+        app:layout_constraintEnd_toStartOf="@+id/name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/name9"
+        android:layout_width="190dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="34dp"
+        android:layout_marginEnd="19dp"
+        android:ellipsize="end"
+
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toTopOf="@+id/address"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/profilePicture"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+
+        android:id="@+id/favActivityLabel"
+        android:visibility = "gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="39dp"
+        android:layout_marginTop="22dp"
+        android:layout_marginEnd="11dp"
+        android:text="Favourite Activity"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/theme_color"
+        app:layout_constraintBottom_toTopOf="@+id/favActivityView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/textView8"
+        app:layout_constraintTop_toBottomOf="@+id/address"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/address9"
+        android:layout_width="190dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="18dp"
+        android:ellipsize="end"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toTopOf="@+id/favActivityLabel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/profilePicture"
+        app:layout_constraintTop_toBottomOf="@+id/name" />
+
+    <TextView
+        android:id="@+id/favActivityView"
+        android:visibility = "gone"
+        android:layout_width="107dp"
+        android:layout_height="23dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginEnd="11dp"
+        android:layout_marginBottom="15dp"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintBottom_toTopOf="@+id/divider3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/friends"
+        app:layout_constraintTop_toBottomOf="@+id/favActivityLabel" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:visibility = "gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="34dp"
+        android:layout_marginTop="22dp"
+        android:text="Friends"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/theme_color"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/friends"
+        app:layout_constraintEnd_toStartOf="@+id/favActivityLabel"
+        app:layout_constraintStart_toEndOf="@+id/friendsButton"
+        app:layout_constraintTop_toBottomOf="@+id/address" />
+
+    <TextView
+        android:id="@+id/friends"
+        android:visibility = "gone"
+        android:layout_width="71dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginBottom="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:text="0"
+        android:textAlignment="center"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/divider3"
+        app:layout_constraintEnd_toStartOf="@+id/favActivityView"
+        app:layout_constraintStart_toEndOf="@+id/friendsButton"
+        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+
+    <View
+        android:id="@+id/divider3"
+        android:visibility = "gone"
+        android:layout_width="413dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="11dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/friendsButton" />
+
+    <Button
+        android:id="@+id/friendsButton"
+        android:visibility = "gone"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="123dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="11dp"
+        android:layout_marginBottom="11dp"
+        android:text="Add Friends"
+        app:layout_constraintBottom_toTopOf="@+id/divider3"
+        app:layout_constraintEnd_toStartOf="@+id/friends"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profilePicture" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
