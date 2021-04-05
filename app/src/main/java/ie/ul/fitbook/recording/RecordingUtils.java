@@ -2,7 +2,6 @@ package ie.ul.fitbook.recording;
 
 import android.location.Location;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -54,29 +53,6 @@ public final class RecordingUtils {
     private RecordingUtils() {}
 
     /**
-     * Constructs a JSONArray of locations from the provided array list
-     * @param locations the locations to convert to a JSONArray
-     * @return JSONArray with locations for the API request
-     */
-    private static JSONArray constructLocations(ArrayList<Location> locations) {
-        try {
-            JSONArray array = new JSONArray();
-
-            for (Location location : locations) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("latitude", location.getLatitude());
-                jsonObject.put("longitude", location.getLongitude());
-                array.put(jsonObject);
-            }
-
-            return array;
-        } catch (JSONException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
      * Takes the JSON response and calculates elevation gain
      * @param response the response to handle
      * @param consumer the consumer object which will take the computed value
@@ -113,34 +89,8 @@ public final class RecordingUtils {
     }
 
     /**
-     * Calculates elevation gain for the provided recording service
-     * @param recordingService the recording service to calculate elevation gain for
-     * @param response the handler to consume the elevation gain with
-     */
-    public static void calculateElevationGain(RecordingService recordingService, ActionHandlerConsumer<Double> response) {
-        ArrayList<Location> locations = recordingService.getLocations();
-        JSONArray array = constructLocations(locations);
-
-        try {
-            if (array != null) {
-                RequestQueue requestQueue = Volley.newRequestQueue(recordingService);
-                String url = "https://api.open-elevation.com/api/v1/lookup";
-                JSONObject requestHeader = new JSONObject(); // TODO this seems very slow
-                requestHeader.put("locations", array);
-                JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, requestHeader,
-                        response1 -> handleSuccessfulResponse(response1, response), RecordingUtils::handleErrorResponse);
-                request.setRetryPolicy(new DefaultRetryPolicy(500000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                requestQueue.add(request);
-            }
-        } catch (JSONException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /**
      * Generates the URL for the google elevation request api
      * @param recordingService the service which recorded the locations
-     * @return the url to request elevations
      */
     private static void url(RecordingService recordingService) {
         requestURLs = new ArrayList<>();
@@ -222,7 +172,7 @@ public final class RecordingUtils {
      * @param recordingService the service that recorded the locations
      * @param response the consumer of the elevation gain variable
      */
-    public static void calculateElevationGainGoogle(RecordingService recordingService, ActionHandlerConsumer<Double> response) {
+    public static void calculateElevationGain(RecordingService recordingService, ActionHandlerConsumer<Double> response) {
         url(recordingService);
 
         RequestQueue requestQueue = Volley.newRequestQueue(recordingService);

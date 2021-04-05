@@ -51,6 +51,8 @@ import ie.ul.fitbook.ui.profile.activities.ViewRecordedActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
+// TODO activity crashes on save if left in background for a while
+
 /**
  * This activity is used for saving a recorded activity or deleting it. Pass in the RecordedActivity object
  * using the RECORDED_ACTIVITY key
@@ -76,13 +78,21 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_save_recording);
+        
+        if (savedInstanceState == null) {
+            Intent intent = getIntent();
 
-        Intent intent = getIntent();
-
-        if (intent.hasExtra(RECORDED_ACTIVITY)) {
-            recordedActivity = intent.getParcelableExtra(RECORDED_ACTIVITY);
+            if (intent.hasExtra(RECORDED_ACTIVITY)) {
+                recordedActivity = intent.getParcelableExtra(RECORDED_ACTIVITY);
+            } else {
+                throw new IllegalStateException("Cannot launch this activity without a RECORDED_ACTIVITY");
+            }
         } else {
-            throw new IllegalStateException("Cannot launch this activity without a RECORDED_ACTIVITY");
+            if (savedInstanceState.containsKey(RECORDED_ACTIVITY)) {
+                recordedActivity = savedInstanceState.getParcelable(RECORDED_ACTIVITY);
+            } else {
+                throw new IllegalStateException("Cannot launch this activity without a RECORDED_ACTIVITY");
+            }
         }
 
         ActionBar actionBar = getSupportActionBar();
@@ -236,12 +246,23 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
                         }
                     }
 
-                    Intent intent = new Intent(this, ViewRecordedActivity.class);
-                    intent.putExtra(HomeActivity.FRAGMENT_ID, getIntent().getIntExtra(HomeActivity.FRAGMENT_ID, 0));
-                    startActivity(intent);
-                    finish();
+                    launchViewActivity();
                 })
                 .addOnFailureListener(this::onGoalsFailure);
+    }
+
+    /**
+     * Launch the activity to view the recorded activity
+     */
+    private void launchViewActivity() {
+        Intent intent = new Intent(this, ViewRecordedActivity.class);
+        intent.putExtra(HomeActivity.FRAGMENT_ID, getIntent().getIntExtra(HomeActivity.FRAGMENT_ID, 0));
+        intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, recordedActivity);
+        Profile profile = Login.getProfile();
+        intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
+        ViewRecordedActivity.setProfileImage(profile.getProfileImage());
+        startActivity(intent);
+        finish();
     }
 
     /**
@@ -284,6 +305,15 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
     }
 
     /**
+     * Handles when the profile has been downloaded if it had to be re-downloaded
+     * @param profile the profile that was downloaded
+     */
+    private void onProfileDownloaded(Profile profile) {
+        Login.setProfile(profile); // reset the profile as the Login in. We have to do this since ProfileUtils.syncProfile used to do it but does not download the profile image synchronously
+        setStatistics(profile, recordedActivity);
+    }
+
+    /**
      * Handles when the save button is clicked
      */
     private void onSaveClicked() {
@@ -294,9 +324,10 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
 
                     Profile profile = Login.getProfile();
 
+                    recordedActivity.setFirestoreId(success.getId());
                     if (profile == null) {
-                        ProfileUtils.syncProfile(this, () -> setStatistics(Login.getProfile(), recordedActivity),
-                                () -> onStatisticsFail(null), null);
+                        ProfileUtils.downloadProfile(Login.getUserId(), this::onProfileDownloaded, () -> Toast.makeText(this, "Failed to save", Toast.LENGTH_SHORT).show(),
+                                null, false, this, true); // download profile and profile image synchronously so that the image is available on activity save
                     } else {
                         setStatistics(profile, recordedActivity);
                     }
@@ -362,5 +393,11 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
     @Override
     public void onMyLocationClick(@NonNull Location location) {
         //no-op
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(RECORDED_ACTIVITY, recordedActivity);
     }
 }

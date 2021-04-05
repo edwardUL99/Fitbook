@@ -2,6 +2,7 @@ package ie.ul.fitbook.ui.recording;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
@@ -240,12 +241,15 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
         Profile profile = Login.getProfile();
 
         if (profile == null) {
-            ProfileUtils.syncProfile(this, () -> createRecordedActivity(recordingService, elevationGain, Login.getProfile()), () -> {
+            ProfileUtils.downloadProfile(Login.getUserId(), downloaded -> {
+                createRecordedActivity(recordingService, elevationGain, downloaded);
+                Login.setProfile(downloaded);
+            }, () -> {
                 Toast.makeText(this, "An error occurred, please try again", Toast.LENGTH_SHORT).show();
                 stopButton.setEnabled(false);
                 resumeButton.setVisibility(View.VISIBLE);
                 paused = true;
-            }, null);
+            }, null, false, this, true); // download profile image synchronously so only save when fully complete
         } else {
             createRecordedActivity(recordingService, elevationGain, profile);
         }
@@ -265,7 +269,7 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
 
             stopButton.setEnabled(false);
             resumeButton.setVisibility(View.GONE);
-            RecordingUtils.calculateElevationGainGoogle(recordingService, gain -> saveActivity(recordingService, gain));
+            RecordingUtils.calculateElevationGain(recordingService, gain -> saveActivity(recordingService, gain));
         } else {
             stopButton.setText("Stop");
             paused = true;
@@ -288,6 +292,20 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
             stopButton.setText("Pause");
             resumeButton.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * Called when the activity has detected the user's press of the back
+     * key. The {@link #getOnBackPressedDispatcher() OnBackPressedDispatcher} will be given a
+     * chance to handle the back button before the default behavior of
+     * {@link Activity#onBackPressed()} is invoked.
+     *
+     * @see #getOnBackPressedDispatcher()
+     */
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(this, "To exit, press Pause > Stop", Toast.LENGTH_SHORT)
+                .show();
     }
 
     /**

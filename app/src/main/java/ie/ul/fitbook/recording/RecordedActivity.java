@@ -54,8 +54,7 @@ public class RecordedActivity implements Parcelable {
      */
     private final int caloriesBurned;
     /**
-     * The Firestore Id this recorded activity is stored in. An optional field for saving,
-     * but it should be set when retrieving activities so that they can be deleted
+     * The Firestore Id this recorded activity is stored in
      */
     private String firestoreId;
 
@@ -325,8 +324,6 @@ public class RecordedActivity implements Parcelable {
 
     /**
      * Sets the Firestore document id referring to this RecordedActivity.
-     * For a save, this is optional but if retrieving from Firestore, it should be set so that activities can
-     * be deleted.
      * @param firestoreId the document ID
      */
     public void setFirestoreId(String firestoreId) {
