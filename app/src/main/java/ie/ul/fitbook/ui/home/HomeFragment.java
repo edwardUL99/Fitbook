@@ -1,6 +1,5 @@
 package ie.ul.fitbook.ui.home;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,39 +12,16 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.ui.profiles.ProfilesActivity;
 import ie.ul.fitbook.ui.notifications.NotificationsActivity;
 
 public class HomeFragment extends Fragment {
 
-
-
-
-    List<Model> modelList;
-    RecyclerView mRecyclerView;
-    RecyclerView.LayoutManager layoutManager;
-    FirebaseFirestore db;
-    CustomAdapter adapter;
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_home, container, false);
-
     }
 
     /**
@@ -62,41 +38,6 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
-
-
-        FloatingActionButton ab = view.findViewById(R.id.add_fab);
-        //EditText textView = view.findViewById(R.id.textView5);
-        ab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), AddPost.class);
-                startActivity(intent);
-                ((Activity) getActivity()).overridePendingTransition(0, 0);
-            }
-        });
-
-        mRecyclerView = view.findViewById(R.id.recyclerView);
-        mRecyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(layoutManager);
-        db = FirebaseFirestore.getInstance();
-        modelList = new ArrayList<>();
-
-
-        showData();
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     /**
@@ -151,38 +92,4 @@ public class HomeFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
-
-
-    private void showData(){
-
-        db.collection("posts")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                        for(DocumentSnapshot doc: task.getResult()){
-                            Model model = new Model(doc.getId(), doc.getString("userId"),doc.getString("post"), String.valueOf(doc.get("createdAt")));
-                            modelList.add(model);
-                        }
-
-                        Collections.sort(modelList);
-                        Collections.reverse(modelList);
-                        adapter = new CustomAdapter(HomeFragment.this, modelList);
-                        mRecyclerView.setAdapter(adapter);
-
-                    }
-
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                    }
-                });
-
-
-
-    }
-
 }
