@@ -28,6 +28,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.LocalTime;
 import org.threeten.bp.format.DateTimeFormatter;
 
 import java.util.List;
@@ -346,25 +348,33 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
 
     /**
      * Adjusts the weekly statistics after the activity is deleted
+     * TODO only delete if the activity was within this week's stats
      */
     private void adjustStatisticsAfterDeletion() {
-        DocumentReference reference = WeeklyStatistics.getSportWeeklyStat(userID, activity.getSport());
-        reference.get()
-                .addOnSuccessListener(success -> {
-                    Map<String, Object> data = success.getData();
+        LocalDateTime timestamp = activity.getTimestamp();
+        LocalDateTime startDate = LocalDateTime.of(WeeklyStatistics.getStartOfWeek(), LocalTime.of(0, 0));
+        LocalDateTime endDate = LocalDateTime.of(WeeklyStatistics.getEndOfWeek(), LocalTime.of(23, 59));
+        if (!(timestamp.isBefore(startDate) || timestamp.isAfter(endDate))) { // only adjust this week's stats if the activity occurred within the bounds of the week
+            DocumentReference reference = WeeklyStatistics.getSportWeeklyStat(userID, activity.getSport());
+            reference.get()
+                    .addOnSuccessListener(success -> {
+                        Map<String, Object> data = success.getData();
 
-                    if (data != null) {
-                        WeeklyStat weeklyStat = WeeklyStat.from(data);
-                        weeklyStat.subtractDistance((double)activity.getDistance());
-                        weeklyStat.subtractElevation((int)activity.getElevationGain());
-                        weeklyStat.subtractTime(activity.getRecordedDuration());
+                        if (data != null) {
+                            WeeklyStat weeklyStat = WeeklyStat.from(data);
+                            weeklyStat.subtractDistance((double) activity.getDistance());
+                            weeklyStat.subtractElevation((int) activity.getElevationGain());
+                            weeklyStat.subtractTime(activity.getRecordedDuration());
 
-                        weeklyStat.save(reference, null, this::doDeleteError);
-                    }
+                            weeklyStat.save(reference, null, this::doDeleteError);
+                        }
 
-                    adjustGoalsAfterDeletion();
-                })
-                .addOnFailureListener(this::doDeleteError);
+                        adjustGoalsAfterDeletion();
+                    })
+                    .addOnFailureListener(this::doDeleteError);
+        } else {
+            adjustGoalsAfterDeletion();
+        }
     }
 
     /**

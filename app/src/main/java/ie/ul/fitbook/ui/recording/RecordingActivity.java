@@ -238,11 +238,17 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
      * @param elevationGain the elevation gain recorded in this activity
      */
     private void saveActivity(RecordingService recordingService, double elevationGain) {
+        if (elevationGain == RecordingUtils.ELEVATION_GAIN_UNAVAILABLE) {
+            Toast.makeText(this, "Failed to retrieve elevation gain information", Toast.LENGTH_SHORT)
+                    .show();
+            elevationGain = 0.0;
+        }
         Profile profile = Login.getProfile();
 
+        final double finalElevation = elevationGain;
         if (profile == null) {
             ProfileUtils.downloadProfile(Login.getUserId(), downloaded -> {
-                createRecordedActivity(recordingService, elevationGain, downloaded);
+                createRecordedActivity(recordingService, finalElevation, downloaded);
                 Login.setProfile(downloaded);
             }, () -> {
                 Toast.makeText(this, "An error occurred, please try again", Toast.LENGTH_SHORT).show();
@@ -251,7 +257,7 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
                 paused = true;
             }, null, false, this, true); // download profile image synchronously so only save when fully complete
         } else {
-            createRecordedActivity(recordingService, elevationGain, profile);
+            createRecordedActivity(recordingService, finalElevation, profile);
         }
     }
 

@@ -226,12 +226,6 @@ public class ViewProfileActivity extends AppCompatActivity {
         friendsButton = findViewById(R.id.friendsButton);
         friendsView = findViewById(R.id.friends);
 
-
-
-
-
-
-
         useCache = true;
         setupProfileOptions();
         refreshProfile();

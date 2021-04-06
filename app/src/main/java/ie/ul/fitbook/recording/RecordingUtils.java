@@ -2,6 +2,8 @@ package ie.ul.fitbook.recording;
 
 import android.location.Location;
 
+import androidx.core.content.ContextCompat;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -13,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.interfaces.ActionHandlerConsumer;
@@ -46,6 +49,10 @@ public final class RecordingUtils {
      * The index the request is at
      */
     private static int requestIndex;
+    /**
+     * Returned when elevation gain could not be found. Use this to detect that an error occurred.
+     */
+    public static final Double ELEVATION_GAIN_UNAVAILABLE = -1.0;
 
     /**
      * Prevent instantiation
@@ -77,6 +84,7 @@ public final class RecordingUtils {
             consumer.doAction(elevationGain);
         } catch (JSONException e) {
             e.printStackTrace();
+            consumer.doAction(ELEVATION_GAIN_UNAVAILABLE);
         }
     }
 
@@ -99,35 +107,39 @@ public final class RecordingUtils {
         String key = "&key=" + recordingService.getResources().getString(R.string.mapsApiKey);
         int appendedLocations = 0;
         Location previousLocation = null;
-        for (Location location : recordingService.getLocations()) {
-            boolean appendLocation = false;
-            if (previousLocation == null) {
-                appendLocation = true;
-            } else {
-                double previousAltitude = previousLocation.getAltitude();
-                double currentAltitude = location.getAltitude();
+        List<Location> locations = recordingService.getLocations();
 
-                if (Math.abs(currentAltitude - previousAltitude) >= ELEVATION_GAIN_THRESHOLD) {
+        if (locations.size() > 1) {
+            for (Location location : locations) {
+                boolean appendLocation = false;
+                if (previousLocation == null) {
                     appendLocation = true;
+                } else {
+                    double previousAltitude = previousLocation.getAltitude();
+                    double currentAltitude = location.getAltitude();
+
+                    if (Math.abs(currentAltitude - previousAltitude) >= ELEVATION_GAIN_THRESHOLD) {
+                        appendLocation = true;
+                    }
                 }
+
+                if (appendLocation) {
+                    locationsString.append(location.getLatitude()).append(",").append(location.getLongitude()).append("|");
+                    if (++appendedLocations >= MAX_REQUEST_LOCATIONS) {
+                        appendedLocations = 0;
+                        locationsString.deleteCharAt(locationsString.length() - 1);
+                        locationsString.append(key);
+                        requestURLs.add(locationsString.toString());
+                        locationsString = new StringBuilder(REQUEST_URL_START);
+                    }
+                }
+                previousLocation = location;
             }
 
-            if (appendLocation) {
-                locationsString.append(location.getLatitude()).append(",").append(location.getLongitude()).append("|");
-                if (++appendedLocations >= MAX_REQUEST_LOCATIONS) {
-                    appendedLocations = 0;
-                    locationsString.deleteCharAt(locationsString.length() - 1);
-                    locationsString.append(key);
-                    requestURLs.add(locationsString.toString());
-                    locationsString = new StringBuilder(REQUEST_URL_START);
-                }
-            }
-            previousLocation = location;
+            locationsString.deleteCharAt(locationsString.length() - 1);
+            locationsString.append(key);
+            requestURLs.add(locationsString.toString());
         }
-
-        locationsString.deleteCharAt(locationsString.length() - 1);
-        locationsString.append(key);
-        requestURLs.add(locationsString.toString());
     }
 
     /**
@@ -164,6 +176,8 @@ public final class RecordingUtils {
             }
         } catch (JSONException ex) {
             ex.printStackTrace();
+            consumer.doAction(ELEVATION_GAIN_UNAVAILABLE);
+
         }
     }
 
@@ -176,14 +190,17 @@ public final class RecordingUtils {
         url(recordingService);
 
         RequestQueue requestQueue = Volley.newRequestQueue(recordingService);
-        if (requestURLs.size() == 1) {
+        int size = requestURLs.size();
+        if (size == 1) {
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, requestURLs.get(0), null,
                     response1 -> handleSuccessfulResponse(response1, response), RecordingUtils::handleErrorResponse);
             requestQueue.add(request);
-        } else {
+        } else if (size > 1) {
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, requestURLs.get(requestIndex++), null,
                     response1 -> buildResponseObject(response1, response, recordingService), RecordingUtils::handleErrorResponse);
             requestQueue.add(request);
+        } else {
+            response.doAction(ELEVATION_GAIN_UNAVAILABLE);
         }
     }
 }
