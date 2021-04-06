@@ -31,6 +31,27 @@
             android:foregroundServiceType="location" />
 
         <activity
+            android:name=".ui.home.AddPost"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.profiles.ProfilesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.home.ProfilesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.home.FriendsList"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.chat.CreateMessageActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.chat.NewMessageActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.chat.MessageActivity"
+            android:screenOrientation="portrati" />
+        <activty
             android:name=".ui.profile.activities.ViewRecordedActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -60,9 +81,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.profile.goals.GoalsActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.profiles.ProfilesActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.notifications.NotificationsActivity"

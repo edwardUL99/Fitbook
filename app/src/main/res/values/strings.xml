@@ -4,6 +4,8 @@
     <string name="title_home">Home</string>
     <string name="title_new_activity">Activity</string>
     <string name="title_messages">Messages</string>
+    <string name="title_friends_list">Friends List</string>
+    <string name="title_add_post">Add Post</string>
     <string name="title_profile">Profile</string>
     <!-- Strings used for fragments for navigation -->
 
