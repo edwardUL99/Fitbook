@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".MyApplication"
@@ -22,15 +23,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Fitbook">
+
         <service
-            android:name=".ui.recording.RecordingService"
+            android:name=".recording.services.RecordingService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="false"
+            android:foregroundServiceType="location" />
 
         <activity
             android:name=".ui.home.AddPost"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.profiles.ProfilesActivity"
             android:screenOrientation="portrait" />
@@ -40,7 +42,6 @@
         <activity
             android:name=".ui.home.FriendsList"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.chat.CreateMessageActivity"
             android:screenOrientation="portrait" />
@@ -49,6 +50,12 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.chat.MessageActivity"
+            android:screenOrientation="portrati" />
+        <activty
+            android:name=".ui.profile.activities.ViewRecordedActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.recording.SaveRecordingActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.recording.RecordingActivity"

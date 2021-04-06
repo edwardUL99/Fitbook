@@ -211,7 +211,7 @@
         android:layout_marginStart="136dp"
         android:layout_marginEnd="136dp"
         android:layout_marginBottom="50dp"
-        android:text="Stop"
+        android:text="Pause"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -237,5 +237,18 @@
         app:layout_constraintBottom_toBottomOf="@+id/divider7"
         app:layout_constraintStart_toEndOf="@+id/avgSpeedView"
         app:layout_constraintTop_toBottomOf="@+id/textView14" />
+
+    <Button
+        android:id="@+id/resume"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="55dp"
+        android:layout_marginEnd="51dp"
+        android:text="Resume"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/stop"
+        app:layout_constraintTop_toBottomOf="@+id/divider8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
