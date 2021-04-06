@@ -44,7 +44,6 @@ import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.ui.profile.posts.ProfilePostsActivity;
 import ie.ul.fitbook.ui.profile.statistics.StatisticsActivity;
-import ie.ul.fitbook.ui.profiles.ProfilesActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
@@ -226,6 +225,12 @@ public class ViewProfileActivity extends AppCompatActivity {
         friendsButton = findViewById(R.id.friendsButton);
         friendsView = findViewById(R.id.friends);
 
+
+
+
+
+
+
         useCache = true;
         setupProfileOptions();
         refreshProfile();
@@ -356,6 +361,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         String address = profile.getCity() + ", " + profile.getState();
         addressView.setText(address);
         favouriteActivityView.setText(profile.getFavouriteSport());
+
         setupBioTextView(profile);
 
         onFriendsSync(profile);
@@ -637,7 +643,7 @@ public class ViewProfileActivity extends AppCompatActivity {
      * Handles when the sign out button is clicked
      */
     private void onSignOutClicked() {
-        new AlertDialog.Builder(this) // this doesn't work with using the activity instance field for some reason
+        new AlertDialog.Builder(this)
                 .setCancelable(true)
                 .setTitle("Sign Out")
                 .setMessage("Are you sure you want to sign out?")
