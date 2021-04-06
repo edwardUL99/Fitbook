@@ -78,7 +78,7 @@ public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListView
 //                        .addOnSuccessListener(new OnSuccessListener<Void>() {
 //                            @Override
 //                            public void onSuccess(Void aVoid) {
-//                                System.out.println("Deleted!");
+//
 //
 //                            }
 //
@@ -111,7 +111,6 @@ public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListView
         final String[] userId = {friendModelList.get(position).getUserId()};
         //String id = modelList.get(position).getId();
 
-        System.out.println("Hereherehere" + friendModelList.get(position).getUserId());
 
 
 

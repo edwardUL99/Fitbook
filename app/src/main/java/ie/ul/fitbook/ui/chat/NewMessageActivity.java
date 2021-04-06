@@ -53,7 +53,7 @@ public class NewMessageActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
 
-        System.out.println("herehereherehere" + userId);
+
 
 
         new UserDatabase(userId).getChildDocument(Profile.PROFILE_DOCUMENT)
@@ -97,7 +97,7 @@ public class NewMessageActivity extends AppCompatActivity {
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                System.out.println("Deleted!");
+
 
                             }
 
@@ -116,7 +116,7 @@ public class NewMessageActivity extends AppCompatActivity {
                            .addOnSuccessListener(new OnSuccessListener<Void>() {
                                @Override
                                public void onSuccess(Void aVoid) {
-                                   System.out.println("Deleted!");
+
 
                                }
 
