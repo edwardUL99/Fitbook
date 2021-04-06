@@ -1,36 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+
+<!--    android:id="@+id/card_view2"-->
+<!--    android:layout_margin="5dp"-->
+<!--    app:cardCornerRadius="5dp"-->
+<!--    app:contentPadding="5dp">-->
+
+<!-- <LinearLayout-->
+<!--     android:layout_width="match_parent"-->
+<!--     android:layout_height="wrap_content"-->
+<!--     android:orientation="vertical">-->
+
+<!--     <de.hdodenhof.circleimageview.CircleImageView-->
+<!--         android:id="@+id/postsPic"-->
+<!--         android:layout_width="128dp"-->
+<!--         android:layout_height="50dp"-->
+<!--         android:layout_marginTop="21dp"-->
+<!--         android:layout_marginEnd="23dp"-->
+<!--         android:layout_marginBottom="11dp"-->
+<!--         android:src="@drawable/profile" />-->
+
+<!--     <de.hdodenhof.circleimageview.CircleImageView-->
+<!--         android:id="@+id/profilePic"-->
+<!--         android:layout_width="128dp"-->
+<!--         android:layout_height="50dp"-->
+<!--         android:layout_marginTop="21dp"-->
+<!--         android:layout_marginEnd="23dp"-->
+<!--         android:layout_marginBottom="11dp"-->
+<!--         android:src="@drawable/profile" />-->
+
+
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-
     android:id="@+id/card_view2"
     android:layout_margin="5dp"
     app:cardCornerRadius="5dp"
     app:contentPadding="5dp">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/postsPic"
+            android:layout_width="250dp"
+            android:layout_height="150dp"
+            android:src="@drawable/profile"
+            app:layout_constraintBottom_toTopOf="@+id/post_createdAt"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profilePic"
+            android:layout_width="77dp"
+            android:layout_height="93dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="13dp"
+            android:src="@drawable/profile"
+            app:layout_constraintEnd_toStartOf="@+id/postsPic"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/post_userId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="userId"
+            android:textStyle="bold|italic"
+            android:textColor="#000"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toTopOf="@+id/post_userPost"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/post_createdAt" />
+        <TextView
+            android:id="@+id/post_userPost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Post content"
+            android:textColor="#000"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/post_userId" />
+        <TextView
+            android:id="@+id/post_createdAt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Post content"
+            android:textColor="#000"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@+id/post_userId"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/postsPic" />
+    </androidx.constraintlayout.widget.ConstraintLayout></androidx.cardview.widget.CardView>
 
- <LinearLayout
-     android:layout_width="match_parent"
-     android:layout_height="wrap_content"
-     android:orientation="vertical">
-
-     <de.hdodenhof.circleimageview.CircleImageView
-         android:id="@+id/postsPic"
-         android:layout_width="128dp"
-         android:layout_height="50dp"
-         android:layout_marginTop="21dp"
-         android:layout_marginEnd="23dp"
-         android:layout_marginBottom="11dp"
-         android:src="@drawable/profile" />
-
-     <de.hdodenhof.circleimageview.CircleImageView
-         android:id="@+id/profilePic"
-         android:layout_width="128dp"
-         android:layout_height="50dp"
-         android:layout_marginTop="21dp"
-         android:layout_marginEnd="23dp"
-         android:layout_marginBottom="11dp"
-         android:src="@drawable/profile" />
 
 
 
@@ -40,27 +114,27 @@
 
 
 
-     <TextView
-         android:id="@+id/post_userId"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:textSize="22sp"
-         android:text="userId"
-         android:textColor ="#000"/>
-     <TextView
-         android:id="@+id/post_createdAt"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:textSize="18sp"
-         android:text="Post content"
-         android:textColor ="#000"/>
+<!--<TextView-->
+<!--         android:id="@+id/post_userId"-->
+<!--         android:layout_width="match_parent"-->
+<!--         android:layout_height="wrap_content"-->
+<!--         android:textSize="22sp"-->
+<!--         android:text="userId"-->
+<!--         android:textColor ="#000"/>-->
+<!--     <TextView-->
+<!--         android:id="@+id/post_createdAt"-->
+<!--         android:layout_width="match_parent"-->
+<!--         android:layout_height="wrap_content"-->
+<!--         android:textSize="18sp"-->
+<!--         android:text="Post content"-->
+<!--         android:textColor ="#000"/>-->
 
-     <TextView
-         android:id="@+id/post_userPost"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:textSize="18sp"
-         android:text="Post content"
-         android:textColor ="#000"/>
+<!--     <TextView-->
+<!--         android:id="@+id/post_userPost"-->
+<!--         android:layout_width="match_parent"-->
+<!--         android:layout_height="wrap_content"-->
+<!--         android:textSize="18sp"-->
+<!--         android:text="Post content"-->
+<!--         android:textColor ="#000"/>-->
 
- </LinearLayout></androidx.cardview.widget.CardView>
+<!-- </LinearLayout></androidx.cardview.widget.CardView>-->

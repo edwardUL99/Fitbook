@@ -19,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -129,11 +130,13 @@ public class NewMessageActivity extends AppCompatActivity {
                                }
                            });
 
-                   String id= UUID.randomUUID().toString();
+                   Date mDate = new Date();
+                   long timeInMilliseconds = mDate.getTime();
 
                    Map<String, Object> message = new HashMap<>();
                    message.put("sender", Login.getUserId());
                    message.put("content", editText.getText().toString());
+                   message.put("timeStamp", timeInMilliseconds);
 
 //                   db.collection("users").document( Login.getUserId() + "/messages/" + userId  + "/message" + "/" + id)
 //                           .set(message)

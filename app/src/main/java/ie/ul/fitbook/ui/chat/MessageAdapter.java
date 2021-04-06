@@ -86,9 +86,26 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
         System.out.println("hereherehereo"  + modelList.get(position).getSender());
         System.out.println("hereherehereo"  + modelList.get(position).getContent());
 
+        new UserDatabase(modelList.get(position).getSender()).getChildDocument(Profile.PROFILE_DOCUMENT)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
 
-        holder.senderId.setText(modelList.get(position).getSender());
+
+                        DocumentSnapshot snapshot = task.getResult();
+                        Map<String, Object> data = snapshot.getData();
+                        Profile profile = Profile.from(data);
+                        holder.senderId.setText(profile.getName());
+                    }});
+
+        //String s = modelList.get(position).getSender();
+
+
+
+
+        //holder.senderId.setText(s.getName());
         holder.messageContent.setText(modelList.get(position).getContent());
+        holder.createdAt.setText(modelList.get(position).getDate());
 
 //        final String[] userId = {modelList.get(position).getTile()};
 //        String id = modelList.get(position).getId();

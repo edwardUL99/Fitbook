@@ -26,6 +26,8 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +70,7 @@ public class MessageActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.recycler_view_messages);
         mRecyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(MessageActivity.this);
+        ((LinearLayoutManager) layoutManager).setReverseLayout(true);
         mRecyclerView.setLayoutManager(layoutManager);
         db = FirebaseFirestore.getInstance();
         modelList = new ArrayList<>();
@@ -121,11 +124,13 @@ public class MessageActivity extends AppCompatActivity {
 
 
 
-                    String id= UUID.randomUUID().toString();
+                    Date mDate = new Date();
+                    long timeInMilliseconds = mDate.getTime();
 
                     Map<String, Object> message = new HashMap<>();
                     message.put("sender", Login.getUserId());
                     message.put("content", editText.getText().toString());
+                    message.put("timeStamp", timeInMilliseconds);
 
 //                   db.collection("users").document( Login.getUserId() + "/messages/" + userId  + "/message" + "/" + id)
 //                           .set(message)
@@ -187,13 +192,16 @@ public class MessageActivity extends AppCompatActivity {
                         for(DocumentSnapshot doc: task.getResult()){
 
 
-                            MessageModel model = new MessageModel(doc.getString("sender"), doc.getString("content"));
+                            MessageModel model = new MessageModel(doc.getString("sender"), doc.getString("content"),String.valueOf(doc.get("timeStamp")));
                             modelList.add(model);
                             System.out.println("hereherehere" + modelList.size());
                         }
 
                         //Collections.sort(modelList);
                         //Collections.reverse(modelList);
+
+                        Collections.sort(modelList);
+                        Collections.reverse(modelList);
 
 
                         adapter = new MessageAdapter(MessageActivity.this, modelList);

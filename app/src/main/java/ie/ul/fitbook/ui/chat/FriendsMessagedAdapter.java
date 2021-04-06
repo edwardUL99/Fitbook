@@ -93,8 +93,6 @@ public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListView
 //                        });
 //
 //                friendsList.finish();
-                System.out.println("NOW" + userId);
-
                 Intent intent = new Intent(messagesFragment.getActivity(), MessageActivity.class);
                 intent.putExtra("userId", userId );
                 messagesFragment.startActivity(intent);

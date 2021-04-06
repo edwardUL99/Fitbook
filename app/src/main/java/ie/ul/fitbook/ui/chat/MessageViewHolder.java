@@ -42,6 +42,7 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
 
         senderId = itemView.findViewById(R.id.message_sender);
         messageContent = itemView.findViewById(R.id.message_content);
+        createdAt = itemView.findViewById(R.id.message_createdAt);
 
 
 

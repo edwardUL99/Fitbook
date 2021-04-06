@@ -14,24 +14,55 @@
         android:layout_height="wrap_content"
          />
 
-    <EditText
-        android:id="@+id/textView17"
-        android:layout_width="wrap_content"
+<!--    <EditText-->
+<!--        android:id="@+id/textView17"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="TextView"-->
+<!--        app:layout_constraintEnd_toStartOf="@+id/button3"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        tools:layout_editor_absoluteY="697dp" />-->
+
+<!--    <Button-->
+<!--        android:id="@+id/button3"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginEnd="88dp"-->
+<!--        android:text="Button"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        tools:layout_editor_absoluteY="681dp" />-->
+
+    <RelativeLayout
+        android:id="@+id/layout_gchat_chatbox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintEnd_toStartOf="@+id/button3"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="697dp" />
+        app:layout_constraintStart_toStartOf="parent">
+
+
+    <EditText
+        android:layout_marginStart="16dp"
+        android:id="@+id/textView17"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/button18"
+        android:background="@android:color/transparent"
+        android:hint="Enter Message"
+        android:inputType="text"
+        android:maxLines="6"
+        tools:ignore="Autofill" />
 
     <Button
         android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="88dp"
-        android:text="Button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:layout_editor_absoluteY="681dp" />
+        android:layout_width="76dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:background="?attr/selectableItemBackground"
+        android:text="Send"
+        android:textColor="@color/colorPrimary" />
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

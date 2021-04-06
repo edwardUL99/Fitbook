@@ -1,15 +1,36 @@
 package ie.ul.fitbook.ui.chat;
 
-public class MessageModel {
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import ie.ul.fitbook.ui.home.Model;
+
+public class MessageModel implements Comparable<MessageModel>{
 
 
-    String sender, content;
+    String sender, content, timeStamp;
 
-    public MessageModel(String sender, String content){
+    public MessageModel(String sender, String content, String timeStamp){
 
 
         this.sender = sender;
         this.content = content;
+        this.timeStamp = timeStamp;
+
+    }
+
+    public String getDate(){
+
+        long num = Long.parseLong(timeStamp);
+
+
+        SimpleDateFormat formatter= new SimpleDateFormat("dd-MM-yyyy 'at' HH:mm:ss");
+
+        Date date = new Date(num);
+        System.out.println(formatter.format(date));
+        String dateString = formatter.format(date);
+
+        return dateString;
 
     }
 
@@ -22,6 +43,16 @@ public class MessageModel {
 
         return content;
     }
+    public String getTime() {
+        return timeStamp;
+    }
 
 
+    @Override
+    public int compareTo(MessageModel o) {
+        if (getTime() == null || o.getTime() == null) {
+            return 0;
+        }
+        return getTime().compareTo(o.getTime());
+    }
 }
