@@ -50,8 +50,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.chat.MessageActivity"
-            android:screenOrientation="portrati" />
-        <activty
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".ui.profile.activities.ViewRecordedActivity"
             android:screenOrientation="portrait" />
         <activity

@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -211,8 +210,7 @@ public class RecordingService extends Service {
      * thread where UI operations take place for Activities running in the
      * same process.  You should always avoid stalling the main
      * thread's event loop.  When doing long-running operations,
-     * network calls, or heavy disk I/O, you should kick off a new
-     * thread, or use {@link AsyncTask}.</p>
+     * network calls, or heavy disk I/O,
      *
      * @param intent  The Intent supplied to {@link Context#startService},
      *                as given.  This may be null if the service is being restarted after
