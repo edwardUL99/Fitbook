@@ -101,7 +101,7 @@ public class MessagesFragment extends Fragment {
 
                             FriendModel model = new FriendModel(doc.getId());
                             friendModelList.add(model);
-                            System.out.println("nownownow" + friendModelList.size());
+
                         }
 
                         //Collections.sort(modelList);

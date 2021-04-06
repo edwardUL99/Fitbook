@@ -78,7 +78,7 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
 //                        .addOnSuccessListener(new OnSuccessListener<Void>() {
 //                            @Override
 //                            public void onSuccess(Void aVoid) {
-//                                System.out.println("Deleted!");
+//
 //
 //                            }
 //
@@ -93,7 +93,7 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
 //                        });
 //
 //                friendsList.finish();
-                System.out.println("NOW" + userId);
+
 
                 Intent intent = new Intent(friendsList, NewMessageActivity.class);
                 intent.putExtra("userId", userId );
@@ -113,7 +113,7 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
         final String[] userId = {friendModelList.get(position).getUserId()};
         //String id = modelList.get(position).getId();
 
-        System.out.println("Hereherehere" + friendModelList.get(position).getUserId());
+
 
 
 

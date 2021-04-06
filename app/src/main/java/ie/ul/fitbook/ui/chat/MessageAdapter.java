@@ -83,9 +83,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
 
-        System.out.println("hereherehereo"  + modelList.get(position).getSender());
-        System.out.println("hereherehereo"  + modelList.get(position).getContent());
-
         new UserDatabase(modelList.get(position).getSender()).getChildDocument(Profile.PROFILE_DOCUMENT)
                 .get()
                 .addOnCompleteListener(task -> {
