@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -15,6 +16,7 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.util.Map;
 
+import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.interfaces.ActionHandler;
 import ie.ul.fitbook.interfaces.ActionHandlerConsumer;
@@ -91,11 +93,32 @@ public final class ProfileUtils {
                                 imageView.setImageBitmap(bitmap);
                             }
                         })
-                        .addOnFailureListener(failed -> onFailedProfileSync());
+                        .addOnFailureListener(failed -> {
+                            failed.printStackTrace();
+                            onFailedProfilePhotoDownload(context, Login.getProfile(), imageView);
+                        });
             } else {
                 onFailedProfileSync();
             }
         }
+    }
+
+    /**
+     * Handles when the profile photo could not be downloaded successfully
+     * @param context the context the photo was being downloaded with
+     * @param profile the profile to download it into
+     * @param imageView the image view to also download the profile photo into
+     */
+    private static void onFailedProfilePhotoDownload(Context context, Profile profile, ImageView imageView) {
+        Toast.makeText(context, "Failed to download user's profile photo as it may not exist", Toast.LENGTH_SHORT)
+                .show();
+
+        Bitmap defaultPhoto = Utils.drawableToBitmap(context, R.drawable.profile);
+        if (profile != null)
+            profile.setProfileImage(defaultPhoto);
+
+        if (imageView != null)
+            imageView.setImageBitmap(defaultPhoto);
     }
 
     /**
@@ -171,8 +194,8 @@ public final class ProfileUtils {
                                 onSuccess.doAction(profile);
                         })
                         .addOnFailureListener(failed -> {
-                            if (onFail != null)
-                                onFail.doAction();
+                            failed.printStackTrace();
+                            onFailedProfilePhotoDownload(context, profile, imageView);
                         });
             } else {
                 if (onFail != null)

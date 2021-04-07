@@ -348,7 +348,6 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
 
     /**
      * Adjusts the weekly statistics after the activity is deleted
-     * TODO only delete if the activity was within this week's stats
      */
     private void adjustStatisticsAfterDeletion() {
         LocalDateTime timestamp = activity.getTimestamp();
