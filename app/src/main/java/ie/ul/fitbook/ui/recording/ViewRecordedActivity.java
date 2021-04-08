@@ -1,4 +1,4 @@
-package ie.ul.fitbook.ui.profile.activities;
+package ie.ul.fitbook.ui.recording;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.database.ActivitiesDatabase;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.goals.DistanceGoal;
 import ie.ul.fitbook.goals.ElevationGoal;
@@ -51,6 +52,7 @@ import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
 import ie.ul.fitbook.ui.HomeActivity;
+import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.utils.Utils;
 
 /**
@@ -383,8 +385,8 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
         String documentId = activity.getFirestoreId();
 
         if (documentId != null) {
-            new UserDatabase()
-                    .getChildCollection(RecordedActivity.ACTIVITIES_PATH)
+            new ActivitiesDatabase()
+                    .getDatabase()
                     .document(documentId)
                     .delete()
                     .addOnSuccessListener(success -> adjustStatisticsAfterDeletion())

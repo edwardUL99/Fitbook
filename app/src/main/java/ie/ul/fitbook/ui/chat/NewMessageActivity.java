@@ -22,7 +22,6 @@ import com.squareup.picasso.Picasso;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;

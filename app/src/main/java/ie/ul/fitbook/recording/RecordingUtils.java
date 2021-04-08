@@ -2,8 +2,6 @@ package ie.ul.fitbook.recording;
 
 import android.location.Location;
 
-import androidx.core.content.ContextCompat;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;

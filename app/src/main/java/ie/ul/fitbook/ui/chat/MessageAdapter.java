@@ -1,10 +1,8 @@
 package ie.ul.fitbook.ui.chat;
 
-import android.content.Intent;
 import android.content.Context;
 
 
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,26 +10,17 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.StorageReference;
-import com.squareup.picasso.Picasso;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.profile.Profile;
-import ie.ul.fitbook.storage.PostsStorage;
-import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.chat.MessageActivity;
 import ie.ul.fitbook.ui.chat.MessageModel;
-import ie.ul.fitbook.ui.profile.ViewProfileActivity;
-
-import static java.lang.Integer.parseInt;
 
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {

@@ -18,18 +18,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.profile.Profile;
-import ie.ul.fitbook.storage.PostsStorage;
 import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.profile.ViewProfileActivity;
-
-import static java.lang.Integer.parseInt;
 
 
 public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListViewHolder> {

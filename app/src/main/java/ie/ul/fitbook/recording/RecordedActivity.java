@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.sports.Sport;
 
 /**
@@ -54,14 +55,14 @@ public class RecordedActivity implements Parcelable {
      */
     private final int caloriesBurned;
     /**
+     * The user ID of the user that created this activity
+     */
+    private final String userId;
+    /**
      * The Firestore Id this recorded activity is stored in
      */
     private String firestoreId;
 
-    /**
-     * Pass this into user DB.getChildCollection to get recorded activities
-     */
-    public static final String ACTIVITIES_PATH = "activities";
     /**
      * The key to store the timestamp on firestore
      */
@@ -94,6 +95,10 @@ public class RecordedActivity implements Parcelable {
      * The key to store calories burned on firestore
      */
     public static final String CALORIES_BURNED_KEY = "calories_burned";
+    /**
+     * The user that posted this activity
+     */
+    public static final String USER_ID_KEY = "user";
 
     /**
      * Construct a RecordedActivity object to represent an activity that has been recorded
@@ -107,7 +112,7 @@ public class RecordedActivity implements Parcelable {
      */
     public RecordedActivity(List<LatLng> recordedLocations, Duration recordedDuration,
                             Sport sport, float distance, float averageSpeed, float elevationGain, int caloriesBurned) {
-        this(LocalDateTime.now(), recordedLocations, recordedDuration, sport, distance, averageSpeed, elevationGain, caloriesBurned);
+        this(LocalDateTime.now(), recordedLocations, recordedDuration, sport, distance, averageSpeed, elevationGain, caloriesBurned, Login.getUserId());
     }
 
     /**
@@ -120,9 +125,10 @@ public class RecordedActivity implements Parcelable {
      * @param averageSpeed the average speed of this activity in km/h
      * @param elevationGain the elevation gained for this activity in metres
      * @param caloriesBurned the number of calories burned for this activity
+     * @param userId the User ID of the user that created this activity
      */
     protected RecordedActivity(LocalDateTime timestamp, List<LatLng> recordedLocations, Duration recordedDuration,
-                               Sport sport, float distance, float averageSpeed, float elevationGain, int caloriesBurned) {
+                               Sport sport, float distance, float averageSpeed, float elevationGain, int caloriesBurned, String userId) {
         this.timestamp = timestamp;
         this.recordedLocations = recordedLocations;
         this.recordedDuration = recordedDuration;
@@ -131,6 +137,7 @@ public class RecordedActivity implements Parcelable {
         this.averageSpeed = averageSpeed;
         this.elevationGain = elevationGain;
         this.caloriesBurned = caloriesBurned;
+        this.userId = userId;
     }
 
     /**
@@ -146,6 +153,7 @@ public class RecordedActivity implements Parcelable {
         averageSpeed = in.readFloat();
         elevationGain = in.readFloat();
         caloriesBurned = in.readInt();
+        userId = in.readString();
         firestoreId = in.readString();
     }
 
@@ -241,6 +249,7 @@ public class RecordedActivity implements Parcelable {
         data.put(AVERAGE_SPEED_KEY, averageSpeed);
         data.put(ELEVATION_GAIN_KEY, elevationGain);
         data.put(CALORIES_BURNED_KEY, caloriesBurned);
+        data.put(USER_ID_KEY, userId);
 
         return data;
     }
@@ -259,10 +268,11 @@ public class RecordedActivity implements Parcelable {
         Object avgSpeedObj = data.get(AVERAGE_SPEED_KEY);
         Object elevationObj = data.get(ELEVATION_GAIN_KEY);
         Object caloriesObj = data.get(CALORIES_BURNED_KEY);
+        Object userObj = data.get(USER_ID_KEY);
 
         if (!(timestampObj instanceof String) || !(locationsObj instanceof String) || !(durationObj instanceof Long)
             || !(sportObj instanceof String) || !(distanceObj instanceof Double) || !(avgSpeedObj instanceof Double) || !(elevationObj instanceof Double)
-            || !(caloriesObj instanceof Long))
+            || !(caloriesObj instanceof Long) || !(userObj instanceof String))
             return null;
 
         LocalDateTime timestamp = LocalDateTime.parse((String)timestampObj);
@@ -276,7 +286,7 @@ public class RecordedActivity implements Parcelable {
         double elevation = (Double)elevationObj;
         long calories = (Long)caloriesObj;
 
-        return new RecordedActivity(timestamp, locations, duration, sport, (float)distance, (float)avgSpeed, (float)elevation, (int)calories);
+        return new RecordedActivity(timestamp, locations, duration, sport, (float)distance, (float)avgSpeed, (float)elevation, (int)calories, (String)userObj);
     }
 
     /**
@@ -311,7 +321,16 @@ public class RecordedActivity implements Parcelable {
         dest.writeFloat(averageSpeed);
         dest.writeFloat(elevationGain);
         dest.writeInt(caloriesBurned);
+        dest.writeString(userId);
         dest.writeString(firestoreId);
+    }
+
+    /**
+     * Retrieve the user ID of the user that posted this activity
+     * @return ID of user who owns this activity
+     */
+    public String getUserId() {
+        return userId;
     }
 
     /**

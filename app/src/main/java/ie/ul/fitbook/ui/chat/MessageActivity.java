@@ -31,16 +31,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
-import ie.ul.fitbook.ui.home.FriendModel;
-import ie.ul.fitbook.ui.home.FriendsList;
-import ie.ul.fitbook.ui.home.FriendsListCustomAdapter;
 
 public class MessageActivity extends AppCompatActivity {
 

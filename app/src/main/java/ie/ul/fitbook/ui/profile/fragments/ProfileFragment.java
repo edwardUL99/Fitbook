@@ -49,7 +49,6 @@ import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
 import ie.ul.fitbook.ui.profile.posts.ProfilePostsActivity;
-import ie.ul.fitbook.ui.profile.statistics.StatisticsActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
@@ -296,13 +295,6 @@ public class ProfileFragment extends Fragment {
         ConstraintLayout activitiesLayout = view.findViewById(R.id.activitiesLayout);
         activitiesLayout.setOnClickListener(v -> {
             Intent intent = new Intent(activity, ListActivitiesActivity.class);
-            intent.putExtra(HomeActivity.FRAGMENT_ID, activity.getNavController().getCurrentDestination().getId());
-            startActivity(intent);
-        });
-
-        ConstraintLayout statisticsLayout = view.findViewById(R.id.statisticsLayout);
-        statisticsLayout.setOnClickListener(v -> {
-            Intent intent = new Intent(activity, StatisticsActivity.class);
             intent.putExtra(HomeActivity.FRAGMENT_ID, activity.getNavController().getCurrentDestination().getId());
             startActivity(intent);
         });

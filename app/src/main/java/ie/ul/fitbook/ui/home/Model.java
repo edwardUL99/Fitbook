@@ -1,11 +1,7 @@
 package ie.ul.fitbook.ui.home;
 
-import android.widget.ImageView;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static java.lang.Integer.parseInt;
 
 public class Model implements Comparable<Model>{
 

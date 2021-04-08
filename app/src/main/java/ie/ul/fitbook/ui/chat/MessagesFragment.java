@@ -27,7 +27,6 @@ import java.util.List;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
-import ie.ul.fitbook.ui.home.AddPost;
 
 /**
  * Fragment for displaying messages
