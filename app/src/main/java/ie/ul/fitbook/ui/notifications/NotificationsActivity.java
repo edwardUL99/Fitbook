@@ -3,16 +3,35 @@ package ie.ul.fitbook.ui.notifications;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.login.Login;
 
 /**
  * This activity provides an activity for displaying notifications
  */
 public class NotificationsActivity extends AppCompatActivity {
+
+    List<NotificationModel> notificationModelList;
+    RecyclerView mRecyclerView;
+    RecyclerView.LayoutManager layoutManager;
+    FirebaseFirestore db;
+    NotificationsCustomAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +44,15 @@ public class NotificationsActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle("Notifications");
         }
+
+        mRecyclerView = findViewById(R.id.recyclerViewNotification);
+        mRecyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(NotificationsActivity.this);
+        mRecyclerView.setLayoutManager(layoutManager);
+        db = FirebaseFirestore.getInstance();
+        notificationModelList = new ArrayList<>();
+
+        showData();
     }
 
     /**
@@ -46,12 +74,33 @@ public class NotificationsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-
         if (id == android.R.id.home) {
             finish();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
+
+    private void showData(){
+        db.collection("users/" + Login.getUserId() +"/notifications")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        for(DocumentSnapshot doc: task.getResult()){
+                            NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"));
+                            notificationModelList.add(model);
+                        }
+                        adapter = new NotificationsCustomAdapter(NotificationsActivity.this, notificationModelList);
+                        mRecyclerView.setAdapter(adapter);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                    }
+                });
+    }
+
+
 }
