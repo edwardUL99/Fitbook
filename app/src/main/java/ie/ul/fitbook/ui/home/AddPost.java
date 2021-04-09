@@ -149,6 +149,29 @@ public class AddPost extends AppCompatActivity {
                         Toast.makeText(AddPost.this, "DocumentSnapshot written with ID: "
                                 + documentReference.getId(), Toast.LENGTH_SHORT).show();
 
+                        db.collection("users/" + Login.getUserId() +"/friends")
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        for(DocumentSnapshot doc: task.getResult()){
+                                            Map<String, Object> notification = new HashMap<>();
+                                            notification.put("userId", Login.getUserId());
+                                            notification.put("notificationType", "New Post");
+                                            notification.put("postId", documentReference.getId());
+
+                                            db.collection("users" + "/" + doc.getId() + "/notifications")
+                                                    .add(notification)
+                                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                        @Override
+                                                        public void onSuccess(DocumentReference documentReference) {
+
+                                                        }
+                                                    });
+                                        }
+                                    }
+                                });
+
                         if(imageUri != null){
 
                             StorageReference fileReference =mStorageRef.child(documentReference.getId()
@@ -171,28 +194,29 @@ public class AddPost extends AppCompatActivity {
                     }
                 });
 
-        db.collection("users/" + Login.getUserId() +"/friends")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        for(DocumentSnapshot doc: task.getResult()){
-                            Map<String, Object> notification = new HashMap<>();
-                            notification.put("userId", Login.getUserId());
-                            notification.put("notificationType", "userPost");
-                            System.out.println("mikey" + doc.getId());
+//        db.collection("users/" + Login.getUserId() +"/friends")
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        for(DocumentSnapshot doc: task.getResult()){
+//                            Map<String, Object> notification = new HashMap<>();
+//                            notification.put("userId", Login.getUserId());
+//                            notification.put("notificationType", "userPost");
+//
+//                            db.collection("users" + "/" + doc.getId() + "/notifications")
+//                                    .add(notification)
+//                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+//                                        @Override
+//                                        public void onSuccess(DocumentReference documentReference) {
+//
+//                                        }
+//                                    });
+//                        }
+//                    }
+//                });
 
-                            db.collection("users" + "/" + doc.getId() + "/notifications")
-                                    .add(notification)
-                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                        @Override
-                                        public void onSuccess(DocumentReference documentReference) {
 
-                                        }
-                                    });
-                        }
-                    }
-                });
     }
     //Toast.makeText(AddPost.this, "Not working", Toast.LENGTH_SHORT).show();
 }

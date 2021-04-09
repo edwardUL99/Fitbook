@@ -88,8 +88,13 @@ public class NotificationsActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         for(DocumentSnapshot doc: task.getResult()){
-                            NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"));
-                            notificationModelList.add(model);
+                            if(doc.getString("postId") != null){
+                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"), doc.getString("postId"));
+                                notificationModelList.add(model);
+                            } else {
+                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"));
+                                notificationModelList.add(model);
+                            }
                         }
                         adapter = new NotificationsCustomAdapter(NotificationsActivity.this, notificationModelList);
                         mRecyclerView.setAdapter(adapter);

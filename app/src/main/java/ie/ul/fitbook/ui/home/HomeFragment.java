@@ -9,6 +9,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,14 +34,12 @@ import ie.ul.fitbook.ui.notifications.NotificationsActivity;
 
 public class HomeFragment extends Fragment {
 
-
-
-
     List<Model> modelList;
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager layoutManager;
     FirebaseFirestore db;
     CustomAdapter adapter;
+    String notificationId;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -63,7 +62,6 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
 
-
         FloatingActionButton ab = view.findViewById(R.id.add_fab);
         //EditText textView = view.findViewById(R.id.textView5);
         ab.setOnClickListener(new View.OnClickListener() {
@@ -82,21 +80,9 @@ public class HomeFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         modelList = new ArrayList<>();
 
-
+        notificationId = getActivity().getIntent().getStringExtra("postId");
+        Toast.makeText(getActivity(), notificationId, Toast.LENGTH_SHORT).show();
         showData();
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     /**
@@ -160,16 +146,26 @@ public class HomeFragment extends Fragment {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
+                        int position = 0;
                         for(DocumentSnapshot doc: task.getResult()){
                             Model model = new Model(doc.getId(), doc.getString("userId"),doc.getString("post"), String.valueOf(doc.get("createdAt")));
                             modelList.add(model);
+
                         }
 
                         Collections.sort(modelList);
                         Collections.reverse(modelList);
+                        for(int i = 0; i<modelList.size()-1; i++){
+                            if(modelList.get(i).getId().equals(notificationId)) {
+                                position = i;
+                            }
+                        }
+//                        if(doc.getId().equals(notificationId)) {
+//                            position = modelList.size()-1;
+//                        }
                         adapter = new CustomAdapter(HomeFragment.this, modelList);
                         mRecyclerView.setAdapter(adapter);
+                        mRecyclerView.scrollToPosition(position);
 
                     }
 
@@ -180,7 +176,6 @@ public class HomeFragment extends Fragment {
 
                     }
                 });
-
 
 
     }

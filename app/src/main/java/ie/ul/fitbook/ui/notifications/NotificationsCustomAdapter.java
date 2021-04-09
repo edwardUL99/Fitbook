@@ -24,7 +24,9 @@ import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
+import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.chat.MessageActivity;
+import ie.ul.fitbook.ui.home.HomeFragment;
 import ie.ul.fitbook.ui.notifications.NotificationModel;
 import ie.ul.fitbook.ui.notifications.NotificationsActivity;
 import ie.ul.fitbook.ui.notifications.NotificationsViewHolder;
@@ -64,13 +66,17 @@ public class NotificationsCustomAdapter extends RecyclerView.Adapter<Notificatio
                     String userId = notificationModelList.get(position).getUserId();
                     String notificationType = notificationModelList.get(position).getNotificationType();
 
-                    if(notificationType.equals("message")) {
+                    if(notificationType.equals("Message")) {
                         Intent intent = new Intent(notification, MessageActivity.class);
                         intent.putExtra("userId", userId);
                         notification.startActivity(intent);
                     } else if(notificationType.equals("New Friend")){
                         Intent intent = new Intent(notification, ViewProfileActivity.class);
-                        intent.putExtra("userId", userId);
+                        intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
+                        notification.startActivity(intent);
+                    } else if(notificationType.equals("New Post")){
+                        Intent intent = new Intent(notification, HomeActivity.class);
+                        intent.putExtra("postId", notificationModelList.get(position).getPostId());
                         notification.startActivity(intent);
                     }
             }
