@@ -61,15 +61,18 @@ public class NotificationsCustomAdapter extends RecyclerView.Adapter<Notificatio
 
             @Override
             public void onItemLongClicked(View view, int position) {
-//                String userId = notificationModelList.get(position).getUserId();
-//                Intent intent = new Intent(notification, ViewProfileActivity.class);
-//                intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
-//                context.startActivity(intent);
-
                     String userId = notificationModelList.get(position).getUserId();
-                    Intent intent = new Intent(notification, MessageActivity.class);
-                    intent.putExtra("userId", userId );
-                    notification.startActivity(intent);
+                    String notificationType = notificationModelList.get(position).getNotificationType();
+
+                    if(notificationType.equals("message")) {
+                        Intent intent = new Intent(notification, MessageActivity.class);
+                        intent.putExtra("userId", userId);
+                        notification.startActivity(intent);
+                    } else if(notificationType.equals("New Friend")){
+                        Intent intent = new Intent(notification, ViewProfileActivity.class);
+                        intent.putExtra("userId", userId);
+                        notification.startActivity(intent);
+                    }
             }
         });
 
