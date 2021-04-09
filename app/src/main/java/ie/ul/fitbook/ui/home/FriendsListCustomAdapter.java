@@ -41,6 +41,8 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
         this.friendModelList = friendModelList;
         context = friendsList;
         db = FirebaseFirestore.getInstance();
+
+
     }
 
     @NonNull
@@ -54,16 +56,25 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
         viewHolder.setOnClickListener(new FriendsListViewHolder.ClickListener() {
             @Override
             public void onItemClicked(View view, int position) {
+
                 //String title = friendModelList.get(position).getUserName();
                 //String post = friendModelList.get(position).getUserLocation();
+
             }
 
             @Override
             public void onItemLongClicked(View view, int position) {
+
+
+
+
                 String userId = friendModelList.get(position).getUserId();
                 Intent intent = new Intent(friendsList, ViewProfileActivity.class);
                 intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
                 context.startActivity(intent);
+
+
+
             }
         });
 
@@ -76,18 +87,32 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
         final String[] userId = {friendModelList.get(position).getUserId()};
         //String id = modelList.get(position).getId();
 
+
+
+
+
+
+
         new UserDatabase(userId[0]).getChildDocument(Profile.PROFILE_DOCUMENT)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+
+
                         DocumentSnapshot snapshot = task.getResult();
                         Map<String, Object> data = snapshot.getData();
                         Profile profile = Profile.from(data);
                         holder.userName.setText(profile.getName());
                         holder.userLocation.setText(profile.getCity());
 
+
+
+
+
                         StorageReference reference = new UserStorage(userId[0]).getChildFolder(Profile.PROFILE_IMAGE_PATH);
+
                         //StorageReference reference2 = new PostsStorage(id).getChildFolder("jpg");
+
                         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
                         {
                             @Override
@@ -96,10 +121,25 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
                                 String uri = downloadUrl.toString();
                                 //Picasso.get().load(uri).into(holder.postsPic);
                                 Picasso.get().load(uri).into(holder.profilePic2);
+
                             }
                         });
+
+
+
                         //Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/fitbook-35d87.appspot.com/o/posts%2FL6xu9qTB1DenfIjHIcgC.jpg?alt=media&token=47fd9876-1b76-40d4-a0e2-2b2795e85b20").into(holder.postsPic);
+
+
+
+
+
+
+
                     }});
+
+
+
+
     }
 
     @Override
