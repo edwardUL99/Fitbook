@@ -172,6 +172,20 @@ public class NewMessageActivity extends AppCompatActivity {
                                }
                            });
 
+                   Map<String, Object> notification = new HashMap<>();
+                   notification.put("userId", Login.getUserId());
+                   notification.put("notificationType", "message");
+
+                   db.collection("users" + "/" + userId + "/notifications")
+                           .add(notification)
+                           .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                               @Override
+                               public void onSuccess(DocumentReference documentReference) {
+
+                               }
+                           });
+
+
                    Intent intent = new Intent(NewMessageActivity.this, MessageActivity.class);
                    intent.putExtra("userId", userId);
                    startActivity(intent);

@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,6 +19,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import org.threeten.bp.format.DateTimeFormatter;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +28,10 @@ import java.util.Map;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.profile.Profile;
+import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.storage.PostsStorage;
 import ie.ul.fitbook.storage.UserStorage;
-import ie.ul.fitbook.ui.profile.ViewProfileActivity;
+import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
 
 import static java.lang.Integer.parseInt;
 
@@ -54,35 +58,50 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
+        ViewHolder viewHolder;
+
+        if(viewType==0){
+             View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.model_layout, parent, false);
-
-        ViewHolder viewHolder = new ViewHolder(itemView);
-
-        viewHolder.setOnClickListener(new ViewHolder.ClickListener() {
-            @Override
-            public void onItemClicked(View view, int position) {
-
-                String title = modelList.get(position).getTile();
-                String post = modelList.get(position).getPost();
-
-            }
-
-            @Override
-            public void onItemLongClicked(View view, int position) {
+             viewHolder = new ViewHolder(itemView);}
+        else{
+            View itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.recorded_activity_layout, parent, false);
+            viewHolder = new ActivityViewHolder(itemView);
+        }
 
 
 
 
-                String userId = modelList.get(position).getTile();
-                Intent intent = new Intent(homeFragment.getActivity(), ViewProfileActivity.class);
-                intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
-                context.startActivity(intent);
 
 
 
-            }
-        });
+            //                @Override
+//                public void onItemClicked(View view, int position) {
+//
+////                    String title = modelList.get(position).getTile();
+////                    String post = modelList.get(position).getPost();
+//
+//                }
+//
+//                @Override
+//                public void onItemLongClicked(View view, int position) {
+//
+//
+////                String userId = modelList.get(position).getTile();
+////                Intent intent = new Intent(homeFragment.getActivity(), ViewProfileActivity.class);
+////                intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
+////                context.startActivity(intent);
+//
+//                    String s = String.valueOf(position);
+//
+//                    Toast.makeText(homeFragment.getActivity(), s, Toast.LENGTH_SHORT).show();
+//
+//
+//                }
+
+
+
 
         return viewHolder;
     }
@@ -90,36 +109,39 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
+        if(getItemViewType(position)==0){
+
+
+
+
+            ViewHolder holder1 = (ViewHolder) holder;
+
+            holder1.itemView.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+
+                    String s = String.valueOf(position);
+                    Toast.makeText(homeFragment.getActivity(), s, Toast.LENGTH_SHORT).show();
+
+                }
+            });
+
+
         final String[] userId = {modelList.get(position).getTile()};
         String id = modelList.get(position).getId();
-
-
-
-
-
-
-
         new UserDatabase(userId[0]).getChildDocument(Profile.PROFILE_DOCUMENT)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-
-
                         DocumentSnapshot snapshot = task.getResult();
                         Map<String, Object> data = snapshot.getData();
                         Profile profile = Profile.from(data);
-                        holder.userId.setText(profile.getName());
-                        holder.postContent.setText(modelList.get(position).getPost());
-                        holder.createdAt.setText(modelList.get(position).getDate());
-
-
-
+                        holder1.userId.setText(profile.getName());
+                        holder1.postContent.setText(modelList.get(position).getPost());
+                        holder1.createdAt.setText(modelList.get(position).getDate());
 
                         StorageReference reference = new UserStorage(userId[0]).getChildFolder(Profile.PROFILE_IMAGE_PATH);
-
                         StorageReference reference2 = new PostsStorage(id).getChildFolder("jpg");
-
-
                         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
                         {
                             @Override
@@ -127,35 +149,97 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                             {
                                 String uri = downloadUrl.toString();
                                 //Picasso.get().load(uri).into(holder.postsPic);
-                                Picasso.get().load(uri).into(holder.profilePic);
+                                Picasso.get().load(uri).into(holder1.profilePic);
 
                             }
                         });
-
-
                         reference2.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
                         {
                             @Override
                             public void onSuccess(Uri downloadUrl)
                             {
                                 String uri = downloadUrl.toString();
-                                Picasso.get().load(uri).into(holder.postsPic);
+                                Picasso.get().load(uri).into(holder1.postsPic);
                                 //Picasso.get().load(uri).into(holder.profilePic);
 
                             }
                         });
-                        //Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/fitbook-35d87.appspot.com/o/posts%2FL6xu9qTB1DenfIjHIcgC.jpg?alt=media&token=47fd9876-1b76-40d4-a0e2-2b2795e85b20").into(holder.postsPic);
-
-
-
-
-
-
-
                     }});
 
 
+        }
+        else{
+            RecordedActivity activity = (RecordedActivity)modelList.get(position);
 
+
+            ActivityViewHolder holder2 = (ActivityViewHolder) holder;
+            double ab = activity.getDistance();//((ActivitiesModel)modelList.get(position)).getDistance();
+           String s = String.valueOf(ab);
+           s = s.substring(0,3) + "km";
+           holder2.distance.setText(s);
+           ab = activity.getElevationGain();//((ActivitiesModel)modelList.get(position)).getElevation();
+           s = String.valueOf(ab);
+           s = s.substring(0,3) + "m";
+           holder2.elevation.setText(s);
+
+
+
+           holder2.time.setText(activity.getTimestamp().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm")));
+            //((ActivitiesModel)modelList.get(position)).getTimeStamp()
+            holder2.itemView.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+
+
+                    String id = activity.getUserId();
+                    new UserDatabase(id).getChildDocument(Profile.PROFILE_DOCUMENT)
+                            .get()
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    DocumentSnapshot snapshot = task.getResult();
+                                    Map<String, Object> data = snapshot.getData();
+                                    Profile profile = Profile.from(data);
+                                    String s = String.valueOf(position);
+                                    Toast.makeText(homeFragment.getActivity(), s, Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(context, ViewRecordedActivity.class);
+                                    intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
+                                    intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, activity);
+                                    //ViewRecordedActivity.setProfileImage(profile.getProfileImage());
+                                    context.startActivity(intent);
+
+
+
+
+
+
+                                }});
+
+
+
+
+
+
+                }
+            });
+
+
+        }
+
+    }
+
+
+    @Override
+    public int getItemViewType(int position) {
+
+        if (modelList.get(position) instanceof RecordedActivity){return 1;}
+        else{return 0;}
+//        if(modelList.get(position).getClass() == Model.class){
+//
+//            return 0;
+//
+//
+//        }
+//        else return 1;
 
     }
 

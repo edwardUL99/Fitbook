@@ -23,24 +23,24 @@ public class ViewHolder extends RecyclerView.ViewHolder {
 
         mView = itemView;
 
-        itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+//        itemView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                mClickListener.onItemClicked(v, getAdapterPosition());
+//
+//            }
+//        });
+//
+//        itemView.setOnLongClickListener(new View.OnLongClickListener(){
 
-                mClickListener.onItemClicked(v, getAdapterPosition());
-
-            }
-        });
-
-        itemView.setOnLongClickListener(new View.OnLongClickListener(){
-
-            @Override
-            public boolean onLongClick(View v){
-                mClickListener.onItemLongClicked(v, getAdapterPosition());
-
-
-                return true;
-            }});
+//            @Override
+//            public boolean onLongClick(View v){
+//                mClickListener.onItemLongClicked(v, getAdapterPosition());
+//
+//
+//                return true;
+//            }});
 
         userId = itemView.findViewById(R.id.post_userId);
         postContent = itemView.findViewById(R.id.post_userPost);
@@ -58,7 +58,7 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         void onItemLongClicked(View view, int position);
 
     }
-    public void setOnClickListener(ViewHolder.ClickListener clicklistener){
-        mClickListener = clicklistener;
-    }
+//    public void setOnClickListener(ViewHolder.ClickListener clicklistener){
+//        mClickListener = clicklistener;
+//    }
 }

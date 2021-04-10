@@ -1,23 +1,21 @@
-package ie.ul.fitbook.ui.home;
+package ie.ul.fitbook.ui.notifications;
 
 import android.view.View;
-
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.ui.home.FriendsListViewHolder;
 
+public class NotificationsViewHolder extends RecyclerView.ViewHolder{
 
-
-public class FriendsListViewHolder extends RecyclerView.ViewHolder {
-
-    TextView userName, userLocation;
-    ImageView profilePic2;
+    TextView userId;
+    TextView notificationType;
+    ImageView profilePic;
     View mView;
 
-    public FriendsListViewHolder(@NonNull View itemView) {
+    public NotificationsViewHolder(@NonNull View itemView) {
         super(itemView);
 
         mView = itemView;
@@ -25,37 +23,29 @@ public class FriendsListViewHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 mClickListener.onItemClicked(v, getAdapterPosition());
-
             }
         });
-
         itemView.setOnLongClickListener(new View.OnLongClickListener(){
-
             @Override
             public boolean onLongClick(View v){
                 mClickListener.onItemLongClicked(v, getAdapterPosition());
-
-
                 return true;
             }});
 
-        userName = itemView.findViewById(R.id.userName);
-        userLocation = itemView.findViewById(R.id.userLocation);
-
-        profilePic2 = itemView.findViewById(R.id.profilePic2);
-
-
+        userId = itemView.findViewById(R.id.userId);
+        notificationType = itemView.findViewById(R.id.notificationType);
+        profilePic = itemView.findViewById(R.id.profilePicNotification);
     }
-    private FriendsListViewHolder.ClickListener mClickListener;
+
+    private NotificationsViewHolder.ClickListener mClickListener;
 
     public interface ClickListener{
         void onItemClicked(View view, int position);
         void onItemLongClicked(View view, int position);
 
     }
-    public void setOnClickListener(FriendsListViewHolder.ClickListener clicklistener){
+    public void setOnClickListener(NotificationsViewHolder.ClickListener clicklistener){
         mClickListener = clicklistener;
     }
 }
