@@ -115,7 +115,7 @@ public class AddPost extends AppCompatActivity {
         if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
             && data != null && data.getData() != null){
 
-            System.out.println("All fine to ehre!!!!");
+
 
             imageUri = data.getData();
 

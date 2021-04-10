@@ -20,6 +20,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
+import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
 import ie.ul.fitbook.utils.Utils;
 
 /**

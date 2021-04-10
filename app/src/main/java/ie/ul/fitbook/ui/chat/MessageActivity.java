@@ -31,16 +31,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
-import ie.ul.fitbook.ui.home.FriendModel;
-import ie.ul.fitbook.ui.home.FriendsList;
-import ie.ul.fitbook.ui.home.FriendsListCustomAdapter;
 
 public class MessageActivity extends AppCompatActivity {
 
@@ -160,8 +156,7 @@ public class MessageActivity extends AppCompatActivity {
 
     public void showMessages(){
 
-        //System.out.println("hereherehere" + db.collection("users/" + Login.getUserId() +"/messages" + "/" + getIntent().getStringExtra("userId") + "/message")
-                //.get());
+
 
 
         db.collection("users/" + Login.getUserId() +"/messages" + "/" + getIntent().getStringExtra("userId") + "/message")
@@ -175,7 +170,7 @@ public class MessageActivity extends AppCompatActivity {
 
                             MessageModel model = new MessageModel(doc.getString("sender"), doc.getString("content"),String.valueOf(doc.get("timeStamp")));
                             modelList.add(model);
-                            System.out.println("hereherehere" + modelList.size());
+
                         }
 
                         //Collections.sort(modelList);

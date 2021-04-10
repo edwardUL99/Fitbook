@@ -1,4 +1,4 @@
-package ie.ul.fitbook.ui.profile.activities;
+package ie.ul.fitbook.ui.recording;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -28,6 +28,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.LocalTime;
 import org.threeten.bp.format.DateTimeFormatter;
 
 import java.util.List;
@@ -37,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.database.ActivitiesDatabase;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.goals.DistanceGoal;
 import ie.ul.fitbook.goals.ElevationGoal;
@@ -49,6 +52,7 @@ import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
 import ie.ul.fitbook.ui.HomeActivity;
+import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.utils.Utils;
 
 /**
@@ -348,23 +352,30 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
      * Adjusts the weekly statistics after the activity is deleted
      */
     private void adjustStatisticsAfterDeletion() {
-        DocumentReference reference = WeeklyStatistics.getSportWeeklyStat(userID, activity.getSport());
-        reference.get()
-                .addOnSuccessListener(success -> {
-                    Map<String, Object> data = success.getData();
+        LocalDateTime timestamp = activity.getTimestamp();
+        LocalDateTime startDate = LocalDateTime.of(WeeklyStatistics.getStartOfWeek(), LocalTime.of(0, 0));
+        LocalDateTime endDate = LocalDateTime.of(WeeklyStatistics.getEndOfWeek(), LocalTime.of(23, 59));
+        if (!(timestamp.isBefore(startDate) || timestamp.isAfter(endDate))) { // only adjust this week's stats if the activity occurred within the bounds of the week
+            DocumentReference reference = WeeklyStatistics.getSportWeeklyStat(userID, activity.getSport());
+            reference.get()
+                    .addOnSuccessListener(success -> {
+                        Map<String, Object> data = success.getData();
 
-                    if (data != null) {
-                        WeeklyStat weeklyStat = WeeklyStat.from(data);
-                        weeklyStat.subtractDistance((double)activity.getDistance());
-                        weeklyStat.subtractElevation((int)activity.getElevationGain());
-                        weeklyStat.subtractTime(activity.getRecordedDuration());
+                        if (data != null) {
+                            WeeklyStat weeklyStat = WeeklyStat.from(data);
+                            weeklyStat.subtractDistance((double) activity.getDistance());
+                            weeklyStat.subtractElevation((int) activity.getElevationGain());
+                            weeklyStat.subtractTime(activity.getRecordedDuration());
 
-                        weeklyStat.save(reference, null, this::doDeleteError);
-                    }
+                            weeklyStat.save(reference, null, this::doDeleteError);
+                        }
 
-                    adjustGoalsAfterDeletion();
-                })
-                .addOnFailureListener(this::doDeleteError);
+                        adjustGoalsAfterDeletion();
+                    })
+                    .addOnFailureListener(this::doDeleteError);
+        } else {
+            adjustGoalsAfterDeletion();
+        }
     }
 
     /**
@@ -374,8 +385,8 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
         String documentId = activity.getFirestoreId();
 
         if (documentId != null) {
-            new UserDatabase()
-                    .getChildCollection(RecordedActivity.ACTIVITIES_PATH)
+            new ActivitiesDatabase()
+                    .getDatabase()
                     .document(documentId)
                     .delete()
                     .addOnSuccessListener(success -> adjustStatisticsAfterDeletion())

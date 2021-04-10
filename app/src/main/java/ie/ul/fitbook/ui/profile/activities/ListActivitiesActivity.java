@@ -24,7 +24,7 @@ import java.util.Map;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.custom.LoadingBar;
-import ie.ul.fitbook.database.UserDatabase;
+import ie.ul.fitbook.database.ActivitiesDatabase;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
@@ -97,8 +97,7 @@ public class ListActivitiesActivity extends AppCompatActivity {
 
         this.userId = userId;
 
-        activitiesReference = new UserDatabase(userId)
-                .getChildCollection(RecordedActivity.ACTIVITIES_PATH);
+        activitiesReference = new ActivitiesDatabase().getDatabase();
 
         noActivitiesMessage = findViewById(R.id.noActivitiesMessage);
         noActivitiesMessage.setText("No activities found");
@@ -145,6 +144,7 @@ public class ListActivitiesActivity extends AppCompatActivity {
     private void getActivities() {
         activitiesAdapter.clear();
         activitiesReference
+                .whereEqualTo(RecordedActivity.USER_ID_KEY, userId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(success -> {

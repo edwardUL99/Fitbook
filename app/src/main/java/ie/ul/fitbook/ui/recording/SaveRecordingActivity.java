@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.database.ActivitiesDatabase;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.goals.DistanceGoal;
 import ie.ul.fitbook.goals.ElevationGoal;
@@ -47,11 +48,9 @@ import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
 import ie.ul.fitbook.ui.HomeActivity;
-import ie.ul.fitbook.ui.profile.activities.ViewRecordedActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
-// TODO activity crashes on save if left in background for a while
 
 /**
  * This activity is used for saving a recorded activity or deleting it. Pass in the RecordedActivity object
@@ -317,7 +316,8 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
      * Handles when the save button is clicked
      */
     private void onSaveClicked() {
-        new UserDatabase().getChildCollection(RecordedActivity.ACTIVITIES_PATH)
+        new ActivitiesDatabase()
+                .getDatabase()
                 .add(recordedActivity.toData())
                 .addOnSuccessListener(success -> {
                     Toast.makeText(this, "Activity saved", Toast.LENGTH_SHORT).show();

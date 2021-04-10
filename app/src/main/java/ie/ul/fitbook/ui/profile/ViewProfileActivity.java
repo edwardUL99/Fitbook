@@ -51,7 +51,6 @@ import ie.ul.fitbook.ui.profile.cache.ProfileCache;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.ui.profile.posts.ProfilePostsActivity;
-import ie.ul.fitbook.ui.profile.statistics.StatisticsActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
@@ -232,12 +231,6 @@ public class ViewProfileActivity extends AppCompatActivity {
         favouriteActivityView = findViewById(R.id.favActivityView);
         friendsButton = findViewById(R.id.friendsButton);
         friendsView = findViewById(R.id.friends);
-
-
-
-
-
-
 
         useCache = true;
         setupProfileOptions();
@@ -474,7 +467,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                         friendsButton.setOnClickListener(view -> removeFriend(userId, ownId));
                         profileOptions.setVisibility(View.VISIBLE);
                     } else if (ownProfile) {
-                        friendsButton.setText("Add Friend");
+                        friendsButton.setText("Add Friends");
                         friendsButton.setOnClickListener(view -> launchProfilesActivity());
                         profileOptions.setVisibility(View.VISIBLE);
                         friendsView.setOnClickListener(view -> onFriendsClicked());
@@ -690,13 +683,6 @@ public class ViewProfileActivity extends AppCompatActivity {
         activitiesLayout.setOnClickListener(v -> {
             Intent intent = new Intent(this, ListActivitiesActivity.class);
             intent.putExtra(ListActivitiesActivity.USER_ID_EXTRA, finalUserId);
-            startActivity(intent);
-        });
-
-        ConstraintLayout statisticsLayout = findViewById(R.id.statisticsLayout);
-        statisticsLayout.setOnClickListener(v -> {
-            Intent intent = new Intent(this, StatisticsActivity.class);
-            intent.putExtra(StatisticsActivity.USER_ID_EXTRA, finalUserId);
             startActivity(intent);
         });
 

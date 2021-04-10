@@ -27,7 +27,6 @@ import java.util.List;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
-import ie.ul.fitbook.ui.home.AddPost;
 
 /**
  * Fragment for displaying messages
@@ -101,7 +100,7 @@ public class MessagesFragment extends Fragment {
 
                             FriendModel model = new FriendModel(doc.getId());
                             friendModelList.add(model);
-                            System.out.println("nownownow" + friendModelList.size());
+
                         }
 
                         //Collections.sort(modelList);

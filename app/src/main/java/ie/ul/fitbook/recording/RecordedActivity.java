@@ -271,8 +271,8 @@ public class RecordedActivity implements Parcelable {
         Object userObj = data.get(USER_ID_KEY);
 
         if (!(timestampObj instanceof String) || !(locationsObj instanceof String) || !(durationObj instanceof Long)
-                || !(sportObj instanceof String) || !(distanceObj instanceof Double) || !(avgSpeedObj instanceof Double) || !(elevationObj instanceof Double)
-                || !(caloriesObj instanceof Long) || !(userObj instanceof String))
+            || !(sportObj instanceof String) || !(distanceObj instanceof Double) || !(avgSpeedObj instanceof Double) || !(elevationObj instanceof Double)
+            || !(caloriesObj instanceof Long) || !(userObj instanceof String))
             return null;
 
         LocalDateTime timestamp = LocalDateTime.parse((String)timestampObj);

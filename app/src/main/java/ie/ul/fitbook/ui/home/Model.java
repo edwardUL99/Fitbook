@@ -1,17 +1,12 @@
 package ie.ul.fitbook.ui.home;
 
-import android.widget.ImageView;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static java.lang.Integer.parseInt;
-
 public class Model implements Comparable<Model>{
 
     String id, tile, post, timeStamp;
-    //ImageView profileImage;
 
     public Model(){
 }
@@ -33,7 +28,6 @@ public class Model implements Comparable<Model>{
         SimpleDateFormat formatter= new SimpleDateFormat("dd-MM-yyyy 'at' HH:mm:ss");
 
         Date date = new Date(num);
-        System.out.println(formatter.format(date));
         String dateString = formatter.format(date);
 
         return dateString;

@@ -1,6 +1,5 @@
 package ie.ul.fitbook.ui.chat;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.Context;
 
@@ -19,20 +18,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.database.UserDatabase;
-import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
-import ie.ul.fitbook.storage.PostsStorage;
 import ie.ul.fitbook.storage.UserStorage;
-import ie.ul.fitbook.ui.profile.ViewProfileActivity;
-
-import static java.lang.Integer.parseInt;
 
 
 public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListViewHolder> {
@@ -78,7 +70,7 @@ public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListView
 //                        .addOnSuccessListener(new OnSuccessListener<Void>() {
 //                            @Override
 //                            public void onSuccess(Void aVoid) {
-//                                System.out.println("Deleted!");
+//
 //
 //                            }
 //
@@ -111,7 +103,6 @@ public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListView
         final String[] userId = {friendModelList.get(position).getUserId()};
         //String id = modelList.get(position).getId();
 
-        System.out.println("Hereherehere" + friendModelList.get(position).getUserId());
 
 
 

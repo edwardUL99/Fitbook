@@ -3,8 +3,6 @@ package ie.ul.fitbook.ui.chat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import ie.ul.fitbook.ui.home.Model;
-
 public class MessageModel implements Comparable<MessageModel>{
 
 
@@ -27,7 +25,6 @@ public class MessageModel implements Comparable<MessageModel>{
         SimpleDateFormat formatter= new SimpleDateFormat("dd-MM-yyyy 'at' HH:mm:ss");
 
         Date date = new Date(num);
-        System.out.println(formatter.format(date));
         String dateString = formatter.format(date);
 
         return dateString;
