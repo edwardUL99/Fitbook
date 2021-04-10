@@ -22,6 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -132,8 +133,6 @@ public class AddPost extends AppCompatActivity {
 
         //Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
 
-
-
         Date mDate = new Date();
         long timeInMilliseconds = mDate.getTime();
 
@@ -150,6 +149,29 @@ public class AddPost extends AppCompatActivity {
                         Toast.makeText(AddPost.this, "DocumentSnapshot written with ID: "
                                 + documentReference.getId(), Toast.LENGTH_SHORT).show();
 
+                        db.collection("users/" + Login.getUserId() +"/friends")
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        for(DocumentSnapshot doc: task.getResult()){
+                                            Map<String, Object> notification = new HashMap<>();
+                                            notification.put("userId", Login.getUserId());
+                                            notification.put("notificationType", "New Post");
+                                            notification.put("postId", documentReference.getId());
+
+                                            db.collection("users" + "/" + doc.getId() + "/notifications")
+                                                    .add(notification)
+                                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                        @Override
+                                                        public void onSuccess(DocumentReference documentReference) {
+
+                                                        }
+                                                    });
+                                        }
+                                    }
+                                });
+
                         if(imageUri != null){
 
                             StorageReference fileReference =mStorageRef.child(documentReference.getId()
@@ -159,16 +181,9 @@ public class AddPost extends AppCompatActivity {
                                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                         @Override
                                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-
                                         }
                                     });
-}
-
-
-                        //Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
-
-
+                        }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -179,7 +194,27 @@ public class AddPost extends AppCompatActivity {
                     }
                 });
 
-
+//        db.collection("users/" + Login.getUserId() +"/friends")
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        for(DocumentSnapshot doc: task.getResult()){
+//                            Map<String, Object> notification = new HashMap<>();
+//                            notification.put("userId", Login.getUserId());
+//                            notification.put("notificationType", "userPost");
+//
+//                            db.collection("users" + "/" + doc.getId() + "/notifications")
+//                                    .add(notification)
+//                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+//                                        @Override
+//                                        public void onSuccess(DocumentReference documentReference) {
+//
+//                                        }
+//                                    });
+//                        }
+//                    }
+//                });
 
 
     }

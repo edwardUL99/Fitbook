@@ -25,7 +25,6 @@ import ie.ul.fitbook.login.Login;
 public class FriendsList extends AppCompatActivity {
 
     List<FriendModel> friendModelList;
-
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager layoutManager;
     FirebaseFirestore db;
@@ -56,42 +55,23 @@ public class FriendsList extends AppCompatActivity {
     }
 
     private void showData(){
-
-
-
         db.collection("users/" + Login.getUserId() +"/friends")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
                         for(DocumentSnapshot doc: task.getResult()){
-
-
                             FriendModel model = new FriendModel(doc.getId());
                             friendModelList.add(model);
                         }
-
-                        //Collections.sort(modelList);
-                        //Collections.reverse(modelList);
-
-
                         adapter = new FriendsListCustomAdapter(FriendsList.this, friendModelList);
                         mRecyclerView.setAdapter(adapter);
-
-
-
                     }
-
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-
                     }
                 });
-
-
-
     }
 }
