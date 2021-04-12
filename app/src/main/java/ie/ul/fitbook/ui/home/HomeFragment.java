@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -42,6 +43,7 @@ public class HomeFragment extends Fragment {
     FirebaseFirestore db;
     CustomAdapter adapter;
     String notificationId;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -79,6 +81,11 @@ public class HomeFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(layoutManager);
+        swipeRefreshLayout = getActivity().findViewById(R.id.homeRefresh);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            showData();
+            swipeRefreshLayout.setRefreshing(false);
+        });
         db = FirebaseFirestore.getInstance();
         modelList = new ArrayList<>();
 
