@@ -5,9 +5,11 @@ import android.os.Parcel;
 import org.threeten.bp.LocalDateTime;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.login.Login;
+import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.sports.Sport;
 
 /**
@@ -47,7 +49,7 @@ public final class DistanceGoal extends Goal {
      * @param targetValue the target value in km for this goal
      */
     public DistanceGoal(String userId, Sport sport, LocalDateTime targetDate, Double targetValue) {
-        this(userId, sport, targetDate, targetValue, 0.0);
+        this(userId, sport, targetDate, targetValue, 0.0, null);
     }
 
     /**
@@ -58,9 +60,10 @@ public final class DistanceGoal extends Goal {
      * @param targetDate the date/time this goal should be completed by
      * @param targetValue the target value in km for this goal
      * @param achievedValue achieved value of this goal if already exists
+     * @param activityIds activity IDs of activities that contributed to the achieved value of this goal. If null, a new list is created
      */
-    public DistanceGoal(String userId, Sport sport, LocalDateTime targetDate, Double targetValue, Double achievedValue) {
-        super(userId, sport, GoalType.DISTANCE, targetDate);
+    public DistanceGoal(String userId, Sport sport, LocalDateTime targetDate, Double targetValue, Double achievedValue, List<String> activityIds) {
+        super(userId, sport, GoalType.DISTANCE, targetDate, activityIds);
         setTargetValue(targetValue);
         this.achievedValue = achievedValue;
     }
@@ -127,18 +130,15 @@ public final class DistanceGoal extends Goal {
      * Adds the given value to the achieved value. For DistanceGoal, value should be an Integer.
      * The value will never go over the target value
      * @param value the value to add
+     * @param recordedActivity the activity contributing to the achieved value
      */
     @Override
-    public void addAchievedValue(Object value) {
+    public void addAchievedValue(Object value, RecordedActivity recordedActivity) {
         checkExpiration();
         checkValueType(value);
+        contributeToGoal(recordedActivity);
         Double doubleVal = (Double)value;
-        double total = achievedValue + doubleVal;
-
-        if (total < targetValue)
-            achievedValue = total;
-        else
-            achievedValue = targetValue;
+        achievedValue += doubleVal;
     }
 
     /**
@@ -146,15 +146,21 @@ public final class DistanceGoal extends Goal {
      * The achieved value will never go below 0.
      *
      * @param value the value to subtract
+     * @param recordedActivity the activity that has been deleted to subtract from the achieved value
      */
     @Override
-    public void subtractAchievedValue(Object value) {
+    public void subtractAchievedValue(Object value, RecordedActivity recordedActivity) {
         checkExpiration();
         checkValueType(value);
         Double doubleVal = (Double)value;
         double total = achievedValue - doubleVal;
 
         achievedValue = Math.max(total, 0);
+
+        if (achievedValue == 0)
+            activityIds.clear();
+        else
+            activityIds.remove(recordedActivity.getFirestoreId());
     }
 
     /**
@@ -164,7 +170,7 @@ public final class DistanceGoal extends Goal {
      */
     @Override
     public boolean isCompleted() {
-        return achievedValue.equals(targetValue);
+        return achievedValue >= targetValue;
     }
 
     /**
@@ -178,6 +184,7 @@ public final class DistanceGoal extends Goal {
                 + sport.hashCode()
                 + type.hashCode()
                 + targetDate.hashCode()
+                + activityIds.hashCode()
                 + targetValue.hashCode()
                 + achievedValue.hashCode();
     }
@@ -201,6 +208,7 @@ public final class DistanceGoal extends Goal {
                     && sport == goal.sport
                     && type == goal.type
                     && targetDate.equals(goal.targetDate)
+                    && activityIds.equals(goal.activityIds)
                     && targetValue.equals(goal.targetValue)
                     && achievedValue.equals(goal.achievedValue);
         }
@@ -218,6 +226,7 @@ public final class DistanceGoal extends Goal {
         data.put(Goal.SPORT_KEY, sport.toString());
         data.put(Goal.TYPE_KEY, type.toString());
         data.put(Goal.TARGET_DATE_KEY, targetDate.toString());
+        data.put(Goal.CONTRIBUTED_ACTIVITIES_KEY, activityIds);
         data.put(Goal.TARGET_VALUE_KEY, targetValue);
         data.put(Goal.ACHIEVED_VALUE_KEY, achievedValue);
 
@@ -249,7 +258,12 @@ public final class DistanceGoal extends Goal {
         Double targetDouble = targetValue instanceof Long ? Double.parseDouble("" + targetValue):(Double)targetValue;
         Double achievedDouble = achievedValue instanceof Long ? Double.parseDouble("" + achievedValue):(Double)achievedValue;
 
-        return new DistanceGoal(Login.getUserId(), Sport.convertToSport(sport), LocalDateTime.parse(targetDate), targetDouble, achievedDouble);
+        Object contributedActivities = data.get(Goal.CONTRIBUTED_ACTIVITIES_KEY);
+
+        if (!(contributedActivities instanceof List))
+            contributedActivities = null;
+
+        return new DistanceGoal(Login.getUserId(), Sport.convertToSport(sport), LocalDateTime.parse(targetDate), targetDouble, achievedDouble, (List<String>)contributedActivities);
     }
 
     /**

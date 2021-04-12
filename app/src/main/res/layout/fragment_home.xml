@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.home.HomeFragment">
+    tools:context=".ui.home.HomeFragment"
+    android:layout_marginTop="?attr/actionBarSize">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -23,7 +24,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -33,9 +34,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewNotification"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="?attr/actionBarSize"
-            android:layout_marginBottom="48dp"/>
+            android:layout_height="match_parent"
+            android:layout_marginBottom="48dp" />
     </LinearLayout>
 
 

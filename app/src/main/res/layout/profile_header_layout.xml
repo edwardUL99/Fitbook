@@ -128,7 +128,6 @@ or viewing another's. The text and handler of friendsButton may need to be chang
         android:layout_marginBottom="11dp"
         android:text="Add Friends"
         app:layout_constraintBottom_toTopOf="@+id/divider3"
-        app:layout_constraintEnd_toStartOf="@+id/friends"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/profilePicture" />
 
