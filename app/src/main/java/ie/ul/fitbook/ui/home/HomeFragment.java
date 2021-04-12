@@ -25,22 +25,20 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.ui.notifications.NotificationsActivity;
 
 public class HomeFragment extends Fragment {
-
-
-
 
     List<Model> modelList;
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager layoutManager;
     FirebaseFirestore db;
     CustomAdapter adapter;
+    String notificationId;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -63,7 +61,6 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
 
-
         FloatingActionButton ab = view.findViewById(R.id.add_fab);
         //EditText textView = view.findViewById(R.id.textView5);
         ab.setOnClickListener(new View.OnClickListener() {
@@ -75,28 +72,16 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        mRecyclerView = view.findViewById(R.id.recyclerView);
+        mRecyclerView = view.findViewById(R.id.recyclerViewNotification);
         mRecyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(layoutManager);
         db = FirebaseFirestore.getInstance();
         modelList = new ArrayList<>();
 
-
+        notificationId = getActivity().getIntent().getStringExtra("postId");
+        //Toast.makeText(getActivity(), notificationId, Toast.LENGTH_SHORT).show();
         showData();
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     /**
@@ -164,13 +149,61 @@ public class HomeFragment extends Fragment {
                         for(DocumentSnapshot doc: task.getResult()){
                             Model model = new Model(doc.getId(), doc.getString("userId"),doc.getString("post"), String.valueOf(doc.get("createdAt")));
                             modelList.add(model);
-                        }
 
-                        Collections.sort(modelList);
-                        Collections.reverse(modelList);
-                        adapter = new CustomAdapter(HomeFragment.this, modelList);
-                        mRecyclerView.setAdapter(adapter);
+                         }
 
+                        db.collection("activities")
+                                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task2) {
+
+
+                                for(DocumentSnapshot doc: task2.getResult()){
+                                    //Model model = new ActivitiesModel(doc.getDouble("distance"),doc.getDouble("elevation_gain"), doc.getString("timestamp"),doc.getId());
+                                   // modelList.add(model);
+
+
+                                     Model model = RecordedActivity.from(doc.getData());
+                                     modelList.add(model);
+                                }
+
+                                //Collections.sort(modelList);
+                                //Collections.reverse(modelList);
+
+                                adapter = new CustomAdapter(HomeFragment.this.getActivity(), modelList);
+                                mRecyclerView.setAdapter(adapter);
+
+
+
+
+                            }
+                        });
+
+
+
+
+
+
+
+                        //System.out.println("hereherehere" + modelList.size());
+                        //Collections.sort(modelList);
+                        //Collections.reverse(modelList);
+//                        if(notificationId != ""){
+//
+//                        for(int i = 0; i<modelList.size()-1; i++){
+//                            if(modelList.get(i).getId().equals(notificationId)) {
+//                                position = i;
+//                                break;
+//                            }
+//                        }}
+
+//                        adapter = new CustomAdapter(HomeFragment.this, modelList);
+//                        mRecyclerView.setAdapter(adapter);
+
+//                        if(notificationId != null) {
+//                            mRecyclerView.scrollToPosition(position);
+//                        }
+                        getActivity().getIntent().removeExtra("postId");
                     }
 
                 })
@@ -180,7 +213,6 @@ public class HomeFragment extends Fragment {
 
                     }
                 });
-
 
 
     }

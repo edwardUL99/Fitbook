@@ -1,12 +1,12 @@
 package ie.ul.fitbook.ui.home;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Model implements Comparable<Model>{
 
     String id, tile, post, timeStamp;
-    //ImageView profileImage;
 
     public Model(){
 }
@@ -65,7 +65,7 @@ public class Model implements Comparable<Model>{
         return post;
     }
 
-    public String getTime() {
+    public String getTime() throws ParseException {
         return timeStamp;
     }
 
@@ -76,9 +76,18 @@ public class Model implements Comparable<Model>{
 
     @Override
     public int compareTo(Model o) {
-        if (getTime() == null || o.getTime() == null) {
-            return 0;
+        try {
+            if (getTime() == null || o.getTime() == null) {
+                return 0;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-        return getTime().compareTo(o.getTime());
+        try {
+            return getTime().compareTo(o.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

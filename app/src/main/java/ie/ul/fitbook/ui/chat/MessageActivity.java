@@ -77,19 +77,13 @@ public class MessageActivity extends AppCompatActivity {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-
-
                         DocumentSnapshot snapshot = task.getResult();
                         Map<String, Object> data = snapshot.getData();
                         Profile profile = Profile.from(data);
                         name.setText(profile.getName());
                         address.setText(profile.getCity());
 
-
                         StorageReference reference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
-
-                        //StorageReference reference2 = new PostsStorage(id).getChildFolder("jpg");
-
 
                         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
@@ -103,22 +97,13 @@ public class MessageActivity extends AppCompatActivity {
                     }
                 });
 
-
-
-
         showMessages();
-
-
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(editText != null)  {
                     String userId = getIntent().getStringExtra("userId");
-
-
-
-
 
                     Date mDate = new Date();
                     long timeInMilliseconds = mDate.getTime();
@@ -128,23 +113,6 @@ public class MessageActivity extends AppCompatActivity {
                     message.put("content", editText.getText().toString());
                     message.put("timeStamp", timeInMilliseconds);
 
-//                   db.collection("users").document( Login.getUserId() + "/messages/" + userId  + "/message" + "/" + id)
-//                           .set(message)
-//                           .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                               @Override
-//                               public void onSuccess(Void aVoid) {
-//
-//                               }
-//                           });
-//
-//                   db.collection("users").document( userId + "/messages/" + Login.getUserId()  + "/message"+ "/" + id)
-//                           .set(message)
-//                           .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                               @Override
-//                               public void onSuccess(Void aVoid) {
-//
-//                               }
-//                           });
                     db.collection("users" + "/" + Login.getUserId() + "/messages/" + userId  + "/message")
                             .add(message)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -156,6 +124,19 @@ public class MessageActivity extends AppCompatActivity {
 
                     db.collection("users" + "/" + userId + "/messages/" + Login.getUserId()  + "/message")
                             .add(message)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+
+                                }
+                            });
+
+                    Map<String, Object> notification = new HashMap<>();
+                    notification.put("userId", Login.getUserId());
+                    notification.put("notificationType", "Message");
+
+                    db.collection("users" + "/" + userId + "/notifications")
+                            .add(notification)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                 @Override
                                 public void onSuccess(DocumentReference documentReference) {

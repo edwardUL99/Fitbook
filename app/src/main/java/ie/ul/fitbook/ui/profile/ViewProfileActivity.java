@@ -22,16 +22,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Source;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.custom.LoadingBar;
-import ie.ul.fitbook.custom.TraceableScrollView;
+import ie.ul.fitbook.ui.custom.LoadingBar;
+import ie.ul.fitbook.ui.custom.TraceableScrollView;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
@@ -422,29 +427,59 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     private void onFriendsSync(Profile profile) {
         String userId = profile.getUserId();
-        String ownId = Login.getUserId();
 
-        Source source = useCache ? Source.CACHE:Source.SERVER;
+
+        String ownId = Login.getUserId();
+        //boolean friends, ownProfile;
+
+
         UserDatabase userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends")
                 .whereEqualTo("id", ownId)
-                .get(source)
+                .get()
                 .addOnSuccessListener(query -> {
-                    boolean friends = query.size() > 0;
+
+                    boolean pending = false;
+                    boolean requested = false;
+                    boolean exists = query.size() >0;
+
+
+                    if(exists){
+
+                        List<DocumentSnapshot> documents = query.getDocuments();
+                        Map<String,Object> test = documents.get(0).getData();
+
+                        if( test.containsKey("status")){
+                            pending = test.get("status").equals("requested");
+
+                        }
+                        if( test.containsKey("status")){
+                            requested = test.get("status").equals("pending");
+
+                        }
+                    }
                     boolean ownProfile = userId.equals(Login.getUserId());
 
-                    if (friends && !ownProfile) {
+                    if (exists && !ownProfile && !pending && !requested) {
                         friendsButton.setText("Remove Friend");
-                        friendsButton.setOnClickListener(view -> removeFriend());
+                        friendsButton.setOnClickListener(view -> removeFriend(userId, ownId));
                         profileOptions.setVisibility(View.VISIBLE);
                     } else if (ownProfile) {
                         friendsButton.setText("Add Friends");
                         friendsButton.setOnClickListener(view -> launchProfilesActivity());
                         profileOptions.setVisibility(View.VISIBLE);
                         friendsView.setOnClickListener(view -> onFriendsClicked());
-                    } else {
+                    } else if(exists && pending) {
+                        friendsButton.setText("Accept");
+                        friendsButton.setOnClickListener(view -> acceptFriend(userId, ownId));
+                        profileOptions.setVisibility(View.GONE);
+                    } else if(exists && requested) {
+                        friendsButton.setText("Cancel Request");
+                        friendsButton.setOnClickListener(view -> cancelRequest(userId, ownId));
+                        profileOptions.setVisibility(View.GONE);
+                    } else{
                         friendsButton.setText("Add Friend");
-                        friendsButton.setOnClickListener(view -> addFriend());
+                        friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
                         profileOptions.setVisibility(View.GONE);
                     }
 
@@ -452,7 +487,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                     swipeRefreshLayout.setRefreshing(false);
 
                     userDb.getDatabase()
-                            .get(source)
+                            .get()
                             .addOnSuccessListener(success -> {
                                 Map<String, Object> data = success.getData();
 
@@ -476,15 +511,94 @@ public class ViewProfileActivity extends AppCompatActivity {
     /**
      * This method removes the profile being viewed by the current user as a friend
      */
-    private void removeFriend() {
-        // TODO this logic will remove the friend
+    private void removeFriend(String userId, String ownId) {
+
+        UserDatabase userDb = new UserDatabase(ownId);
+        userDb.getChildCollection("friends").document(userId).delete();
+        userDb = new UserDatabase(userId);
+        userDb.getChildCollection("friends").document(ownId).delete();
+
+    }
+
+    private void cancelRequest(String userId, String ownId) {
+        UserDatabase userDb = new UserDatabase(ownId);
+        userDb.getChildCollection("friends").document(userId).delete();
+        userDb = new UserDatabase(userId);
+        userDb.getChildCollection("friends").document(ownId).delete();
     }
 
     /**
      * Adds the profile being viewed as a friend
      */
-    private void addFriend() {
-        // TODO this logic will add this user as a friend
+    private void addFriend(String userId, String ownId) {
+
+        Map<String, Object> requested = new HashMap<>();
+        requested.put("id", userId);
+        requested.put("status", "requested");
+
+        UserDatabase userDb = new UserDatabase(ownId);
+        userDb.getChildCollection("friends").document(userId).set(requested).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        requested = new HashMap<>();
+        requested.put("id", ownId);
+        requested.put("status", "pending");
+
+        userDb = new UserDatabase(userId);
+        userDb.getChildCollection("friends").document(ownId).set(requested).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Map<String, Object> notification = new HashMap<>();
+        notification.put("userId", Login.getUserId());
+        notification.put("notificationType", "New Friend");
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("users" + "/" + userId + "/notifications")
+                .add(notification)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+
+                    }
+                });
+    }
+
+    private void acceptFriend(String userId, String ownId){
+        Map<String, Object> accepted = new HashMap<>();
+        accepted.put("id", userId);
+        accepted.put("status", "accepted");
+
+        UserDatabase userDb = new UserDatabase(ownId);
+        userDb.getChildCollection("friends").document(userId).set(accepted).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        accepted = new HashMap<>();
+        accepted.put("id", ownId);
+        accepted.put("status", "accepted");
+
+        userDb = new UserDatabase(userId);
+        userDb.getChildCollection("friends").document(ownId).set(accepted).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**

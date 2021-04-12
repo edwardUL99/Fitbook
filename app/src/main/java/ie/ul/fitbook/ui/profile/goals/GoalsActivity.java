@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.custom.LoadingBar;
+import ie.ul.fitbook.ui.custom.LoadingBar;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.goals.DistanceGoal;
 import ie.ul.fitbook.goals.ElevationGoal;
