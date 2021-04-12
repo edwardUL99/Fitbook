@@ -4,10 +4,14 @@ import android.content.Intent;
 import android.content.Context;
 
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,6 +25,8 @@ import com.squareup.picasso.Picasso;
 
 import org.threeten.bp.format.DateTimeFormatter;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +37,9 @@ import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.storage.PostsStorage;
 import ie.ul.fitbook.storage.UserStorage;
+
 import ie.ul.fitbook.ui.profile.ViewProfileActivity;
-import ie.ul.fitbook.ui.profile.activities.ViewRecordedActivity;
+import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
 
 import static java.lang.Integer.parseInt;
 
@@ -89,10 +96,10 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 //                public void onItemLongClicked(View view, int position) {
 //
 //
-////                String userId = modelList.get(position).getTile();
-////                Intent intent = new Intent(homeFragment.getActivity(), ViewProfileActivity.class);
-////                intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
-////                context.startActivity(intent);
+//                String userId = modelList.get(position).getTile();
+//                Intent intent = new Intent(homeFragment.getActivity(), ViewProfileActivity.class);
+//                intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
+//                context.startActivity(intent);
 //
 //                    String s = String.valueOf(position);
 //
@@ -121,8 +128,12 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                 @Override
                 public void onClick(View v) {
 
-                    String s = String.valueOf(position);
-                    Toast.makeText(homeFragment.getActivity(), s, Toast.LENGTH_SHORT).show();
+                    //String s = String.valueOf(position);
+                    //Toast.makeText(homeFragment.getActivity(), s, Toast.LENGTH_SHORT).show();
+                    String userId = modelList.get(position).getTile();
+                    Intent intent = new Intent(homeFragment.getActivity(), ViewProfileActivity.class);
+                    intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
+                    context.startActivity(intent);
 
                 }
             });
@@ -200,13 +211,28 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                                     DocumentSnapshot snapshot = task.getResult();
                                     Map<String, Object> data = snapshot.getData();
                                     Profile profile = Profile.from(data);
+                                    profile.setUserId(id);
                                     String s = String.valueOf(position);
                                     Toast.makeText(homeFragment.getActivity(), s, Toast.LENGTH_SHORT).show();
                                     Intent intent = new Intent(context, ViewRecordedActivity.class);
                                     intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
                                     intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, activity);
-                                    //ViewRecordedActivity.setProfileImage(profile.getProfileImage());
+                                    //ViewRecordedActivity.setProfileImage(bitmap);
                                     context.startActivity(intent);
+
+
+
+
+
+
+
+
+
+
+
+
+                                    //ViewRecordedActivity.setProfileImage(profile.getProfileImage());
+                                    //context.startActivity(intent);
 
 
 

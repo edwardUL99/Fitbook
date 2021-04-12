@@ -17,11 +17,12 @@ import java.util.Objects;
 
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.sports.Sport;
+import ie.ul.fitbook.ui.home.Model;
 
 /**
  * This class stores an activity that has been recorded
  */
-public class RecordedActivity implements Parcelable {
+public class RecordedActivity extends Model implements Parcelable, Comparable<Model> {
     /**
      * The timestamp the recorded activity was created at
      */

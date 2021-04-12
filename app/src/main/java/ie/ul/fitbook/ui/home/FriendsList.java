@@ -62,7 +62,8 @@ public class FriendsList extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         for(DocumentSnapshot doc: task.getResult()){
                             FriendModel model = new FriendModel(doc.getId());
-                            friendModelList.add(model);
+                            if(doc.getString("status").equals("accepted")){
+                            friendModelList.add(model);}
                         }
                         adapter = new FriendsListCustomAdapter(FriendsList.this, friendModelList);
                         mRecyclerView.setAdapter(adapter);

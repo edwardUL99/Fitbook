@@ -170,8 +170,8 @@ public class HomeFragment extends Fragment {
                                      modelList.add(model);
                                 }
 
-                                //Collections.sort(modelList);
-                                //Collections.reverse(modelList);
+                                Collections.sort(modelList);
+                                Collections.reverse(modelList);
 
                                 adapter = new CustomAdapter(HomeFragment.this, modelList);
                                 mRecyclerView.setAdapter(adapter);
