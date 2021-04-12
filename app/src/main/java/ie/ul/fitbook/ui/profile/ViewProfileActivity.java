@@ -517,10 +517,10 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         UserDatabase userDb = new UserDatabase(ownId);
         userDb.getChildCollection("friends").document(userId).delete();
-        userDb.getChildCollection("messages/" + userId + "/message").document().delete();
+        userDb.getChildCollection("messages").document(userId).delete();
         userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends").document(ownId).delete();
-        userDb.getChildCollection("messages/" + ownId + "/message").document().delete();
+        userDb.getChildCollection("messages").document(ownId).delete();
 
         friendsButton.setText("Add Friend");
         friendsButton.setOnClickListener(view -> addFriend(userId, ownId));

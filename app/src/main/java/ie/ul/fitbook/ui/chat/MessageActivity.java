@@ -144,10 +144,13 @@ public class MessageActivity extends AppCompatActivity {
                                 }
                             });
 
-                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
-                    intent.putExtra("userId", userId);
-                    startActivity(intent);
-                    finish();
+//                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
+//                    intent.putExtra("userId", userId);
+//                    startActivity(intent);
+//                    finish();
+                    adapter.notifyDataSetChanged();
+                    showMessages();
+                    editText.setText(null);
                 }
             }
         });
