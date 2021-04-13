@@ -1,3 +1,4 @@
+
 package ie.ul.fitbook.ui.chat;
 
 import android.widget.ImageView;
