@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -114,11 +113,6 @@ public class MessageActivity extends AppCompatActivity {
                     message.put("content", editText.getText().toString());
                     message.put("timeStamp", timeInMilliseconds);
 
-                    Map<String, Object> recent = new HashMap<>();
-                    recent.put("timeStamp", timeInMilliseconds);
-
-
-r
                     db.collection("users" + "/" + Login.getUserId() + "/messages/" + userId  + "/message")
                             .add(message)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -137,48 +131,6 @@ r
                                 }
                             });
 
-
-                    UserDatabase userDb = new UserDatabase(Login.getUserId());
-                    userDb.getChildCollection("messages").document(userId).set(recent).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            e.printStackTrace();
-
-                        }
-                    });
-
-                    userDb = new UserDatabase(userId);
-                    userDb.getChildCollection("messages").document(Login.getUserId()).set(recent).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            e.printStackTrace();
-
-                        }
-                    });
-
-                    System.out.println("here here" + userId + Login.getUserId());
-
-
-
-//                    db.collection("users" + "/" + Login.getUserId() + "/messages/" + userId  + "/recent")
-//                            .add(recent)
-//                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-//                                @Override
-//                                public void onSuccess(DocumentReference documentReference) {
-//
-//                                }
-//                            });
-//
-//                    db.collection("users" + "/" + userId + "/messages/" + Login.getUserId()  + "/recent")
-//                            .add(recent)
-//                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-//                                @Override
-//                                public void onSuccess(DocumentReference documentReference) {
-//
-//                                }
-//                            });
-
-
                     Map<String, Object> notification = new HashMap<>();
                     notification.put("userId", Login.getUserId());
                     notification.put("notificationType", "Message");
@@ -192,20 +144,10 @@ r
                                 }
                             });
 
-
-//                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
-//                    intent.putExtra("userId", userId);
-//                    startActivity(intent);
-//                    finish();
-                    adapter.notifyDataSetChanged();
-                    showMessages();
-                    editText.setText(null);
-
                     Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
                     intent.putExtra("userId", userId);
                     startActivity(intent);
                     finish();
-
                 }
             }
         });
