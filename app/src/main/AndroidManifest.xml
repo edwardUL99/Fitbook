@@ -71,6 +71,9 @@
             android:name=".ui.profile.posts.ProfilePostsActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".ui.profile.statistics.StatisticsActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".ui.profile.activities.ListActivitiesActivity"
             android:screenOrientation="portrait" />
         <activity
