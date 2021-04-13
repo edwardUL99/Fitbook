@@ -184,7 +184,7 @@ public class HomeFragment extends Fragment {
                                 Collections.sort(modelList);
                                 Collections.reverse(modelList);
 
-                                adapter = new CustomAdapter(HomeFragment.this, modelList);
+                                adapter = new CustomAdapter(getActivity(), modelList);
                                 mRecyclerView.setAdapter(adapter);
 
 
