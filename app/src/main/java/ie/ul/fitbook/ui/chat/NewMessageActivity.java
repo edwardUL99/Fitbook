@@ -8,13 +8,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -31,7 +28,6 @@ import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
-import ie.ul.fitbook.ui.profile.ViewProfileActivity;
 
 public class NewMessageActivity extends AppCompatActivity {
 
@@ -141,31 +137,6 @@ public class NewMessageActivity extends AppCompatActivity {
                    message.put("content", editText.getText().toString());
                    message.put("timeStamp", timeInMilliseconds);
 
-                   Map<String, Object> recent = new HashMap<>();
-                   recent.put("timeStamp", timeInMilliseconds);
-
-
-                   UserDatabase userDb = new UserDatabase(Login.getUserId());
-                   userDb.getChildCollection("messages").document(userId).set(recent).addOnFailureListener(new OnFailureListener() {
-                       @Override
-                       public void onFailure(@NonNull Exception e) {
-                           e.printStackTrace();
-
-                       }
-                   });
-
-                   userDb = new UserDatabase(userId);
-                   userDb.getChildCollection("messages").document(Login.getUserId()).set(recent).addOnFailureListener(new OnFailureListener() {
-                       @Override
-                       public void onFailure(@NonNull Exception e) {
-                           e.printStackTrace();
-
-                       }
-                   });
-
-                   System.out.println("here here" + userId + Login.getUserId());
-
-
 //                   db.collection("users").document( Login.getUserId() + "/messages/" + userId  + "/message" + "/" + id)
 //                           .set(message)
 //                           .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -200,19 +171,6 @@ public class NewMessageActivity extends AppCompatActivity {
 
                                }
                            });
-
-//                   db.collection("users" + "/" + Login.getUserId() + "/messages").document(userId)
-//                           .update({"timeStamp": timeInMilliseconds; });
-
-
-//                   db.collection("users" + "/" + userId + "/messages/" + Login.getUserId()  + "/rece t")
-//                           .add(recent)
-//                           .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-//                               @Override
-//                               public void onSuccess(DocumentReference documentReference) {
-//
-//                               }
-//                           });
 
                    Map<String, Object> notification = new HashMap<>();
                    notification.put("userId", Login.getUserId());

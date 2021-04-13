@@ -1,4 +1,4 @@
-<ie.ul.fitbook.custom.MapScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ie.ul.fitbook.ui.custom.MapScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollView"
@@ -198,4 +198,4 @@
             app:layout_constraintEnd_toEndOf="@+id/viewRecordMapContainer" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</ie.ul.fitbook.custom.MapScrollView>
+</ie.ul.fitbook.ui.custom.MapScrollView>

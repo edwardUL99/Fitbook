@@ -59,6 +59,11 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
                 //String title = friendModelList.get(position).getUserName();
                 //String post = friendModelList.get(position).getUserLocation();
 
+            }
+
+            @Override
+            public void onItemLongClicked(View view, int position) {
+
                 String userId = friendModelList.get(position).getUserId();
 //                db.collection("users/" + Login.getUserId() + "/unmessaged").document(userId)
 //                        .delete()
@@ -85,41 +90,6 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
                 Intent intent = new Intent(friendsList, NewMessageActivity.class);
                 intent.putExtra("userId", userId );
                 friendsList.startActivity(intent);
-                friendsList.finish();
-
-
-            }
-
-            @Override
-            public void onItemLongClicked(View view, int position) {
-
-                //String userId = friendModelList.get(position).getUserId();
-//                db.collection("users/" + Login.getUserId() + "/unmessaged").document(userId)
-//                        .delete()
-//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                            @Override
-//                            public void onSuccess(Void aVoid) {
-//
-//
-//                            }
-//
-//                        });
-//                db.collection("users").document( Login.getUserId() + "/messages/" + userId)
-//                        .set(new HashMap<String, Object>())
-//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                            @Override
-//                            public void onSuccess(Void aVoid) {
-//
-//                            }
-//                        });
-//
-//                friendsList.finish();
-
-
-//                Intent intent = new Intent(friendsList, NewMessageActivity.class);
-//                intent.putExtra("userId", userId );
-//                friendsList.startActivity(intent);
-//                friendsList.finish();
 
 
 

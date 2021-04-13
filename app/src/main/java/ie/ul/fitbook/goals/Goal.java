@@ -11,10 +11,12 @@ import com.google.firebase.firestore.DocumentReference;
 
 import org.threeten.bp.LocalDateTime;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.sports.Sport;
 
 /**
@@ -42,6 +44,10 @@ public abstract class Goal implements Parcelable {
      * The date and time this goal should be completed by
      */
     protected LocalDateTime targetDate;
+    /**
+     * The list of activity IDs that contributed to this goal
+     */
+    protected List<String> activityIds;
 
     /**
      * The collection path inside the users uid folder of /users/uid
@@ -67,6 +73,10 @@ public abstract class Goal implements Parcelable {
      * The key for storing the achieved value so far
      */
     public static final String ACHIEVED_VALUE_KEY = "achieved_value";
+    /**
+     * The key for the contributed activities list
+     */
+    public static final String CONTRIBUTED_ACTIVITIES_KEY = "contributed_activities";
 
     /**
      * Constructs a goal instance with the provided parameters
@@ -75,12 +85,14 @@ public abstract class Goal implements Parcelable {
      * @param sport      the sport this goal is to be used for
      * @param type       the type of the goal. This type should be used to parse the value retrieved from the database into the appropriate goal object
      * @param targetDate the date/time this goal should be completed by
+     * @param activityIds activity IDs of activities that contributed to the achieved value of this goal. If null, a new list is created
      */
-    protected Goal(String userId, Sport sport, GoalType type, LocalDateTime targetDate) {
+    protected Goal(String userId, Sport sport, GoalType type, LocalDateTime targetDate, List<String> activityIds) {
         this.userId = userId;
         this.sport = sport;
         this.type = type;
         this.targetDate = targetDate;
+        this.activityIds = activityIds == null ? new ArrayList<>():activityIds;
     }
 
     /**
@@ -92,6 +104,7 @@ public abstract class Goal implements Parcelable {
         sport = Sport.convertToSport(in.readString());
         type = GoalType.convertToGoalType(in.readString());
         targetDate = LocalDateTime.parse(in.readString());
+        in.readList(activityIds, null);
     }
 
     /**
@@ -219,18 +232,34 @@ public abstract class Goal implements Parcelable {
     }
 
     /**
+     * Contribute the provided activity to the goal
+     * @param recordedActivity the activity contributing to the achieved value
+     */
+    protected void contributeToGoal(RecordedActivity recordedActivity) {
+        String id = recordedActivity.getFirestoreId();
+
+        if (id == null)
+            throw new NullPointerException("The provided activity has no ID set");
+
+        if (!activityIds.contains(id))
+            activityIds.add(id);
+    }
+
+    /**
      * Adds the given value to the achieved value. This method shouldn't be called if isExpired() returns true.
      * The achieved value will never go above the target value.
      * @param value the value to add
+     * @param recordedActivity the activity that is contributing to this achieved value
      */
-    public abstract void addAchievedValue(Object value);
+    public abstract void addAchievedValue(Object value, RecordedActivity recordedActivity);
 
     /**
      * Subtracts the given value from the achieved value. This method shouldn't be called if isExpired() returns true.
      * The achieved value will never go below 0.
      * @param value the value to subtract
+     * @param recordedActivity the activity that is being deleted to request this method
      */
-    public abstract void subtractAchievedValue(Object value);
+    public abstract void subtractAchievedValue(Object value, RecordedActivity recordedActivity);
 
     /**
      * Returns true if the current date and time has gone past the target date
@@ -277,7 +306,7 @@ public abstract class Goal implements Parcelable {
      * @param data the data to check
      */
     protected static void checkKeysValidity(Map<String, Object> data) {
-        List<String> keys = Arrays.asList(SPORT_KEY, TYPE_KEY, TARGET_DATE_KEY, TARGET_VALUE_KEY, ACHIEVED_VALUE_KEY);
+        List<String> keys = Arrays.asList(SPORT_KEY, TYPE_KEY, TARGET_DATE_KEY, TARGET_VALUE_KEY, ACHIEVED_VALUE_KEY, CONTRIBUTED_ACTIVITIES_KEY);
 
         for (String key : data.keySet()) {
             if (!keys.contains(key))
@@ -300,5 +329,6 @@ public abstract class Goal implements Parcelable {
         dest.writeString(sport.toString());
         dest.writeString(type.toString());
         dest.writeString(targetDate.toString());
+        dest.writeList(activityIds);
     }
 }
