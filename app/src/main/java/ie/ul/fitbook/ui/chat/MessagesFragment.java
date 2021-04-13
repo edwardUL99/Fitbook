@@ -23,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ie.ul.fitbook.R;
@@ -83,8 +84,22 @@ public class MessagesFragment extends Fragment {
             }
         });
 
-        showData();
+
+
+        //showData();
 }
+
+
+
+
+    @Override
+    public void onResume(){
+
+        friendModelList.clear();
+        super.onResume();
+
+        showData();
+    }
     private void showData(){
 
 
@@ -98,13 +113,14 @@ public class MessagesFragment extends Fragment {
                         for(DocumentSnapshot doc: task.getResult()){
 
 
-                            FriendModel model = new FriendModel(doc.getId());
+                            FriendModel model = new FriendModel(doc.getId(), String.valueOf(doc.get("timeStamp")));
                             friendModelList.add(model);
 
-                        }
 
-                        //Collections.sort(modelList);
-                        //Collections.reverse(modelList);
+
+                        }
+                        Collections.sort(friendModelList);
+                        Collections.reverse(friendModelList);
 
 
                         adapter = new FriendsMessagedAdapter(MessagesFragment.this, friendModelList);
@@ -121,6 +137,8 @@ public class MessagesFragment extends Fragment {
 
                     }
                 });
+
+
 
 
 

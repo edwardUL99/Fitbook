@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/homeRefresh"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="?attr/actionBarSize"
+
+    tools:context=".ui.home.HomeFragment">
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.home.HomeFragment"
-    android:layout_marginTop="?attr/actionBarSize">
+    tools:context=".ui.home.HomeFragment">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -24,7 +33,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -34,8 +43,9 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewNotification"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="48dp" />
+            android:layout_height="wrap_content"
+
+            android:layout_marginBottom="48dp"/>
     </LinearLayout>
 
 
@@ -50,3 +60,4 @@
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
