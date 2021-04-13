@@ -28,7 +28,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import ie.ul.fitbook.R;
@@ -43,6 +42,7 @@ public class HomeFragment extends Fragment {
     FirebaseFirestore db;
     CustomAdapter adapter;
     String notificationId;
+
     private SwipeRefreshLayout swipeRefreshLayout;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -81,6 +81,7 @@ public class HomeFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(layoutManager);
+
         swipeRefreshLayout = getActivity().findViewById(R.id.homeRefresh);
         swipeRefreshLayout.setOnRefreshListener(() -> {
 
@@ -90,6 +91,7 @@ public class HomeFragment extends Fragment {
 
             swipeRefreshLayout.setRefreshing(false);
         });
+
         db = FirebaseFirestore.getInstance();
         modelList = new ArrayList<>();
 
@@ -172,6 +174,7 @@ public class HomeFragment extends Fragment {
                             public void onComplete(@NonNull Task<QuerySnapshot> task2) {
 
 
+
                                 for(DocumentSnapshot doc: task2.getResult()){
                                     //Model model = new ActivitiesModel(doc.getDouble("distance"),doc.getDouble("elevation_gain"), doc.getString("timestamp"),doc.getId());
                                    // modelList.add(model);
@@ -186,6 +189,28 @@ public class HomeFragment extends Fragment {
 
                                 adapter = new CustomAdapter(HomeFragment.this, modelList);
                                 mRecyclerView.setAdapter(adapter);
+
+
+
+
+
+
+
+//                                 for(DocumentSnapshot doc: task2.getResult()){
+//                                     //Model model = new ActivitiesModel(doc.getDouble("distance"),doc.getDouble("elevation_gain"), doc.getString("timestamp"),doc.getId());
+//                                    // modelList.add(model);
+
+
+//                                      Model model = RecordedActivity.from(doc.getData());
+//                                      modelList.add(model);
+//                                 }
+
+//                                 //Collections.sort(modelList);
+//                                 //Collections.reverse(modelList);
+
+//                                 adapter = new CustomAdapter(HomeFragment.this.getActivity(), modelList);
+//                                 mRecyclerView.setAdapter(adapter);
+
 
 
 

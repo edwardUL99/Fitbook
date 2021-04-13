@@ -52,6 +52,8 @@ import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
 
+
+
 /**
  * This activity is used for saving a recorded activity or deleting it. Pass in the RecordedActivity object
  * using the RECORDED_ACTIVITY key
@@ -233,7 +235,7 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
                                         }
 
                                         if (achievedValue != null) {
-                                            goal.addAchievedValue(achievedValue);
+                                            goal.addAchievedValue(achievedValue, recordedActivity);
 
                                             DocumentReference documentReference = collectionReference.document(snapshot.getId());
                                             documentReference.set(goal.toData())

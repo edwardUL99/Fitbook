@@ -1,7 +1,9 @@
 package ie.ul.fitbook.ui.home;
 
 import android.os.Bundle;
+
 import android.view.MenuItem;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -89,6 +91,8 @@ public class FriendsList extends AppCompatActivity {
 
 
         showData();
+
+
 
 
     }

@@ -35,8 +35,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.custom.LoadingBar;
-import ie.ul.fitbook.custom.TraceableScrollView;
+import ie.ul.fitbook.ui.custom.LoadingBar;
+import ie.ul.fitbook.ui.custom.TraceableScrollView;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.goals.Goal;
 import ie.ul.fitbook.login.Login;
@@ -517,6 +517,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         UserDatabase userDb = new UserDatabase(ownId);
         userDb.getChildCollection("friends").document(userId).delete();
+
         userDb.getChildCollection("messages").document(userId).delete();
         userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends").document(ownId).delete();
@@ -534,6 +535,10 @@ public class ViewProfileActivity extends AppCompatActivity {
 
 
 
+//         userDb = new UserDatabase(userId);
+//         userDb.getChildCollection("friends").document(ownId).delete();
+
+
     }
 
     private void cancelRequest(String userId, String ownId) {
@@ -542,9 +547,11 @@ public class ViewProfileActivity extends AppCompatActivity {
         userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends").document(ownId).delete();
 
+
         friendsButton.setText("Add Friend");
         friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
         profileOptions.setVisibility(View.GONE);
+
 
 
     }
@@ -581,6 +588,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         });
 
 
+
         userDb = new UserDatabase(userId);
         userDb.getChildCollection("unmessaged").document(ownId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -600,6 +608,7 @@ public class ViewProfileActivity extends AppCompatActivity {
             }
         });
 
+
         Map<String, Object> notification = new HashMap<>();
         notification.put("userId", Login.getUserId());
         notification.put("notificationType", "New Friend");
@@ -614,9 +623,11 @@ public class ViewProfileActivity extends AppCompatActivity {
                     }
                 });
 
+
         friendsButton.setText("Cancel Request");
         friendsButton.setOnClickListener(view -> cancelRequest(userId, ownId));
         profileOptions.setVisibility(View.GONE);
+
 
 
 
@@ -649,9 +660,11 @@ public class ViewProfileActivity extends AppCompatActivity {
             }
         });
 
+
         friendsButton.setText("Remove Friend");
         friendsButton.setOnClickListener(view -> removeFriend(userId, ownId));
         profileOptions.setVisibility(View.VISIBLE);
+
     }
 
     /**

@@ -23,7 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
+
 import ie.ul.fitbook.custom.LoadingBar;
+
+// import ie.ul.fitbook.ui.custom.LoadingBar;
+
 import ie.ul.fitbook.database.ActivitiesDatabase;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;

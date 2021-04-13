@@ -1,4 +1,4 @@
-package ie.ul.fitbook.custom;
+package ie.ul.fitbook.ui.custom;
 
 import android.content.Context;
 import android.util.AttributeSet;
