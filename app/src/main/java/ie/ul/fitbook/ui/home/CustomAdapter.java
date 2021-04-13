@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
@@ -40,6 +41,7 @@ import ie.ul.fitbook.storage.UserStorage;
 
 import ie.ul.fitbook.ui.profile.ViewProfileActivity;
 import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
+import ie.ul.fitbook.utils.Utils;
 
 import static java.lang.Integer.parseInt;
 
@@ -185,18 +187,28 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
 
             ActivityViewHolder holder2 = (ActivityViewHolder) holder;
-            double ab = activity.getDistance();//((ActivitiesModel)modelList.get(position)).getDistance();
-           String s = String.valueOf(ab);
-           s = s.substring(0,3) + "km";
-           holder2.distance.setText(s);
-           ab = activity.getElevationGain();//((ActivitiesModel)modelList.get(position)).getElevation();
-           s = String.valueOf(ab);
-           s = s.substring(0,3) + "m";
-           holder2.elevation.setText(s);
+            holder2.distance.setText(String.format(Locale.getDefault(), "%,.02fkm", activity.getDistance()));
+            String elevation = "" + (int)activity.getElevationGain() + "m";
+            holder2.elevation.setText(elevation);
+            String id = activity.getUserId();
+            new UserDatabase(id).getChildDocument(Profile.PROFILE_DOCUMENT)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot snapshot = task.getResult();
+                            Map<String, Object> data = snapshot.getData();
+                            Profile profile = Profile.from(data);
+                            profile.setUserId(id);
+                        holder2.nameView.setText(profile.getName());
+
+
+                        }});
 
 
 
-           holder2.time.setText(activity.getTimestamp().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm")));
+           holder2.dateView.setText(activity.getTimestamp().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm")));
+           holder2.time.setText(Utils.durationToHoursMinutes(activity.getRecordedDuration()));
+           holder2.sportType.setText(Utils.capitalise(activity.getSport().toString()));
             //((ActivitiesModel)modelList.get(position)).getTimeStamp()
             holder2.itemView.setOnClickListener(new View.OnClickListener(){
                 @Override
@@ -212,8 +224,7 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                                     Map<String, Object> data = snapshot.getData();
                                     Profile profile = Profile.from(data);
                                     profile.setUserId(id);
-                                    String s = String.valueOf(position);
-                                    Toast.makeText(homeFragment.getActivity(), s, Toast.LENGTH_SHORT).show();
+
                                     Intent intent = new Intent(context, ViewRecordedActivity.class);
                                     intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
                                     intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, activity);

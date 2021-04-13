@@ -83,7 +83,11 @@ public class HomeFragment extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         swipeRefreshLayout = getActivity().findViewById(R.id.homeRefresh);
         swipeRefreshLayout.setOnRefreshListener(() -> {
+
+            modelList.clear();
             showData();
+
+
             swipeRefreshLayout.setRefreshing(false);
         });
         db = FirebaseFirestore.getInstance();

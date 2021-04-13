@@ -58,13 +58,17 @@ public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListView
 
                 //String title = friendModelList.get(position).getUserName();
                 //String post = friendModelList.get(position).getUserLocation();
+                String userId = friendModelList.get(position).getUserId();
+                Intent intent = new Intent(messagesFragment.getActivity(), MessageActivity.class);
+                intent.putExtra("userId", userId );
+                messagesFragment.startActivity(intent);
 
             }
 
             @Override
             public void onItemLongClicked(View view, int position) {
 
-                String userId = friendModelList.get(position).getUserId();
+//                String userId = friendModelList.get(position).getUserId();
 //                db.collection("users/" + Login.getUserId() + "/unmessaged").document(userId)
 //                        .delete()
 //                        .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -85,9 +89,9 @@ public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListView
 //                        });
 //
 //                friendsList.finish();
-                Intent intent = new Intent(messagesFragment.getActivity(), MessageActivity.class);
-                intent.putExtra("userId", userId );
-                messagesFragment.startActivity(intent);
+//                Intent intent = new Intent(messagesFragment.getActivity(), MessageActivity.class);
+//                intent.putExtra("userId", userId );
+//                messagesFragment.startActivity(intent);
 
 
 

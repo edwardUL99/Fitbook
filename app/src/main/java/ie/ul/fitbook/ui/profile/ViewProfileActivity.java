@@ -614,6 +614,10 @@ public class ViewProfileActivity extends AppCompatActivity {
                     }
                 });
 
+        friendsButton.setText("Cancel Request");
+        friendsButton.setOnClickListener(view -> cancelRequest(userId, ownId));
+        profileOptions.setVisibility(View.GONE);
+
 
 
     }

@@ -6,6 +6,8 @@
     android:id="@+id/homeRefresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="?attr/actionBarSize"
+
     tools:context=".ui.home.HomeFragment">
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -42,7 +44,7 @@
             android:id="@+id/recyclerViewNotification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="?attr/actionBarSize"
+
             android:layout_marginBottom="48dp"/>
     </LinearLayout>
 
