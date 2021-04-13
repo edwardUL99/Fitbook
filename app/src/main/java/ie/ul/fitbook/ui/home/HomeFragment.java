@@ -9,12 +9,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -24,6 +26,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +42,8 @@ public class HomeFragment extends Fragment {
     FirebaseFirestore db;
     CustomAdapter adapter;
     String notificationId;
+
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -76,6 +81,17 @@ public class HomeFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(layoutManager);
+
+        swipeRefreshLayout = getActivity().findViewById(R.id.homeRefresh);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+
+            modelList.clear();
+            showData();
+
+
+            swipeRefreshLayout.setRefreshing(false);
+        });
+
         db = FirebaseFirestore.getInstance();
         modelList = new ArrayList<>();
 
@@ -158,6 +174,7 @@ public class HomeFragment extends Fragment {
                             public void onComplete(@NonNull Task<QuerySnapshot> task2) {
 
 
+
                                 for(DocumentSnapshot doc: task2.getResult()){
                                     //Model model = new ActivitiesModel(doc.getDouble("distance"),doc.getDouble("elevation_gain"), doc.getString("timestamp"),doc.getId());
                                    // modelList.add(model);
@@ -167,11 +184,33 @@ public class HomeFragment extends Fragment {
                                      modelList.add(model);
                                 }
 
-                                //Collections.sort(modelList);
-                                //Collections.reverse(modelList);
+                                Collections.sort(modelList);
+                                Collections.reverse(modelList);
 
-                                adapter = new CustomAdapter(HomeFragment.this.getActivity(), modelList);
+                                adapter = new CustomAdapter(HomeFragment.this, modelList);
                                 mRecyclerView.setAdapter(adapter);
+
+
+
+
+
+
+
+//                                 for(DocumentSnapshot doc: task2.getResult()){
+//                                     //Model model = new ActivitiesModel(doc.getDouble("distance"),doc.getDouble("elevation_gain"), doc.getString("timestamp"),doc.getId());
+//                                    // modelList.add(model);
+
+
+//                                      Model model = RecordedActivity.from(doc.getData());
+//                                      modelList.add(model);
+//                                 }
+
+//                                 //Collections.sort(modelList);
+//                                 //Collections.reverse(modelList);
+
+//                                 adapter = new CustomAdapter(HomeFragment.this.getActivity(), modelList);
+//                                 mRecyclerView.setAdapter(adapter);
+
 
 
 

@@ -2,12 +2,16 @@ package ie.ul.fitbook.ui.home;
 
 import android.os.Bundle;
 
+import android.view.MenuItem;
+
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -29,7 +33,32 @@ public class FriendsList extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
     FirebaseFirestore db;
     FriendsListCustomAdapter adapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
+
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//        int id = item.getItemId();
+//
+//        if (id == android.R.id.home) {
+//            finish();
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,10 +77,24 @@ public class FriendsList extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(FriendsList.this);
         mRecyclerView.setLayoutManager(layoutManager);
         db = FirebaseFirestore.getInstance();
+
+        swipeRefreshLayout = findViewById(R.id.friendsRefresh);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+
+            friendModelList.clear();
+            showData();
+
+
+            swipeRefreshLayout.setRefreshing(false);
+        });
         friendModelList = new ArrayList<>();
 
 
         showData();
+
+
+
+
     }
 
     private void showData(){
@@ -62,7 +105,8 @@ public class FriendsList extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         for(DocumentSnapshot doc: task.getResult()){
                             FriendModel model = new FriendModel(doc.getId());
-                            friendModelList.add(model);
+                            if(doc.getString("status").equals("accepted")){
+                            friendModelList.add(model);}
                         }
                         adapter = new FriendsListCustomAdapter(FriendsList.this, friendModelList);
                         mRecyclerView.setAdapter(adapter);
