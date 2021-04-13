@@ -201,7 +201,6 @@ public class NewMessageActivity extends AppCompatActivity {
                                }
                            });
 
-
 //                   db.collection("users" + "/" + Login.getUserId() + "/messages").document(userId)
 //                           .update({"timeStamp": timeInMilliseconds; });
 
@@ -215,7 +214,7 @@ public class NewMessageActivity extends AppCompatActivity {
 //                               }
 //                           });
 
-     Map<String, Object> notification = new HashMap<>();
+                   Map<String, Object> notification = new HashMap<>();
                    notification.put("userId", Login.getUserId());
                    notification.put("notificationType", "message");
 

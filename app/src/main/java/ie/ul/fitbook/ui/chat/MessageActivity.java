@@ -118,7 +118,6 @@ public class MessageActivity extends AppCompatActivity {
                     recent.put("timeStamp", timeInMilliseconds);
 
 
-r
                     db.collection("users" + "/" + Login.getUserId() + "/messages/" + userId  + "/message")
                             .add(message)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -136,7 +135,6 @@ r
 
                                 }
                             });
-
 
                     UserDatabase userDb = new UserDatabase(Login.getUserId());
                     userDb.getChildCollection("messages").document(userId).set(recent).addOnFailureListener(new OnFailureListener() {
@@ -178,7 +176,6 @@ r
 //                                }
 //                            });
 
-
                     Map<String, Object> notification = new HashMap<>();
                     notification.put("userId", Login.getUserId());
                     notification.put("notificationType", "Message");
@@ -192,7 +189,6 @@ r
                                 }
                             });
 
-
 //                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
 //                    intent.putExtra("userId", userId);
 //                    startActivity(intent);
@@ -200,12 +196,6 @@ r
                     adapter.notifyDataSetChanged();
                     showMessages();
                     editText.setText(null);
-
-                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
-                    intent.putExtra("userId", userId);
-                    startActivity(intent);
-                    finish();
-
                 }
             }
         });

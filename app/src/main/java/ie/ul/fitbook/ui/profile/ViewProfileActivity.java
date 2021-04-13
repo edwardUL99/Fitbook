@@ -23,8 +23,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Source;
 
 import java.util.HashMap;
@@ -43,6 +45,7 @@ import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
 import ie.ul.fitbook.ui.MainActivity;
+import ie.ul.fitbook.ui.chat.MessageActivity;
 import ie.ul.fitbook.ui.home.ProfilesActivity;
 import ie.ul.fitbook.ui.profile.cache.ProfileCache;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
@@ -450,16 +453,18 @@ public class ViewProfileActivity extends AppCompatActivity {
 
                         if( test.containsKey("status")){
                             pending = test.get("status").equals("requested");
+
                         }
                         if( test.containsKey("status")){
                             requested = test.get("status").equals("pending");
+
                         }
                     }
                     boolean ownProfile = userId.equals(Login.getUserId());
 
                     if (exists && !ownProfile && !pending && !requested) {
                         friendsButton.setText("Remove Friend");
-                        friendsButton.setOnClickListener(view -> removeFriend(userId,ownId));
+                        friendsButton.setOnClickListener(view -> removeFriend(userId, ownId));
                         profileOptions.setVisibility(View.VISIBLE);
                     } else if (ownProfile) {
                         friendsButton.setText("Add Friends");
@@ -474,8 +479,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                         friendsButton.setText("Cancel Request");
                         friendsButton.setOnClickListener(view -> cancelRequest(userId, ownId));
                         profileOptions.setVisibility(View.GONE);
-                    }
-                    else{
+                    } else{
                         friendsButton.setText("Add Friend");
                         friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
                         profileOptions.setVisibility(View.GONE);
@@ -513,17 +517,35 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         UserDatabase userDb = new UserDatabase(ownId);
         userDb.getChildCollection("friends").document(userId).delete();
+        userDb.getChildCollection("messages").document(userId).delete();
         userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends").document(ownId).delete();
+        userDb.getChildCollection("messages").document(ownId).delete();
+
+        friendsButton.setText("Add Friend");
+        friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
+        profileOptions.setVisibility(View.GONE);
+
+
+
+
+
+
+
+
 
     }
 
-    private void cancelRequest(String userId, String ownId){
-
+    private void cancelRequest(String userId, String ownId) {
         UserDatabase userDb = new UserDatabase(ownId);
         userDb.getChildCollection("friends").document(userId).delete();
         userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends").document(ownId).delete();
+
+        friendsButton.setText("Add Friend");
+        friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
+        profileOptions.setVisibility(View.GONE);
+
 
     }
 
@@ -531,7 +553,6 @@ public class ViewProfileActivity extends AppCompatActivity {
      * Adds the profile being viewed as a friend
      */
     private void addFriend(String userId, String ownId) {
-        // TODO this logic will add this user as a friend
 
         Map<String, Object> requested = new HashMap<>();
         requested.put("id", userId);
@@ -558,16 +579,56 @@ public class ViewProfileActivity extends AppCompatActivity {
                 Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
             }
         });
+
+
+        userDb = new UserDatabase(userId);
+        userDb.getChildCollection("unmessaged").document(ownId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        userDb = new UserDatabase(ownId);
+        userDb.getChildCollection("unmessaged").document(userId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Map<String, Object> notification = new HashMap<>();
+        notification.put("userId", Login.getUserId());
+        notification.put("notificationType", "New Friend");
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("users" + "/" + userId + "/notifications")
+                .add(notification)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+
+                    }
+                });
+
+        friendsButton.setText("Cancel Request");
+        friendsButton.setOnClickListener(view -> cancelRequest(userId, ownId));
+        profileOptions.setVisibility(View.GONE);
+
+
+
     }
 
     private void acceptFriend(String userId, String ownId){
-
-        Map<String, Object> requested = new HashMap<>();
-        requested.put("id", userId);
-        requested.put("status", "accepted");
+        Map<String, Object> accepted = new HashMap<>();
+        accepted.put("id", userId);
+        accepted.put("status", "accepted");
 
         UserDatabase userDb = new UserDatabase(ownId);
-        userDb.getChildCollection("friends").document(userId).set(requested).addOnFailureListener(new OnFailureListener() {
+        userDb.getChildCollection("friends").document(userId).set(accepted).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 e.printStackTrace();
@@ -575,12 +636,12 @@ public class ViewProfileActivity extends AppCompatActivity {
             }
         });
 
-        requested = new HashMap<>();
-        requested.put("id", ownId);
-        requested.put("status", "accepted");
+        accepted = new HashMap<>();
+        accepted.put("id", ownId);
+        accepted.put("status", "accepted");
 
         userDb = new UserDatabase(userId);
-        userDb.getChildCollection("friends").document(ownId).set(requested).addOnFailureListener(new OnFailureListener() {
+        userDb.getChildCollection("friends").document(ownId).set(accepted).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 e.printStackTrace();
@@ -588,8 +649,9 @@ public class ViewProfileActivity extends AppCompatActivity {
             }
         });
 
-
-
+        friendsButton.setText("Remove Friend");
+        friendsButton.setOnClickListener(view -> removeFriend(userId, ownId));
+        profileOptions.setVisibility(View.VISIBLE);
     }
 
     /**

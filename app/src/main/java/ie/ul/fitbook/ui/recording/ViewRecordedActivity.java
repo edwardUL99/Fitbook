@@ -303,12 +303,7 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
     private void adjustGoalsAfterDeletion() {
         CollectionReference collectionReference = new UserDatabase().getChildCollection(Goal.COLLECTION_PATH);
         collectionReference
-
                 .whereEqualTo("sport", activity.getSport().toString())
-
-//                 .whereEqualTo(Goal.SPORT_KEY, activity.getSport().toString())
-//                 .whereArrayContains(Goal.CONTRIBUTED_ACTIVITIES_KEY, activity.getFirestoreId())
-
                 .get()
                 .addOnSuccessListener(success -> {
                     if (success != null) {
@@ -321,11 +316,7 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
                                 GoalType goalType = goalTypeRef.get();
 
                                 if (goal != null && goalType != null) {
-
                                     if (!goal.isExpired() && !goal.isCompleted()) {
-
-//                                     if (!goal.isExpired()) {
-
                                         Object achievedValue = null;
 
                                         switch (goalType) {
@@ -337,11 +328,7 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
                                         }
 
                                         if (achievedValue != null) {
-
                                             goal.subtractAchievedValue(achievedValue);
-
-//                                             goal.subtractAchievedValue(achievedValue, activity);
-
 
                                             DocumentReference documentReference = collectionReference.document(snapshot.getId());
                                             documentReference.set(goal.toData())

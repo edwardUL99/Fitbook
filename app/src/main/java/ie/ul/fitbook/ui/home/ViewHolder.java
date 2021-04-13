@@ -23,7 +23,6 @@ public class ViewHolder extends RecyclerView.ViewHolder {
 
         mView = itemView;
 
-
 //        itemView.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
@@ -43,7 +42,6 @@ public class ViewHolder extends RecyclerView.ViewHolder {
 //                return true;
 //            }});
 
-
         userId = itemView.findViewById(R.id.post_userId);
         postContent = itemView.findViewById(R.id.post_userPost);
         createdAt = itemView.findViewById(R.id.post_createdAt);
@@ -53,7 +51,6 @@ public class ViewHolder extends RecyclerView.ViewHolder {
 
 
     }
-
     private ViewHolder.ClickListener mClickListener;
 
     public interface ClickListener{
@@ -64,5 +61,4 @@ public class ViewHolder extends RecyclerView.ViewHolder {
 //    public void setOnClickListener(ViewHolder.ClickListener clicklistener){
 //        mClickListener = clicklistener;
 //    }
-
 }

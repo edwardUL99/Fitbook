@@ -175,7 +175,7 @@ public class GoalsAdapter extends RecyclerView.Adapter<GoalsAdapter.ViewHolder> 
         } else if (type == GoalType.TIME) {
             Duration value = (Duration)goal.getAchievedValue();
 
-            return Utils.durationToHoursMinutes(value); // TODO maybe show seconds too
+            return Utils.durationToHoursMinutes(value);
         }
 
         return null;

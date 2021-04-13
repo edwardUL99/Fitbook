@@ -6,11 +6,9 @@ import org.threeten.bp.Duration;
 import org.threeten.bp.LocalDateTime;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.login.Login;
-import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.sports.Sport;
 
 /**
@@ -51,7 +49,7 @@ public class TimeGoal extends Goal {
      * @param targetValue the target value in km for this goal
      */
     public TimeGoal(String userId, Sport sport, LocalDateTime targetDate, Duration targetValue) {
-        this(userId, sport, targetDate, targetValue, Duration.ZERO, null);
+        this(userId, sport, targetDate, targetValue, Duration.ZERO);
     }
 
     /**
@@ -62,10 +60,9 @@ public class TimeGoal extends Goal {
      * @param targetDate the date/time this goal should be completed by
      * @param targetValue the target value in km for this goal
      * @param achievedValue achieved value of this goal if already exists
-     * @param activityIds activity IDs of activities that contributed to the achieved value of this goal. If null, a new list is created
      */
-    public TimeGoal(String userId, Sport sport, LocalDateTime targetDate, Duration targetValue, Duration achievedValue, List<String> activityIds) {
-        super(userId, sport, GoalType.TIME, targetDate, activityIds);
+    public TimeGoal(String userId, Sport sport, LocalDateTime targetDate, Duration targetValue, Duration achievedValue) {
+        super(userId, sport, GoalType.TIME, targetDate);
         setTargetValue(targetValue);
         this.achievedValue = achievedValue;
     }
@@ -132,16 +129,19 @@ public class TimeGoal extends Goal {
      * Adds the given value to the achieved value. For TimeGoal, the value should be a Duration
      *
      * @param value the value to add
-     * @param recordedActivity the recorded activity that contributed to this achieved value
      */
     @Override
-    public void addAchievedValue(Object value, RecordedActivity recordedActivity) {
+    public void addAchievedValue(Object value) {
         checkExpiration();
         checkValueType(value);
-        contributeToGoal(recordedActivity);
         Duration duration = (Duration)value;
 
-        achievedValue = achievedValue.plus(duration);
+        Duration total = achievedValue.plus(duration);
+
+        if (total.compareTo(achievedValue) < 0)
+            achievedValue = total;
+        else
+            achievedValue = targetValue;
     }
 
     /**
@@ -149,23 +149,19 @@ public class TimeGoal extends Goal {
      * The achieved value will never go below 0.
      *
      * @param value the value to subtract
-     * @param recordedActivity the activity that was deleted to cause the subtraction of the achieved value
      */
     @Override
-    public void subtractAchievedValue(Object value, RecordedActivity recordedActivity) {
+    public void subtractAchievedValue(Object value) {
         checkExpiration();
         checkValueType(value);
         Duration duration = (Duration)value;
 
         Duration total = achievedValue.minus(duration);
 
-        if (total.compareTo(Duration.ZERO) < 0) {
+        if (total.compareTo(Duration.ZERO) < 0)
             achievedValue = Duration.ZERO;
-            activityIds.clear();
-        } else {
+        else
             achievedValue = total;
-            activityIds.remove(recordedActivity.getFirestoreId());
-        }
     }
 
     /**
@@ -175,7 +171,7 @@ public class TimeGoal extends Goal {
      */
     @Override
     public boolean isCompleted() {
-        return achievedValue.toMillis() >= targetValue.toMillis();
+        return achievedValue.equals(targetValue);
     }
 
     /**
@@ -256,12 +252,7 @@ public class TimeGoal extends Goal {
         if (targetLong == null || achievedLong == null || targetDate == null)
             throw new IllegalStateException("Expected fields are missing from the data object");
 
-        Object contributedActivities = data.get(Goal.CONTRIBUTED_ACTIVITIES_KEY);
-
-        if (!(contributedActivities instanceof List))
-            contributedActivities = null;
-
-        return new TimeGoal(Login.getUserId(), Sport.convertToSport(sport), LocalDateTime.parse(targetDate), Duration.ofMillis(targetLong), Duration.ofMillis(achievedLong), (List<String>)contributedActivities);
+        return new TimeGoal(Login.getUserId(), Sport.convertToSport(sport), LocalDateTime.parse(targetDate), Duration.ofMillis(targetLong), Duration.ofMillis(achievedLong));
     }
 
     /**

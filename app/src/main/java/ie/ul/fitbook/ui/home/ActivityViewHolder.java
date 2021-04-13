@@ -17,12 +17,10 @@ public class ActivityViewHolder extends ViewHolder {
     TextView elevation;
     TextView time;
     View mView;
-
     TextView nameView;
     TextView dateView;
     TextView sportType;
     ImageView profilePic;
-
 
 
     public ActivityViewHolder(@NonNull View itemView) {
@@ -52,7 +50,6 @@ public class ActivityViewHolder extends ViewHolder {
         distance = itemView.findViewById(R.id.distanceRecorded);
         time = itemView.findViewById(R.id.timeRecorded);
         elevation = itemView.findViewById(R.id.elevationRecorded);
-
         nameView = itemView.findViewById(R.id.nameView);
         dateView = itemView.findViewById(R.id.dateView);
         sportType = itemView.findViewById(R.id.sportType);

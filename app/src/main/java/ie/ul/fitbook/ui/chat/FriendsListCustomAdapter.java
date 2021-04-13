@@ -116,7 +116,6 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
 //                friendsList.finish();
 
 
-
 //                Intent intent = new Intent(friendsList, NewMessageActivity.class);
 //                intent.putExtra("userId", userId );
 //                friendsList.startActivity(intent);

@@ -79,10 +79,6 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
      */
     private boolean paused;
     /**
-     * A flag to determine if the service has been registered or not
-     */
-    private boolean serviceRegistered;
-    /**
      * The intent used to start the service
      */
     private Intent serviceIntent;
@@ -176,7 +172,6 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
 
         application.bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
 
-        serviceRegistered = true;
         setupChosenActivity();
     }
 
@@ -257,7 +252,7 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
                 Login.setProfile(downloaded);
             }, () -> {
                 Toast.makeText(this, "An error occurred, please try again", Toast.LENGTH_SHORT).show();
-                stopButton.setEnabled(true);
+                stopButton.setEnabled(false);
                 resumeButton.setVisibility(View.VISIBLE);
                 paused = true;
             }, null, false, this, true); // download profile image synchronously so only save when fully complete
@@ -271,21 +266,15 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
      */
     private void stopRecording() {
         if (paused) {
-            stopButton.setEnabled(false);
-            if (serviceRegistered) {
-                Application application = getApplication();
-                application.stopService(serviceIntent);
-                application.unbindService(serviceConnection);
-                recordingService.stopForeground(true);
-                recordingService.stopSelf();
-                serviceRegistered = false;
-            }
+            Application application = getApplication();
+            application.stopService(serviceIntent);
+            application.unbindService(serviceConnection);
+            recordingService.stopForeground(true);
+            recordingService.stopSelf();
             timeView.stop();
 
-            Toast.makeText(this, "Retrieving elevation data, please wait", Toast.LENGTH_SHORT)
-                    .show();
+            stopButton.setEnabled(false);
             resumeButton.setVisibility(View.GONE);
-            stopButton.setEnabled(true);
             RecordingUtils.calculateElevationGain(recordingService, gain -> saveActivity(recordingService, gain));
         } else {
             stopButton.setText("Stop");

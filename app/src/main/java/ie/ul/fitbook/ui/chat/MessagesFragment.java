@@ -118,7 +118,6 @@ public class MessagesFragment extends Fragment {
 
 
 
-
                         }
                         Collections.sort(friendModelList);
                         Collections.reverse(friendModelList);
