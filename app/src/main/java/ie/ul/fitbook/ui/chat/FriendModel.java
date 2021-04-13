@@ -87,8 +87,8 @@ public class FriendModel implements Comparable<FriendModel>{
 
     @Override
     public int compareTo(FriendModel o) {
-       if (getTime() == null || o.getTime() == null) {
-                return 0;
+        if (getTime() == null || o.getTime() == null) {
+            return 0;
 
         } else
 

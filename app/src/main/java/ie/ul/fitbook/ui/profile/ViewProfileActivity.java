@@ -38,14 +38,12 @@ import ie.ul.fitbook.R;
 import ie.ul.fitbook.custom.LoadingBar;
 import ie.ul.fitbook.custom.TraceableScrollView;
 import ie.ul.fitbook.database.UserDatabase;
-import ie.ul.fitbook.goals.Goal;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
 import ie.ul.fitbook.ui.MainActivity;
-import ie.ul.fitbook.ui.chat.MessageActivity;
 import ie.ul.fitbook.ui.home.ProfilesActivity;
 import ie.ul.fitbook.ui.profile.cache.ProfileCache;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
@@ -526,14 +524,6 @@ public class ViewProfileActivity extends AppCompatActivity {
         friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
         profileOptions.setVisibility(View.GONE);
 
-
-
-
-
-
-
-
-
     }
 
     private void cancelRequest(String userId, String ownId) {
@@ -541,12 +531,10 @@ public class ViewProfileActivity extends AppCompatActivity {
         userDb.getChildCollection("friends").document(userId).delete();
         userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends").document(ownId).delete();
-
+        
         friendsButton.setText("Add Friend");
         friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
         profileOptions.setVisibility(View.GONE);
-
-
     }
 
     /**
@@ -580,7 +568,6 @@ public class ViewProfileActivity extends AppCompatActivity {
             }
         });
 
-
         userDb = new UserDatabase(userId);
         userDb.getChildCollection("unmessaged").document(ownId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -589,8 +576,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
             }
         });
-
-
+        
         userDb = new UserDatabase(ownId);
         userDb.getChildCollection("unmessaged").document(userId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -599,7 +585,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
             }
         });
-
+        
         Map<String, Object> notification = new HashMap<>();
         notification.put("userId", Login.getUserId());
         notification.put("notificationType", "New Friend");
@@ -617,9 +603,6 @@ public class ViewProfileActivity extends AppCompatActivity {
         friendsButton.setText("Cancel Request");
         friendsButton.setOnClickListener(view -> cancelRequest(userId, ownId));
         profileOptions.setVisibility(View.GONE);
-
-
-
     }
 
     private void acceptFriend(String userId, String ownId){
@@ -648,7 +631,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
             }
         });
-
+        
         friendsButton.setText("Remove Friend");
         friendsButton.setOnClickListener(view -> removeFriend(userId, ownId));
         profileOptions.setVisibility(View.VISIBLE);

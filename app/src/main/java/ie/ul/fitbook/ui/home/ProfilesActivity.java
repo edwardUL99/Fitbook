@@ -67,14 +67,12 @@ public class ProfilesActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
 
-                //searchData(query);
+                searchData(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-
-                searchData(newText);
                 return false;
             }
         });
@@ -126,7 +124,6 @@ public class ProfilesActivity extends AppCompatActivity {
                                             DocumentSnapshot snapshot = innerTask.getResult();
                                             Map<String, Object> data = snapshot.getData();
                                             Profile profile = Profile.from(data);
-                                            if(profile.getName().length() >= s.length()) {
                                             String substring = profile.getName().substring(0,s.length()).toLowerCase();
                                             if(substring.equals(s.toLowerCase()) && !doc.getId().equals(Login.getUserId())){
 
@@ -134,7 +131,7 @@ public class ProfilesActivity extends AppCompatActivity {
                                                 friendModelList.add(model);
                                                 adapter = new SearchAdapter(ProfilesActivity.this, friendModelList);
                                                 mRecyclerView.setAdapter(adapter);
-                                            }}} });
+                                            }} });
                         }
                         friendModelList.clear();
                     }});}}
