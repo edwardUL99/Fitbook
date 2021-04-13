@@ -4,13 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.chat.MessagesFragment">
+    tools:context=".ui.chat.MessagesFragment"
+    android:layout_marginTop="?attr/actionBarSize">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-
         android:src="@drawable/ic_my_messages"
-
-
         android:id="@+id/add_fab2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -24,7 +22,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -34,9 +32,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView21"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="?attr/actionBarSize"
-            android:layout_marginBottom="48dp"/>
+            android:layout_height="match_parent"
+            android:layout_marginBottom="48dp" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -32,8 +32,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.Locale;
 import java.util.Map;
 
-import ie.ul.fitbook.custom.LoadingBar;
-import ie.ul.fitbook.custom.TraceableScrollView;
+import ie.ul.fitbook.ui.custom.LoadingBar;
+import ie.ul.fitbook.ui.custom.TraceableScrollView;
 import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.sports.Sport;
