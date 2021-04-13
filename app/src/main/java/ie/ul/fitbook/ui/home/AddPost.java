@@ -56,7 +56,6 @@ public class AddPost extends AppCompatActivity {
     FirebaseFirestore db;
     ImageView imageView;
     Uri imageUri;
-    boolean imageSet;
     private StorageReference mStorageRef;
 
 
@@ -77,25 +76,15 @@ public class AddPost extends AppCompatActivity {
         Button imageButton = findViewById(R.id.imageButton);
         imageView = findViewById(R.id.imageView);
         mStorageRef = FirebaseStorage.getInstance().getReference("posts");
-        imageSet=false;
 
         db = FirebaseFirestore.getInstance();
-
 
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String post = t3.getText().toString().trim();
                 String userId = Login.getUserId();
-
-                if(imageSet){
                 uploadData(userId, post);
-                }
-                else{
-
-                    Toast.makeText(AddPost.this, "Must add a picture", Toast.LENGTH_SHORT).show();
-                }
-
                 finish();
             }
         });
@@ -113,7 +102,6 @@ public class AddPost extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        imageSet = true;
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
 
     }

@@ -9,14 +9,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -26,9 +24,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import ie.ul.fitbook.R;
@@ -43,7 +39,6 @@ public class HomeFragment extends Fragment {
     FirebaseFirestore db;
     CustomAdapter adapter;
     String notificationId;
-    private SwipeRefreshLayout swipeRefreshLayout;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -81,15 +76,6 @@ public class HomeFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(layoutManager);
-        swipeRefreshLayout = getActivity().findViewById(R.id.homeRefresh);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-
-            modelList.clear();
-            showData();
-
-
-            swipeRefreshLayout.setRefreshing(false);
-        });
         db = FirebaseFirestore.getInstance();
         modelList = new ArrayList<>();
 
@@ -181,10 +167,10 @@ public class HomeFragment extends Fragment {
                                      modelList.add(model);
                                 }
 
-                                Collections.sort(modelList);
-                                Collections.reverse(modelList);
+                                //Collections.sort(modelList);
+                                //Collections.reverse(modelList);
 
-                                adapter = new CustomAdapter(HomeFragment.this, modelList);
+                                adapter = new CustomAdapter(HomeFragment.this.getActivity(), modelList);
                                 mRecyclerView.setAdapter(adapter);
 
 

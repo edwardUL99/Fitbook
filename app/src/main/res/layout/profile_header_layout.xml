@@ -122,13 +122,12 @@ or viewing another's. The text and handler of friendsButton may need to be chang
     <Button
         android:id="@+id/friendsButton"
         style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="123dp"
+        android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_marginTop="11dp"
         android:layout_marginBottom="11dp"
         android:text="Add Friends"
         app:layout_constraintBottom_toTopOf="@+id/divider3"
-        app:layout_constraintEnd_toStartOf="@+id/friends"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/profilePicture" />
 

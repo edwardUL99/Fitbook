@@ -232,7 +232,7 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
                                         }
 
                                         if (achievedValue != null) {
-                                            goal.addAchievedValue(achievedValue);
+                                            goal.addAchievedValue(achievedValue, recordedActivity);
 
                                             DocumentReference documentReference = collectionReference.document(snapshot.getId());
                                             documentReference.set(goal.toData())
