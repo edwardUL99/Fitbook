@@ -1,5 +1,6 @@
 package ie.ul.fitbook.ui.home;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -32,6 +33,7 @@ import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.storage.PostsStorage;
 import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
+import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
 import static java.lang.Integer.parseInt;
@@ -113,6 +115,25 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
         downloadPostImage(model, holder);
     }
 
+    private void handleProfileDownload(Profile profile, RecordedActivity activity, ActivityViewHolder viewHolder){
+        viewHolder.profilePic.setImageBitmap(profile.getProfileImage());
+        viewHolder.nameView.setText(profile.getName());
+        viewHolder.dateView.setText(activity.getTimestamp().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm")));
+        viewHolder.sportType.setText(Utils.capitalise(activity.getSport().toString()));
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ViewRecordedActivity.class);
+                intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
+                intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, activity);
+                ViewRecordedActivity.setProfileImage(profile.getProfileImage());
+                context.startActivity(intent);
+
+            }
+        });
+
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Model model = modelList.get(position);
@@ -154,53 +175,16 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
         else{
             RecordedActivity activity = (RecordedActivity)model;
 
-
             ActivityViewHolder holder2 = (ActivityViewHolder) holder;
             holder2.distance.setText(String.format(Locale.getDefault(), "%,.02fkm", activity.getDistance()));
             String elevation = "" + (int)activity.getElevationGain() + "m";
             holder2.elevation.setText(elevation);
 
-
-
             holder2.time.setText(Utils.durationToHoursMinutesSeconds(activity.getRecordedDuration()));
             //((ActivitiesModel)modelList.get(position)).getTimeStamp()
-            holder2.itemView.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v) {
-
-
-                    String id = activity.getUserId();
-                    new UserDatabase(id).getChildDocument(Profile.PROFILE_DOCUMENT)
-                            .get()
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    DocumentSnapshot snapshot = task.getResult();
-                                    Map<String, Object> data = snapshot.getData();
-                                    Profile profile = Profile.from(data);
-                                    String s = String.valueOf(position);
-                                    Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(context, ViewRecordedActivity.class);
-                                    intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
-                                    intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, activity);
-                                    //ViewRecordedActivity.setProfileImage(profile.getProfileImage());
-                                    context.startActivity(intent);
-
-
-
-
-
-
-                                }});
-
-
-
-
-
-
-                }
-            });
-
-
+            String id = activity.getUserId();
+            ProfileUtils.downloadProfile(id, profile -> handleProfileDownload(profile, activity, holder2),() -> Toast.makeText(context, "Failed to download activity", Toast.LENGTH_SHORT).show(),
+                    null,false, context, true);
         }
 
     }
