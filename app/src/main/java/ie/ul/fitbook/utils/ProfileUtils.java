@@ -1,16 +1,13 @@
 package ie.ul.fitbook.utils;
 
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.Source;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -158,7 +155,7 @@ public final class ProfileUtils {
      * @param context the context to download profile image with
      */
     private static void downloadUserProfileImageSync(Profile profile, String userId, ImageView imageView, ActionHandlerConsumer<Profile> onSuccess,
-                                                     ActionHandler onFail, Context context) {
+                                                 ActionHandler onFail, Context context) {
         File file = getUserProfileImageLocation(context, userId);
 
         if (file == null)
