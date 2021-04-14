@@ -18,6 +18,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import org.threeten.bp.format.DateTimeFormatter;
@@ -88,34 +90,32 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
             @Override
             public void onSuccess(Uri downloadUrl) {
                 String uri = downloadUrl.toString();
-                Picasso.get().load(uri).into(holder.postsPic);
-                //Picasso.get().load(uri).into(holder.profilePic);
+                Picasso.get()
+                        .load(uri)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(holder.postsPic, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                // no-op
+                            }
 
+                            @Override
+                            public void onError(Exception e) {
+                                Picasso.get()
+                                        .load(uri)
+                                        .into(holder.postsPic);
+                            }
+                        });
             }
         });
     }
-    
-    private void handlePostDownload(Model model, DocumentSnapshot snapshot, ViewHolder holder, String userId) {
-        Map<String, Object> data = snapshot.getData();
-        Profile profile = Profile.from(data);
+
+    private void handlePostProfileDownload(Profile profile, ViewHolder holder, Model model) {
+        holder.profilePic.setImageBitmap(profile.getProfileImage());
         holder.userId.setText(profile.getName());
-        holder.postContent.setText(model.getPost());
-        holder.createdAt.setText(model.getDate());
-
-        StorageReference reference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
-        reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri downloadUrl) {
-                String uri = downloadUrl.toString();
-                //Picasso.get().load(uri).into(holder.postsPic);
-                Picasso.get().load(uri).into(holder.profilePic);
-
-            }
-        });
-        downloadPostImage(model, holder);
     }
 
-    private void handleProfileDownload(Profile profile, RecordedActivity activity, ActivityViewHolder viewHolder){
+    private void handleActivityProfileDownload(Profile profile, RecordedActivity activity, ActivityViewHolder viewHolder){
         viewHolder.profilePic.setImageBitmap(profile.getProfileImage());
         viewHolder.nameView.setText(profile.getName());
         viewHolder.dateView.setText(activity.getTimestamp().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm")));
@@ -134,6 +134,8 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     }
 
+
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Model model = modelList.get(position);
@@ -151,19 +153,16 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                 }
             });
 
-
-            final String[] userId = {model.getTile()};
+            final String userId = model.getTile();
             String id = model.getId();
         
             if (profile == null || !id.equals(profile.getUserId())) {
-                new UserDatabase(userId[0]).getChildDocument(Profile.PROFILE_DOCUMENT)
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot snapshot = task.getResult();
-                            handlePostDownload(model, snapshot, holder, userId[0]);
-                        }
-                    });
+                ProfileUtils.downloadProfile(userId, profile -> handlePostProfileDownload(profile, holder, model),
+                        () -> Toast.makeText(context, "Failed to download post", Toast.LENGTH_SHORT).show(),
+                        null, context, false);
+                holder.postContent.setText(model.getPost());
+                holder.createdAt.setText(model.getDate());
+                downloadPostImage(model, holder);
             } else {
                 holder.userId.setText(profile.getName());
                 holder.postContent.setText(model.getPost());
@@ -183,8 +182,8 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
             holder2.time.setText(Utils.durationToHoursMinutesSeconds(activity.getRecordedDuration()));
             //((ActivitiesModel)modelList.get(position)).getTimeStamp()
             String id = activity.getUserId();
-            ProfileUtils.downloadProfile(id, profile -> handleProfileDownload(profile, activity, holder2),() -> Toast.makeText(context, "Failed to download activity", Toast.LENGTH_SHORT).show(),
-                    null,false, context, true);
+            ProfileUtils.downloadProfile(id, profile -> handleActivityProfileDownload(profile, activity, holder2),() -> Toast.makeText(context, "Failed to download activity", Toast.LENGTH_SHORT).show(),
+                    null, context, false);
         }
 
     }
