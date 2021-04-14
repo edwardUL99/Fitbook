@@ -1,6 +1,5 @@
 package ie.ul.fitbook.ui.home;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -15,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Callback;
@@ -26,20 +24,14 @@ import org.threeten.bp.format.DateTimeFormatter;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.storage.PostsStorage;
-import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
-
-import static java.lang.Integer.parseInt;
-
 
 public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
     Context context;
