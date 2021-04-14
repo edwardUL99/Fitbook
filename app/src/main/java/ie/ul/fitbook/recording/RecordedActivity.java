@@ -9,7 +9,10 @@ import com.google.maps.android.PolyUtil;
 import org.threeten.bp.Duration;
 import org.threeten.bp.LocalDateTime;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -369,5 +372,19 @@ public class RecordedActivity extends Model implements Parcelable, Comparable<Mo
     @Override
     public int hashCode() {
         return Objects.hash(timestamp, recordedLocations, recordedDuration, sport, distance, averageSpeed, elevationGain, caloriesBurned, firestoreId);
+    }
+
+    public String getTime() throws ParseException {
+
+
+        String newTimeStamp = timestamp.toString().replace("T", " ");
+
+        String myDate = "2014/10/29 18:10:45";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:sss");
+        Date date = sdf.parse(newTimeStamp);
+        long millis = date.getTime();
+
+
+        return String.valueOf(millis);
     }
 }

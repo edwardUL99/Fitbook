@@ -34,9 +34,6 @@
             android:name=".ui.home.AddPost"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.profiles.ProfilesActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".ui.home.ProfilesActivity"
             android:screenOrientation="portrait" />
         <activity

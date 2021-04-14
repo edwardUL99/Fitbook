@@ -1,6 +1,5 @@
 package ie.ul.fitbook.utils;
 
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;

@@ -49,34 +49,21 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.friends_model_layout, parent, false);
 
-        FriendsListViewHolder viewHolder = new FriendsListViewHolder(itemView);
-
-        viewHolder.setOnClickListener(new FriendsListViewHolder.ClickListener() {
-            @Override
-            public void onItemClicked(View view, int position) {
-                //String title = friendModelList.get(position).getUserName();
-                //String post = friendModelList.get(position).getUserLocation();
-            }
-
-            @Override
-            public void onItemLongClicked(View view, int position) {
-                String userId = friendModelList.get(position).getUserId();
-                Intent intent = new Intent(friendsList, ViewProfileActivity.class);
-                intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
-                context.startActivity(intent);
-            }
-        });
-
-        return viewHolder;
+        return new FriendsListViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull FriendsListViewHolder holder, int position) {
+        FriendModel friendModel = friendModelList.get(position);
+        final String userId = friendModel.getUserId();
 
-        final String[] userId = {friendModelList.get(position).getUserId()};
-        //String id = modelList.get(position).getId();
+        holder.itemView.setOnClickListener(view -> {
+            Intent intent = new Intent(friendsList, ViewProfileActivity.class);
+            intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
+            context.startActivity(intent);
+        });
 
-        new UserDatabase(userId[0]).getChildDocument(Profile.PROFILE_DOCUMENT)
+        new UserDatabase(userId).getChildDocument(Profile.PROFILE_DOCUMENT)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -86,7 +73,7 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
                         holder.userName.setText(profile.getName());
                         holder.userLocation.setText(profile.getCity());
 
-                        StorageReference reference = new UserStorage(userId[0]).getChildFolder(Profile.PROFILE_IMAGE_PATH);
+                        StorageReference reference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
                         //StorageReference reference2 = new PostsStorage(id).getChildFolder("jpg");
                         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
                         {

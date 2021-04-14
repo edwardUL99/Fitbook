@@ -1,6 +1,5 @@
 package ie.ul.fitbook.ui.chat;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -57,7 +57,7 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message_final);
+        setContentView(R.layout.activity_message);
 
         profilePic = findViewById(R.id.profilePicture9);
         TextView name = findViewById(R.id.address9);
@@ -113,6 +113,10 @@ public class MessageActivity extends AppCompatActivity {
                     message.put("content", editText.getText().toString());
                     message.put("timeStamp", timeInMilliseconds);
 
+                    Map<String, Object> recent = new HashMap<>();
+                    recent.put("timeStamp", timeInMilliseconds);
+
+
                     db.collection("users" + "/" + Login.getUserId() + "/messages/" + userId  + "/message")
                             .add(message)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -131,6 +135,46 @@ public class MessageActivity extends AppCompatActivity {
                                 }
                             });
 
+                    UserDatabase userDb = new UserDatabase(Login.getUserId());
+                    userDb.getChildCollection("messages").document(userId).set(recent).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            e.printStackTrace();
+
+                        }
+                    });
+
+                    userDb = new UserDatabase(userId);
+                    userDb.getChildCollection("messages").document(Login.getUserId()).set(recent).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            e.printStackTrace();
+
+                        }
+                    });
+
+                    System.out.println("here here" + userId + Login.getUserId());
+
+
+
+//                    db.collection("users" + "/" + Login.getUserId() + "/messages/" + userId  + "/recent")
+//                            .add(recent)
+//                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+//                                @Override
+//                                public void onSuccess(DocumentReference documentReference) {
+//
+//                                }
+//                            });
+//
+//                    db.collection("users" + "/" + userId + "/messages/" + Login.getUserId()  + "/recent")
+//                            .add(recent)
+//                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+//                                @Override
+//                                public void onSuccess(DocumentReference documentReference) {
+//
+//                                }
+//                            });
+
                     Map<String, Object> notification = new HashMap<>();
                     notification.put("userId", Login.getUserId());
                     notification.put("notificationType", "Message");
@@ -144,10 +188,13 @@ public class MessageActivity extends AppCompatActivity {
                                 }
                             });
 
-                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
-                    intent.putExtra("userId", userId);
-                    startActivity(intent);
-                    finish();
+//                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
+//                    intent.putExtra("userId", userId);
+//                    startActivity(intent);
+//                    finish();
+                    adapter.notifyDataSetChanged();
+                    showMessages();
+                    editText.setText(null);
                 }
             }
         });

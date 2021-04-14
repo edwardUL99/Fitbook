@@ -25,6 +25,9 @@ import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.chat.MessageActivity;
+import ie.ul.fitbook.ui.notifications.NotificationModel;
+import ie.ul.fitbook.ui.notifications.NotificationsActivity;
+import ie.ul.fitbook.ui.notifications.NotificationsViewHolder;
 import ie.ul.fitbook.ui.profile.ViewProfileActivity;
 
 public class NotificationsCustomAdapter extends RecyclerView.Adapter<NotificationsViewHolder> {

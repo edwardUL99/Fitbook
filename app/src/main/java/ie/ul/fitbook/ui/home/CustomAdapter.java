@@ -128,7 +128,6 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                 intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, activity);
                 ViewRecordedActivity.setProfileImage(profile.getProfileImage());
                 context.startActivity(intent);
-
             }
         });
 
@@ -180,7 +179,6 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
             holder2.elevation.setText(elevation);
 
             holder2.time.setText(Utils.durationToHoursMinutesSeconds(activity.getRecordedDuration()));
-            //((ActivitiesModel)modelList.get(position)).getTimeStamp()
             String id = activity.getUserId();
             ProfileUtils.downloadProfile(id, profile -> handleActivityProfileDownload(profile, activity, holder2),() -> Toast.makeText(context, "Failed to download activity", Toast.LENGTH_SHORT).show(),
                     null, context, false);
@@ -188,20 +186,11 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     }
 
-
     @Override
     public int getItemViewType(int position) {
 
         if (modelList.get(position) instanceof RecordedActivity){return 1;}
         else{return 0;}
-//        if(modelList.get(position).getClass() == Model.class){
-//
-//            return 0;
-//
-//
-//        }
-//        else return 1;
-
     }
 
     @Override

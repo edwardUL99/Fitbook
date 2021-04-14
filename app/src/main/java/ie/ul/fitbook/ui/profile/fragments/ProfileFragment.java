@@ -166,11 +166,6 @@ public class ProfileFragment extends Fragment {
         friendsButton.setOnClickListener(v -> onAddFriendsClicked());
         friendsView = view.findViewById(R.id.friends);
 
-
-
-
-
-
         friendsView.setOnClickListener(v -> onFriendsClicked());
         setupProfileOptions(view);
 
@@ -327,7 +322,6 @@ public class ProfileFragment extends Fragment {
      */
     private void onAddFriendsClicked() {
         Intent intent = new Intent(activity, ProfilesActivity.class);
-        // TODO may need to add a new extra for an id to return to which will override any Last ID passed into the intent
         startActivity(intent);
     }
 
@@ -335,10 +329,6 @@ public class ProfileFragment extends Fragment {
      * Handles the clicking of the number of friends to view a friends list
      */
     private void onFriendsClicked() {
-        // TODO show friends list here
-        //Toast.makeText(activity, "Friends list will display when done", Toast.LENGTH_SHORT)
-             //   .show();
-
         Intent intent = new Intent(getActivity(), FriendsList.class);
         startActivity(intent);
         ((Activity) getActivity()).overridePendingTransition(0, 0);
@@ -392,7 +382,11 @@ public class ProfileFragment extends Fragment {
                     LOADED_ONCE = true;
                     Login.setProfileOutOfSync(false); // we have now fully synced our profile
                 })
-                .addOnFailureListener(fail -> onProfileSyncFail());
+                .addOnFailureListener(fail -> {
+                    fail.printStackTrace();
+                    Toast.makeText(activity, "Failed to load friends information", Toast.LENGTH_SHORT)
+                            .show();
+                });
     }
 
     /**

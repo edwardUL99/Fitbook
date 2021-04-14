@@ -1,11 +1,9 @@
 package ie.ul.fitbook.ui.home;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
@@ -17,21 +15,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import java.sql.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.Picasso;
 
 
 import androidx.annotation.NonNull;
@@ -39,11 +29,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
@@ -56,6 +44,7 @@ public class AddPost extends AppCompatActivity {
     FirebaseFirestore db;
     ImageView imageView;
     Uri imageUri;
+    boolean imageSet;
     private StorageReference mStorageRef;
 
 
@@ -76,15 +65,25 @@ public class AddPost extends AppCompatActivity {
         Button imageButton = findViewById(R.id.imageButton);
         imageView = findViewById(R.id.imageView);
         mStorageRef = FirebaseStorage.getInstance().getReference("posts");
+        imageSet=false;
 
         db = FirebaseFirestore.getInstance();
+
 
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String post = t3.getText().toString().trim();
                 String userId = Login.getUserId();
+
+                if(imageSet){
                 uploadData(userId, post);
+                }
+                else{
+
+                    Toast.makeText(AddPost.this, "Must add a picture", Toast.LENGTH_SHORT).show();
+                }
+
                 finish();
             }
         });
@@ -102,6 +101,7 @@ public class AddPost extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
+        imageSet = true;
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
 
     }

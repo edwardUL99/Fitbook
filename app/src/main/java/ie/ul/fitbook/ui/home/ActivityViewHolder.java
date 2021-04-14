@@ -3,7 +3,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+
 import ie.ul.fitbook.R;
 
 public class ActivityViewHolder extends ViewHolder {
@@ -19,23 +19,6 @@ public class ActivityViewHolder extends ViewHolder {
     public ActivityViewHolder(@NonNull View itemView) {
         super(itemView);
         mView = itemView;
-//        itemView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                mClickListener.onItemClicked(v, getAdapterPosition());
-//
-//            }
-//        });
-//        itemView.setOnLongClickListener(new View.OnLongClickListener(){
-//
-//            @Override
-//            public boolean onLongClick(View v){
-//                mClickListener.onItemLongClicked(v, getAdapterPosition());
-//
-//
-//                return true;
-//            }});
         distance = itemView.findViewById(R.id.distanceRecorded);
         time = itemView.findViewById(R.id.timeRecorded);
         elevation = itemView.findViewById(R.id.elevationRecorded);
@@ -46,6 +29,7 @@ public class ActivityViewHolder extends ViewHolder {
 
 
     }
+    
     private ActivityViewHolder.ClickListener mClickListener;
     public interface ClickListener{
         void onItemClicked(View view, int position);

@@ -4,17 +4,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/theme_color"
+    android:background="@color/lightblue"
     tools:context=".ui.MainActivity">
 
+    <ImageView
+        android:id="@+id/applogo"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/fitbooklogocropped"
+        android:contentDescription="Cropped FitBook Logo"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="300dp"
+        />
+
     <TextView
+        android:id="@+id/appname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="FITBOOK"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textColor="#F6F7FA"
+        android:text="FitBook™"
+        android:textSize="50sp"
+        android:fontFamily="@font/thin"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@+id/applogo"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginBottom="300dp"
+        />
+
+    <TextView
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loading, please wait..."
+        android:textSize="20sp"
+        android:fontFamily="@font/light"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@+id/appname"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="260dp"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>
