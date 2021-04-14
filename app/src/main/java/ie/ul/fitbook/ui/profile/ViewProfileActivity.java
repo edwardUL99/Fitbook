@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -661,7 +662,25 @@ public class ViewProfileActivity extends AppCompatActivity {
         accepted.put("id", userId);
         accepted.put("status", "accepted");
 
-        UserDatabase userDb = new UserDatabase(ownId);
+        UserDatabase userDb = new UserDatabase(userId);
+        userDb.getChildCollection("unmessaged").document(ownId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        userDb = new UserDatabase(ownId);
+        userDb.getChildCollection("unmessaged").document(userId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        userDb = new UserDatabase(ownId);
         userDb.getChildCollection("friends")
                 .document(userId)
                 .set(accepted)
@@ -675,6 +694,8 @@ public class ViewProfileActivity extends AppCompatActivity {
                             .document(ownId)
                             .set(accepted)
                             .addOnSuccessListener(success1 -> {
+
+
                                 buttonRemoveFriend(userId, ownId);
                                 updateFriendsCount(userId, ownId, true);
                             })
