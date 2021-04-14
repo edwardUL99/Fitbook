@@ -179,6 +179,11 @@ public class MessageActivity extends AppCompatActivity {
                     notification.put("userId", Login.getUserId());
                     notification.put("notificationType", "Message");
 
+                    Date mDateMessage = new Date();
+                    long timeInMillisecondsMessage = mDateMessage.getTime();
+
+                    notification.put("createdAt", timeInMillisecondsMessage);
+
                     db.collection("users" + "/" + userId + "/notifications")
                             .add(notification)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {

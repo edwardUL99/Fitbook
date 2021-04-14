@@ -17,6 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ie.ul.fitbook.R;
@@ -89,13 +90,15 @@ public class NotificationsActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         for(DocumentSnapshot doc: task.getResult()){
                             if(doc.getString("postId") != null){
-                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"), doc.getString("postId"));
+                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"), doc.getString("postId"), String.valueOf(doc.get("createdAt")));
                                 notificationModelList.add(model);
                             } else {
-                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"));
+                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"), String.valueOf(doc.get("createdAt")));
                                 notificationModelList.add(model);
                             }
                         }
+                        Collections.sort(notificationModelList);
+                        Collections.reverse(notificationModelList);
                         adapter = new NotificationsCustomAdapter(NotificationsActivity.this, notificationModelList);
                         mRecyclerView.setAdapter(adapter);
                     }

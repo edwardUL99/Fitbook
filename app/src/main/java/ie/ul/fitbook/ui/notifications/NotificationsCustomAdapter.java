@@ -76,6 +76,10 @@ public class NotificationsCustomAdapter extends RecyclerView.Adapter<Notificatio
                         Intent intent = new Intent(notification, HomeActivity.class);
                         intent.putExtra("postId", notificationModelList.get(position).getPostId());
                         notification.startActivity(intent);
+                    } else if(notificationType.equals("New Activity")) {
+                        Intent intent = new Intent(notification, HomeActivity.class);
+                        intent.putExtra("postId", notificationModelList.get(position).getPostId());
+                        notification.startActivity(intent);
                     }
             }
         });
