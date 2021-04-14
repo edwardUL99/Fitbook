@@ -65,16 +65,16 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
         db = FirebaseFirestore.getInstance();
         this.profile = profile;
     }
-
+    
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ViewHolder viewHolder;
 
         if(viewType==0){
-            View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.model_layout, parent, false);
-            viewHolder = new ViewHolder(itemView);}
+             View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.model_layout, parent, false);
+             viewHolder = new ViewHolder(itemView);}
         else{
             View itemView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.recorded_activity_layout, parent, false);
@@ -128,7 +128,6 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                 intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, activity);
                 ViewRecordedActivity.setProfileImage(profile.getProfileImage());
                 context.startActivity(intent);
-
             }
         });
 
@@ -139,7 +138,7 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Model model = modelList.get(position);
-
+        
         if(getItemViewType(position)==0){
 
 
@@ -155,7 +154,7 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
             final String userId = model.getTile();
             String id = model.getId();
-
+        
             if (profile == null || !id.equals(profile.getUserId())) {
                 ProfileUtils.downloadProfile(userId, profile -> handlePostProfileDownload(profile, holder),
                         () -> Toast.makeText(context, "Failed to download post", Toast.LENGTH_SHORT).show(),
@@ -180,7 +179,6 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
             holder2.elevation.setText(elevation);
 
             holder2.time.setText(Utils.durationToHoursMinutesSeconds(activity.getRecordedDuration()));
-            //((ActivitiesModel)modelList.get(position)).getTimeStamp()
             String id = activity.getUserId();
             ProfileUtils.downloadProfile(id, profile -> handleActivityProfileDownload(profile, activity, holder2),() -> Toast.makeText(context, "Failed to download activity", Toast.LENGTH_SHORT).show(),
                     null, context, false);
@@ -188,20 +186,11 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     }
 
-
     @Override
     public int getItemViewType(int position) {
 
         if (modelList.get(position) instanceof RecordedActivity){return 1;}
         else{return 0;}
-//        if(modelList.get(position).getClass() == Model.class){
-//
-//            return 0;
-//
-//
-//        }
-//        else return 1;
-
     }
 
     @Override
