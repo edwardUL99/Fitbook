@@ -59,11 +59,6 @@ public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListView
                 //String title = friendModelList.get(position).getUserName();
                 //String post = friendModelList.get(position).getUserLocation();
 
-            }
-
-            @Override
-            public void onItemLongClicked(View view, int position) {
-
                 String userId = friendModelList.get(position).getUserId();
 //                db.collection("users/" + Login.getUserId() + "/unmessaged").document(userId)
 //                        .delete()
@@ -88,6 +83,36 @@ public class FriendsMessagedAdapter extends RecyclerView.Adapter<FriendsListView
                 Intent intent = new Intent(messagesFragment.getActivity(), MessageActivity.class);
                 intent.putExtra("userId", userId );
                 messagesFragment.startActivity(intent);
+
+            }
+
+            @Override
+            public void onItemLongClicked(View view, int position) {
+
+//                String userId = friendModelList.get(position).getUserId();
+////                db.collection("users/" + Login.getUserId() + "/unmessaged").document(userId)
+////                        .delete()
+////                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+////                            @Override
+////                            public void onSuccess(Void aVoid) {
+////
+////
+////                            }
+////
+////                        });
+////                db.collection("users").document( Login.getUserId() + "/messages/" + userId)
+////                        .set(new HashMap<String, Object>())
+////                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+////                            @Override
+////                            public void onSuccess(Void aVoid) {
+////
+////                            }
+////                        });
+////
+////                friendsList.finish();
+//                Intent intent = new Intent(messagesFragment.getActivity(), MessageActivity.class);
+//                intent.putExtra("userId", userId );
+//                messagesFragment.startActivity(intent);
 
 
 

@@ -34,6 +34,7 @@ import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.storage.PostsStorage;
 import ie.ul.fitbook.storage.UserStorage;
+import ie.ul.fitbook.ui.profile.ViewProfileActivity;
 import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
@@ -142,18 +143,30 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
         if(getItemViewType(position)==0){
 
+            final String userId = model.getTile();
+
 
             holder.itemView.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
 
-                    String s = String.valueOf(position);
-                    Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
+                    holder.itemView.setOnClickListener(new View.OnClickListener(){
+                        @Override
+                        public void onClick(View v) {
 
+                            //String s = String.valueOf(position);
+                            //Toast.makeText(homeFragment.getActivity(), s, Toast.LENGTH_SHORT).show();
+                            String userId = modelList.get(position).getTile();
+                            Intent intent = new Intent(context, ViewProfileActivity.class);
+                            intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
+                            context.startActivity(intent);
+
+                        }
+                    });
                 }
             });
 
-            final String userId = model.getTile();
+
             String id = model.getId();
 
             if (profile == null || !id.equals(profile.getUserId())) {
