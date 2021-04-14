@@ -1,6 +1,5 @@
 package ie.ul.fitbook.ui.chat;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -58,7 +57,7 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message_final);
+        setContentView(R.layout.activity_message);
 
         profilePic = findViewById(R.id.profilePicture9);
         TextView name = findViewById(R.id.address9);

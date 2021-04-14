@@ -309,8 +309,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
-import org.threeten.bp.format.DateTimeFormatter;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -323,8 +321,6 @@ import ie.ul.fitbook.storage.PostsStorage;
 import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
 import ie.ul.fitbook.utils.Utils;
-
-import static java.lang.Integer.parseInt;
 
 
 public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
@@ -408,19 +404,6 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
         Model model = modelList.get(position);
         
         if(getItemViewType(position)==0){
-
-
-            holder.itemView.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v) {
-
-                    String s = String.valueOf(position);
-                    Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
-
-                }
-            });
-
-
             final String[] userId = {model.getTile()};
             String id = model.getId();
         
@@ -444,21 +427,15 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
         else{
             RecordedActivity activity = (RecordedActivity)model;
 
-
             ActivityViewHolder holder2 = (ActivityViewHolder) holder;
             holder2.distance.setText(String.format(Locale.getDefault(), "%,.02fkm", activity.getDistance()));
             String elevation = "" + (int)activity.getElevationGain() + "m";
             holder2.elevation.setText(elevation);
 
-
-
             holder2.time.setText(Utils.durationToHoursMinutesSeconds(activity.getRecordedDuration()));
-            //((ActivitiesModel)modelList.get(position)).getTimeStamp()
             holder2.itemView.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
-
-
                     String id = activity.getUserId();
                     new UserDatabase(id).getChildDocument(Profile.PROFILE_DOCUMENT)
                             .get()
@@ -474,19 +451,7 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                                     intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, activity);
                                     //ViewRecordedActivity.setProfileImage(profile.getProfileImage());
                                     context.startActivity(intent);
-
-
-
-
-
-
                                 }});
-
-
-
-
-
-
                 }
             });
 
@@ -501,13 +466,6 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
         if (modelList.get(position) instanceof RecordedActivity){return 1;}
         else{return 0;}
-//        if(modelList.get(position).getClass() == Model.class){
-//
-//            return 0;
-//
-//
-//        }
-//        else return 1;
 
     }
 

@@ -22,11 +22,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
 
 import java.util.HashMap;
@@ -44,6 +43,7 @@ import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
 import ie.ul.fitbook.ui.MainActivity;
+import ie.ul.fitbook.ui.home.FriendsList;
 import ie.ul.fitbook.ui.home.ProfilesActivity;
 import ie.ul.fitbook.ui.profile.cache.ProfileCache;
 import ie.ul.fitbook.ui.profile.goals.GoalsActivity;
@@ -416,9 +416,9 @@ public class ViewProfileActivity extends AppCompatActivity {
      * Handles the clicking of the number of friends to view a friends list
      */
     private void onFriendsClicked() {
-        // TODO show friends list here
-        Toast.makeText(this, "Friends list will display when done", Toast.LENGTH_SHORT)
-                .show();
+        Intent intent = new Intent(this, FriendsList.class);
+        startActivity(intent);
+        this.overridePendingTransition(0, 0);
     }
 
     /**
@@ -461,178 +461,291 @@ public class ViewProfileActivity extends AppCompatActivity {
                     boolean ownProfile = userId.equals(Login.getUserId());
 
                     if (exists && !ownProfile && !pending && !requested) {
-                        friendsButton.setText("Remove Friend");
-                        friendsButton.setOnClickListener(view -> removeFriend(userId, ownId));
-                        profileOptions.setVisibility(View.VISIBLE);
+                        buttonRemoveFriend(userId, ownId);
                     } else if (ownProfile) {
-                        friendsButton.setText("Add Friends");
-                        friendsButton.setOnClickListener(view -> launchProfilesActivity());
-                        profileOptions.setVisibility(View.VISIBLE);
-                        friendsView.setOnClickListener(view -> onFriendsClicked());
+                        buttonAddFriends();
                     } else if(exists && pending) {
-                        friendsButton.setText("Accept");
-                        friendsButton.setOnClickListener(view -> acceptFriend(userId, ownId));
-                        profileOptions.setVisibility(View.GONE);
+                        buttonAcceptFriend(userId, ownId);
                     } else if(exists && requested) {
-                        friendsButton.setText("Cancel Request");
-                        friendsButton.setOnClickListener(view -> cancelRequest(userId, ownId));
-                        profileOptions.setVisibility(View.GONE);
+                        buttonCancelRequest(userId, ownId);
                     } else{
-                        friendsButton.setText("Add Friend");
-                        friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
-                        profileOptions.setVisibility(View.GONE);
+                        buttonAddFriend(userId, ownId);
                     }
 
                     loadingBar.hide();
                     swipeRefreshLayout.setRefreshing(false);
 
-                    userDb.getDatabase()
-                            .get()
-                            .addOnSuccessListener(success -> {
-                                Map<String, Object> data = success.getData();
-
-                                if (data != null) {
-                                    Long friendsNum = (Long)data.get("friends-count");
-                                    friendsNum = friendsNum == null ? 0:friendsNum;
-                                    String numberFriends = "" + friendsNum;
-                                    friendsView.setText(numberFriends);
-                                } else {
-                                    String zero = "" + 0;
-                                    friendsView.setText(zero);
-                                }
-
-                                ProfileCache.setUserCached(getUserId(), true);
-                            })
-                            .addOnFailureListener(fail -> onProfileRefreshFail());
+                    syncFriendsCount();
                 })
-                .addOnFailureListener(fail -> onProfileRefreshFail());
+                .addOnFailureListener(fail -> {
+                    fail.printStackTrace();
+                    Toast.makeText(this, "Failed to load friends information", Toast.LENGTH_SHORT)
+                            .show();
+                });
+    }
+
+    /**
+     * Sync the friends count variable in the profile
+     */
+    private void syncFriendsCount() {
+        String userId = getUserId();
+        new UserDatabase(userId).getDatabase()
+                .get()
+                .addOnSuccessListener(success -> {
+                    Map<String, Object> data = success.getData();
+
+                    if (data != null) {
+                        Long friendsNum = (Long)data.get("friends-count");
+                        friendsNum = friendsNum == null ? 0:friendsNum;
+                        String numberFriends = "" + friendsNum;
+                        friendsView.setText(numberFriends);
+                    } else {
+                        String zero = "" + 0;
+                        friendsView.setText(zero);
+                    }
+
+                    ProfileCache.setUserCached(userId, true);
+                })
+                .addOnFailureListener(fail -> {
+                    fail.printStackTrace();
+                    Toast.makeText(this, "Failed to load friends information", Toast.LENGTH_SHORT)
+                            .show();
+                });
+    }
+
+    /**
+     * Changes the text of the friends button to Add Friends and the appropriate click handler
+     */
+    private void buttonAddFriends() {
+        friendsButton.setText("Add Friends");
+        friendsButton.setOnClickListener(view -> launchProfilesActivity());
+        profileOptions.setVisibility(View.VISIBLE);
+        friendsView.setOnClickListener(view -> onFriendsClicked());
+    }
+
+    /**
+     * Changes the button text to Accept Request and the appropriate click handler
+     */
+    private void buttonAcceptFriend(String userId, String ownId) {
+        friendsButton.setText("Accept Friend");
+        friendsButton.setOnClickListener(view -> acceptFriend(userId, ownId));
+        profileOptions.setVisibility(View.GONE);
+    }
+
+    /**
+     * Changes the text of the friends button to Add Friend and the appropriate click handler
+     */
+    private void buttonAddFriend(String userId, String ownId) {
+        friendsButton.setText("Add Friend");
+        friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
+        profileOptions.setVisibility(View.GONE);
+    }
+
+    /**
+     * Changes the text of the friends button to Cancel Request and the appropriate click handler
+     */
+    private void buttonCancelRequest(String userId, String ownId) {
+        friendsButton.setText("Cancel Request");
+        friendsButton.setOnClickListener(view -> cancelRequest(userId, ownId));
+        profileOptions.setVisibility(View.GONE);
+    }
+
+    /**
+     * Changes the text of the friends button to Remove Friend and the appropriate click handler
+     */
+    private void buttonRemoveFriend(String userId, String ownId) {
+        friendsButton.setText("Remove Friend");
+        friendsButton.setOnClickListener(view -> removeFriend(userId, ownId));
+        profileOptions.setVisibility(View.VISIBLE);
     }
 
     /**
      * This method removes the profile being viewed by the current user as a friend
      */
     private void removeFriend(String userId, String ownId) {
+        String error = "Failed to remove friend";
         UserDatabase userDb = new UserDatabase(ownId);
-        userDb.getChildCollection("friends").document(userId).delete();
-        userDb.getChildCollection("messages").document(userId).delete();
-        userDb = new UserDatabase(userId);
-        userDb.getChildCollection("friends").document(ownId).delete();
-        userDb.getChildCollection("messages").document(ownId).delete();
-
-        friendsButton.setText("Add Friend");
-        friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
-        profileOptions.setVisibility(View.GONE);
+        userDb.getChildCollection("friends")
+                .document(userId)
+                .delete()
+                .addOnSuccessListener(success -> {
+                    userDb.getChildCollection("messages").document(userId).delete();
+                    UserDatabase userDb1 = new UserDatabase(userId);
+                    userDb1.getChildCollection("friends")
+                            .document(ownId)
+                            .delete()
+                            .addOnSuccessListener(success1 -> {
+                                userDb.getChildCollection("messages").document(ownId).delete();
+                                buttonAddFriend(userId, ownId);
+                                updateFriendsCount(userId, ownId, false);
+                            })
+                            .addOnFailureListener(fail -> handleError(error, fail));
+                })
+                .addOnFailureListener(fail -> handleError(error, fail));
     }
 
+    /**
+     * Prints an error message as a toast and with an optional exception trace
+     * @param error the error to display
+     * @param exception the exception to display if not null
+     */
+    private void handleError(String error, Exception exception) {
+        Toast.makeText(this, error, Toast.LENGTH_SHORT)
+                .show();
+        if (exception != null)
+            exception.printStackTrace();
+    }
+
+    /**
+     * This method cancels a friend request
+     * @param userId the id of the user to send a friend request to
+     * @param ownId the id of the user sending the request
+     */
     private void cancelRequest(String userId, String ownId) {
+        String error = "Failed to cancel friend request";
         UserDatabase userDb = new UserDatabase(ownId);
-        userDb.getChildCollection("friends").document(userId).delete();
-        userDb = new UserDatabase(userId);
-        userDb.getChildCollection("friends").document(ownId).delete();
-        
-        friendsButton.setText("Add Friend");
-        friendsButton.setOnClickListener(view -> addFriend(userId, ownId));
-        profileOptions.setVisibility(View.GONE);
+        userDb.getChildCollection("friends").document(userId).delete()
+        .addOnSuccessListener(success -> {
+            UserDatabase userDb1 = new UserDatabase(userId);
+            userDb1.getChildCollection("friends").document(ownId).delete()
+            .addOnSuccessListener(success1 -> buttonAddFriend(userId, ownId))
+            .addOnFailureListener(fail -> handleError(error, fail));
+        })
+        .addOnFailureListener(fail -> handleError(error, fail));
     }
 
     /**
      * Adds the profile being viewed as a friend
      */
     private void addFriend(String userId, String ownId) {
-
+        String error = "Adding friend failed!";
         Map<String, Object> requested = new HashMap<>();
         requested.put("id", userId);
         requested.put("status", "requested");
 
         UserDatabase userDb = new UserDatabase(ownId);
-        userDb.getChildCollection("friends").document(userId).set(requested).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                e.printStackTrace();
-                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
-            }
-        });
+        userDb.getChildCollection("friends").document(userId).set(requested)
+                .addOnSuccessListener(success -> {
+                    requested.clear();
+                    requested.put("id", ownId);
+                    requested.put("status", "pending");
 
-        requested = new HashMap<>();
-        requested.put("id", ownId);
-        requested.put("status", "pending");
+                    UserDatabase userDb1 = new UserDatabase(userId);
+                    userDb1.getChildCollection("friends").document(ownId)
+                            .set(requested)
+                            .addOnSuccessListener(success1 -> userDb1.getChildCollection("unmessaged")
+                                    .document(ownId)
+                                    .delete()
+                                    .addOnSuccessListener(success2 -> userDb.getChildCollection("unmessaged")
+                                            .document(userId)
+                                            .delete()
+                                            .addOnSuccessListener(success3 -> {
+                                                Map<String, Object> notification = new HashMap<>();
+                                                notification.put("userId", Login.getUserId());
+                                                notification.put("notificationType", "New Friend");
 
-        userDb = new UserDatabase(userId);
-        userDb.getChildCollection("friends").document(ownId).set(requested).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                e.printStackTrace();
-                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
-            }
-        });
+                                                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                                                db.collection("users" + "/" + userId + "/notifications")
+                                                        .add(notification);
 
-        userDb = new UserDatabase(userId);
-        userDb.getChildCollection("unmessaged").document(ownId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                e.printStackTrace();
-                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
-            }
-        });
-        
-        userDb = new UserDatabase(ownId);
-        userDb.getChildCollection("unmessaged").document(userId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                e.printStackTrace();
-                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        Map<String, Object> notification = new HashMap<>();
-        notification.put("userId", Login.getUserId());
-        notification.put("notificationType", "New Friend");
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("users" + "/" + userId + "/notifications")
-                .add(notification)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-
-                    }
-                });
-        
-        friendsButton.setText("Cancel Request");
-        friendsButton.setOnClickListener(view -> cancelRequest(userId, ownId));
-        profileOptions.setVisibility(View.GONE);
+                                                buttonCancelRequest(userId, ownId);
+                                            })
+                                            .addOnFailureListener(fail -> handleError(error, fail)))
+                                    .addOnFailureListener(fail -> handleError(error, fail)));
+                            })
+                            .addOnFailureListener(fail -> handleError(error, fail));
     }
 
-    private void acceptFriend(String userId, String ownId){
+    /**
+     * This method accepts a friend request
+     * @param userId the id of the user to accept friend request of
+     * @param ownId the id of the user accepting the request
+     */
+    private void acceptFriend(String userId, String ownId) {
+        String error = "Adding friend failed!";
         Map<String, Object> accepted = new HashMap<>();
         accepted.put("id", userId);
         accepted.put("status", "accepted");
 
         UserDatabase userDb = new UserDatabase(ownId);
-        userDb.getChildCollection("friends").document(userId).set(accepted).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                e.printStackTrace();
-                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+        userDb.getChildCollection("friends")
+                .document(userId)
+                .set(accepted)
+                .addOnSuccessListener(success -> {
+                    accepted.clear();
+                    accepted.put("id", ownId);
+                    accepted.put("status", "accepted");
+
+                    UserDatabase userDb1 = new UserDatabase(userId);
+                    userDb1.getChildCollection("friends")
+                            .document(ownId)
+                            .set(accepted)
+                            .addOnSuccessListener(success1 -> {
+                                buttonRemoveFriend(userId, ownId);
+                                updateFriendsCount(userId, ownId, true);
+                            })
+                            .addOnFailureListener(fail -> handleError(error, fail));
+                })
+                .addOnFailureListener(fail -> handleError(error, fail));
+    }
+
+    /**
+     * Set the friends count variable using the provided reference and data object
+     * @param reference the reference to the document to set/update
+     * @param data the data to set
+     * @param increment true to increment by 1 or false to decrement to no lower than 0
+     * @param updateFriendsCount true to update friends count variable or not
+     */
+    private void setFriendsCount(DocumentReference reference, Map<String, Object> data, boolean increment, boolean updateFriendsCount) {
+        String error = "Failed to update friends count information";
+        if (data != null) {
+            Object valueObj = data.get("friends-count");
+
+            int value = increment ? 1:0;
+
+            if (valueObj instanceof Long) {
+                long temp = (Long)valueObj;
+                value = (int)(increment ? temp + 1:temp - 1);
+                value = Math.max(value, 0);
             }
-        });
 
-        accepted = new HashMap<>();
-        accepted.put("id", ownId);
-        accepted.put("status", "accepted");
+            final int finalValue = value;
+            data.clear();
+            data.put("friends-count", value);
+            reference.set(data, SetOptions.merge())
+                    .addOnSuccessListener(success -> {
+                        if (updateFriendsCount)
+                            friendsView.setText(String.valueOf(finalValue));
+                    })
+                    .addOnFailureListener(fail -> handleError(error, fail));
+        } else {
+            int value = increment ? 1:0;
+            data = new HashMap<>();
+            data.put("friends-count", value);
+            reference.set(data)
+                    .addOnFailureListener(fail -> handleError(error, fail));
+        }
+    }
 
-        userDb = new UserDatabase(userId);
-        userDb.getChildCollection("friends").document(ownId).set(accepted).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                e.printStackTrace();
-                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
-            }
-        });
+    /**
+     * Update the friends count variable of each user
+     * @param userId the userId to update
+     * @param ownId our own profile to update also
+     * @param increment true to increment by 1 or false to decrement by 1 (can't go below 0)
+     */
+    private void updateFriendsCount(String userId, String ownId, boolean increment) {
+        String error = "Failed to update friends count information";
+        UserDatabase userDb = new UserDatabase(userId);
+        DocumentReference documentReference = userDb.getDatabase();
+        documentReference.get()
+                .addOnSuccessListener(success -> setFriendsCount(documentReference, success.getData(), increment, true))
+                .addOnFailureListener(fail -> handleError(error, fail));
 
-        friendsButton.setText("Remove Friend");
-        friendsButton.setOnClickListener(view -> removeFriend(userId, ownId));
-        profileOptions.setVisibility(View.VISIBLE);
+        userDb = new UserDatabase(ownId);
+        DocumentReference documentReference1 = userDb.getDatabase();
+        documentReference1.get()
+                .addOnSuccessListener(success -> setFriendsCount(documentReference1, success.getData(), increment, false)) // our profile view is out of sight, so don't update
+                .addOnFailureListener(fail -> handleError(error, fail));
     }
 
     /**
