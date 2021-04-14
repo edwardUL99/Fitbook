@@ -6,7 +6,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.ui.home.FriendsListViewHolder;
 
 public class NotificationsViewHolder extends RecyclerView.ViewHolder{
 
