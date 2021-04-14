@@ -110,7 +110,7 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
         });
     }
 
-    private void handlePostProfileDownload(Profile profile, ViewHolder holder, Model model) {
+    private void handlePostProfileDownload(Profile profile, ViewHolder holder) {
         holder.profilePic.setImageBitmap(profile.getProfileImage());
         holder.userId.setText(profile.getName());
     }
@@ -157,7 +157,7 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
             String id = model.getId();
         
             if (profile == null || !id.equals(profile.getUserId())) {
-                ProfileUtils.downloadProfile(userId, profile -> handlePostProfileDownload(profile, holder, model),
+                ProfileUtils.downloadProfile(userId, profile -> handlePostProfileDownload(profile, holder),
                         () -> Toast.makeText(context, "Failed to download post", Toast.LENGTH_SHORT).show(),
                         null, context, false);
                 holder.postContent.setText(model.getPost());
