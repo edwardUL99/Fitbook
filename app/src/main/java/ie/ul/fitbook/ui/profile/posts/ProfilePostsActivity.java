@@ -156,7 +156,7 @@ public class ProfilePostsActivity extends AppCompatActivity {
      */
     private void loadProfile() {
         ProfileUtils.downloadProfile(userId, this::onProfileLoad, () -> onLoadFailed(null),
-                null, false, this, false);
+                null, this, false);
     }
 
     /**

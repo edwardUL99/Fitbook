@@ -260,7 +260,7 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
                 stopButton.setEnabled(true);
                 resumeButton.setVisibility(View.VISIBLE);
                 paused = true;
-            }, null, false, this, true); // download profile image synchronously so only save when fully complete
+            }, null, this, true); // download profile image synchronously so only save when fully complete
         } else {
             createRecordedActivity(recordingService, finalElevation, profile);
         }

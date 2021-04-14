@@ -326,7 +326,7 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
                     recordedActivity.setFirestoreId(success.getId());
                     if (profile == null) {
                         ProfileUtils.downloadProfile(Login.getUserId(), this::onProfileDownloaded, () -> Toast.makeText(this, "Failed to save", Toast.LENGTH_SHORT).show(),
-                                null, false, this, true); // download profile and profile image synchronously so that the image is available on activity save
+                                null, this, true); // download profile and profile image synchronously so that the image is available on activity save
                     } else {
                         setStatistics(profile, recordedActivity);
                     }
