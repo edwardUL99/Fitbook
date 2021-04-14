@@ -72,10 +72,9 @@ public class ProfilesActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-
+                friendModelList.clear();
                 searchData(newText);
                 return false;
-                //return false;
             }
         });
     }
