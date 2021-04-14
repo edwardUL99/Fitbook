@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ import ie.ul.fitbook.R;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.storage.PostsStorage;
+import ie.ul.fitbook.ui.profile.ViewProfileActivity;
 import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
@@ -103,8 +105,19 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
     }
 
     private void handlePostProfileDownload(Profile profile, ViewHolder holder) {
-        holder.profilePic.setImageBitmap(profile.getProfileImage());
+        Bitmap profileImage = profile.getProfileImage();
+        holder.profilePic.setImageBitmap(profileImage);
         holder.userId.setText(profile.getName());
+
+        holder.profilePic.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ViewProfileActivity.class);
+                intent.putExtra(ViewProfileActivity.USER_PROFILE_EXTRA, profile);
+                ViewProfileActivity.setProfileImage(profileImage);
+                context.startActivity(intent);
+            }
+        });
     }
 
     private void handleActivityProfileDownload(Profile profile, RecordedActivity activity, ActivityViewHolder viewHolder){
@@ -125,25 +138,11 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     }
 
-
-
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Model model = modelList.get(position);
         
         if(getItemViewType(position)==0){
-
-
-            holder.itemView.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v) {
-
-                    String s = String.valueOf(position);
-                    Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
-
-                }
-            });
-
             final String userId = model.getTile();
             String id = model.getId();
         

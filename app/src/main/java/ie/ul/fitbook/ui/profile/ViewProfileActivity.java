@@ -165,16 +165,18 @@ public class ViewProfileActivity extends AppCompatActivity {
 
             if (profile == null)
                 throw new IllegalStateException("USER_PROFILE_EXTRA used but null profile has been passed to this Activity");
+
+            userId = profile.getUserId();
         } else {
             if (received.hasExtra(USER_ID_EXTRA)) {
                 userId = received.getStringExtra(USER_ID_EXTRA);
             } else {
                 userId = Login.getUserId();
             }
-
-            if (userId == null)
-                throw new IllegalStateException("No UserID has been passed to this Activity");
         }
+
+        if (userId == null)
+            throw new IllegalStateException("No UserID has been passed to this Activity");
 
         setupActivity();
     }
@@ -185,21 +187,13 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     private Source getCacheSource() {
         if (useCache) {
-            if (ProfileCache.hasUserBeenCached(getUserId()))
+            if (ProfileCache.hasUserBeenCached(userId))
                 return Source.CACHE;
             else
                 return Source.SERVER;
         } else {
             return Source.SERVER;
         }
-    }
-
-    /**
-     * Retrieves the User ID represented by this profile activity
-     * @return the user ID of the profile
-     */
-    private String getUserId() {
-        return profile == null ? this.userId:profile.getUserId();
     }
 
     /**
@@ -355,6 +349,12 @@ public class ViewProfileActivity extends AppCompatActivity {
         if (profile == null)
             throw new IllegalStateException("A profile cannot be null on successful profile refresh");
 
+        boolean ownProfile = userId.equals(Login.getUserId());
+
+        profile.setUserId(userId);
+        if (ownProfile)
+            Login.setProfile(profile);
+
         profileImage.setImageBitmap(profile.getProfileImage());
         nameView.setText(profile.getName());
         String address = profile.getCity() + ", " + profile.getState();
@@ -394,7 +394,7 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (Login.getUserId().equals(getUserId())) {
+        if (Login.getUserId().equals(userId)) {
             getMenuInflater().inflate(R.menu.action_bar_profile, menu);
             return true;
         }
@@ -428,10 +428,8 @@ public class ViewProfileActivity extends AppCompatActivity {
     private void onFriendsSync(Profile profile) {
         String userId = profile.getUserId();
 
-
         String ownId = Login.getUserId();
         //boolean friends, ownProfile;
-
 
         UserDatabase userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends")
@@ -443,19 +441,16 @@ public class ViewProfileActivity extends AppCompatActivity {
                     boolean requested = false;
                     boolean exists = query.size() >0;
 
-
                     if(exists){
-
                         List<DocumentSnapshot> documents = query.getDocuments();
                         Map<String,Object> test = documents.get(0).getData();
 
                         if( test.containsKey("status")){
                             pending = test.get("status").equals("requested");
-
                         }
+
                         if( test.containsKey("status")){
                             requested = test.get("status").equals("pending");
-
                         }
                     }
                     boolean ownProfile = userId.equals(Login.getUserId());
@@ -488,7 +483,6 @@ public class ViewProfileActivity extends AppCompatActivity {
      * Sync the friends count variable in the profile
      */
     private void syncFriendsCount() {
-        String userId = getUserId();
         new UserDatabase(userId).getDatabase()
                 .get()
                 .addOnSuccessListener(success -> {
@@ -795,7 +789,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 .show();
 
         swipeRefreshLayout.setRefreshing(false);
-        ProfileCache.setUserCached(getUserId(), false);
+        ProfileCache.setUserCached(userId, false);
     }
 
     /**
