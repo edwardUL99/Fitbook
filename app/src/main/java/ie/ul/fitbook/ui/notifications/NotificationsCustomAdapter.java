@@ -64,7 +64,7 @@ public class NotificationsCustomAdapter extends RecyclerView.Adapter<Notificatio
                     String userId = notificationModelList.get(position).getUserId();
                     String notificationType = notificationModelList.get(position).getNotificationType();
 
-                    if(notificationType.equals("Message")) {
+                    if(notificationType.equals("New Message")) {
                         Intent intent = new Intent(notification, MessageActivity.class);
                         intent.putExtra("userId", userId);
                         notification.startActivity(intent);

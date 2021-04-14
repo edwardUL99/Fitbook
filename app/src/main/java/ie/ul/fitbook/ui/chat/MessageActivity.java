@@ -177,7 +177,7 @@ public class MessageActivity extends AppCompatActivity {
 
                     Map<String, Object> notification = new HashMap<>();
                     notification.put("userId", Login.getUserId());
-                    notification.put("notificationType", "Message");
+                    notification.put("notificationType", "New Message");
 
                     Date mDateMessage = new Date();
                     long timeInMillisecondsMessage = mDateMessage.getTime();
