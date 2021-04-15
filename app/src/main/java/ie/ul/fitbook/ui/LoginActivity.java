@@ -89,6 +89,7 @@ public class LoginActivity extends AppCompatActivity implements SignInHandler {
                 .createSignInIntentBuilder()
                 .setLockOrientation(true)
                 .setAvailableProviders(providers)
+                .setTheme(R.style.Theme_Fitbook)
                 .build();
 
         startActivityForResult(signInIntent, RC_LOGIN);
