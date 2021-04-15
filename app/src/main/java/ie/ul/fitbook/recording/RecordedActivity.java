@@ -1,5 +1,6 @@
 package ie.ul.fitbook.recording;
 
+import android.app.Activity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -9,7 +10,10 @@ import com.google.maps.android.PolyUtil;
 import org.threeten.bp.Duration;
 import org.threeten.bp.LocalDateTime;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +104,8 @@ public class RecordedActivity extends Model implements Parcelable, Comparable<Mo
      * The user that posted this activity
      */
     public static final String USER_ID_KEY = "user";
+
+    public String activityPostId;
 
     /**
      * Construct a RecordedActivity object to represent an activity that has been recorded
@@ -369,5 +375,27 @@ public class RecordedActivity extends Model implements Parcelable, Comparable<Mo
     @Override
     public int hashCode() {
         return Objects.hash(timestamp, recordedLocations, recordedDuration, sport, distance, averageSpeed, elevationGain, caloriesBurned, firestoreId);
+    }
+
+    public String getTime() throws ParseException {
+
+
+        String newTimeStamp = timestamp.toString().replace("T", " ");
+
+        String myDate = "2014/10/29 18:10:45";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:sss");
+        Date date = sdf.parse(newTimeStamp);
+        long millis = date.getTime();
+
+
+        return String.valueOf(millis);
+    }
+
+    public void setActivityPostId(String activityPostId) {
+        this.activityPostId = activityPostId;
+    }
+
+    public String getId(){
+        return activityPostId;
     }
 }

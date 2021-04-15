@@ -244,8 +244,6 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
      */
     private void saveActivity(RecordingService recordingService, double elevationGain) {
         if (elevationGain == RecordingUtils.ELEVATION_GAIN_UNAVAILABLE) {
-            Toast.makeText(this, "Failed to retrieve elevation gain information", Toast.LENGTH_SHORT)
-                    .show();
             elevationGain = 0.0;
         }
         Profile profile = Login.getProfile();
@@ -260,7 +258,7 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
                 stopButton.setEnabled(true);
                 resumeButton.setVisibility(View.VISIBLE);
                 paused = true;
-            }, null, false, this, true); // download profile image synchronously so only save when fully complete
+            }, null, this, true); // download profile image synchronously so only save when fully complete
         } else {
             createRecordedActivity(recordingService, finalElevation, profile);
         }
@@ -272,17 +270,10 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
     private void stopRecording() {
         if (paused) {
             stopButton.setEnabled(false);
-            if (serviceRegistered) {
-                Application application = getApplication();
-                application.stopService(serviceIntent);
-                application.unbindService(serviceConnection);
-                recordingService.stopForeground(true);
-                recordingService.stopSelf();
-                serviceRegistered = false;
-            }
+            stopService();
             timeView.stop();
 
-            Toast.makeText(this, "Retrieving elevation data, please wait", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "Finishing activity, please wait", Toast.LENGTH_SHORT)
                     .show();
             resumeButton.setVisibility(View.GONE);
             stopButton.setEnabled(true);
@@ -321,8 +312,33 @@ public class RecordingActivity extends AppCompatActivity implements RecordedLoca
      */
     @Override
     public void onBackPressed() {
-        Toast.makeText(this, "To exit, press Pause > Stop", Toast.LENGTH_SHORT)
-                .show();
+        RecordingUtils.confirmBackPressedOnRecording(this, this::onDeleteConfirmed);
+    }
+
+    /**
+     * If the service has been registered, this stops the service
+     */
+    public void stopService() {
+        if (serviceRegistered) {
+            Application application = getApplication();
+            application.stopService(serviceIntent);
+            application.unbindService(serviceConnection);
+            recordingService.stopForeground(true);
+            recordingService.stopSelf();
+            serviceRegistered = false;
+        }
+    }
+
+    /**
+     * Handles when delete is confirmed
+     */
+    private void onDeleteConfirmed() {
+        stopService();
+
+        Intent intent = new Intent(this, StartRecordingActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 
     /**

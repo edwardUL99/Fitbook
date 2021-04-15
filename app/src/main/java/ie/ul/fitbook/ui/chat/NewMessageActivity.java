@@ -214,7 +214,7 @@ public class NewMessageActivity extends AppCompatActivity {
 
                    Map<String, Object> notification = new HashMap<>();
                    notification.put("userId", Login.getUserId());
-                   notification.put("notificationType", "message");
+                   notification.put("notificationType", "New Message");
 
                    db.collection("users" + "/" + userId + "/notifications")
                            .add(notification)

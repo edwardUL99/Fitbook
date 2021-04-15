@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.storage.StorageReference;
 
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.LocalTime;
@@ -47,10 +48,12 @@ import ie.ul.fitbook.goals.Goal;
 import ie.ul.fitbook.goals.GoalType;
 import ie.ul.fitbook.goals.TimeGoal;
 import ie.ul.fitbook.login.Login;
+import ie.ul.fitbook.network.NetworkUtils;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
+import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.HomeActivity;
 import ie.ul.fitbook.ui.profile.activities.ListActivitiesActivity;
 import ie.ul.fitbook.utils.Utils;
@@ -67,13 +70,9 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
      */
     public static final String RECORDED_ACTIVITY = "ie.ul.fitbook.RECORDED_ACTIVITY";
     /**
-     * The key to store the profile who recorded the activity in
+     * The key to store the user ID who recorded the activity in
      */
     public static final String ACTIVITY_PROFILE = "ie.ul.fitbook.ACTIVITY_PROFILE";
-    /**
-     * The profile image to display
-     */
-    private static Bitmap profileImage;
     /**
      * The activity recorded
      */
@@ -86,6 +85,10 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
      * The UserId this activity belongs to
      */
     private String userID;
+    /**
+     * The image view to load the profile picture into
+     */
+    private CircleImageView profileImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,11 +122,10 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
 
         returnToHome = getIntent().hasExtra(HomeActivity.FRAGMENT_ID);
 
+        profileImage = findViewById(R.id.userProfilePhoto);
+
         if (activity != null && profile != null) {
-            if (profileImage != null) {
-                CircleImageView imageView = findViewById(R.id.userProfilePhoto);
-                imageView.setImageBitmap(profileImage);
-            }
+            downloadUserProfileImage();
 
             TextView nameView = findViewById(R.id.nameView);
             nameView.setText(profile.getName());
@@ -165,11 +167,13 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
     }
 
     /**
-     * Set the profile image to be displayed
-     * @param profileImage the image to display
+     * Download the user's profile image
      */
-    public static void setProfileImage(Bitmap profileImage) {
-        ViewRecordedActivity.profileImage = profileImage;
+    private void downloadUserProfileImage() {
+        if (NetworkUtils.isNetworkConnected(this)) {
+            StorageReference storageReference = new UserStorage(userID).getChildFolder(Profile.PROFILE_IMAGE_PATH);
+            Utils.downloadImage(storageReference, profileImage);
+        }
     }
 
     /**

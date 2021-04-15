@@ -7,7 +7,6 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -25,10 +24,18 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,6 +51,7 @@ import ie.ul.fitbook.goals.TimeGoal;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
+import ie.ul.fitbook.recording.RecordingUtils;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
@@ -130,19 +138,16 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
      */
     @Override
     public void onBackPressed() {
-        onDeleteClicked();
+        RecordingUtils.confirmBackPressedOnRecording(this, this::onDeleteConfirmed);
     }
 
     /**
      * Handles when delete is clicked
      */
     private void onDeleteClicked() {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Activity")
-                .setMessage("Are you sure you want to delete this activity? It cannot be reversed")
-                .setPositiveButton("Yes", (alertDialog, which) -> onDeleteConfirmed())
-                .setNegativeButton("No", (alertDialog, which) -> alertDialog.dismiss())
-                .show();
+        RecordingUtils.confirmRecordingDeletion(this, this::onDeleteConfirmed,
+                "Delete Activity",
+                "Are you sure you want to delete this activity? It cannot be reversed");
     }
 
     /**
@@ -258,7 +263,6 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
         intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, recordedActivity);
         Profile profile = Login.getProfile();
         intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
-        ViewRecordedActivity.setProfileImage(profile.getProfileImage());
         startActivity(intent);
         finish();
     }
@@ -326,10 +330,38 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
                     recordedActivity.setFirestoreId(success.getId());
                     if (profile == null) {
                         ProfileUtils.downloadProfile(Login.getUserId(), this::onProfileDownloaded, () -> Toast.makeText(this, "Failed to save", Toast.LENGTH_SHORT).show(),
-                                null, false, this, true); // download profile and profile image synchronously so that the image is available on activity save
+                                null, this, true); // download profile and profile image synchronously so that the image is available on activity save
                     } else {
                         setStatistics(profile, recordedActivity);
                     }
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    db.collection("users/" + Login.getUserId() +"/friends")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    for(DocumentSnapshot doc: task.getResult()){
+                                        Map<String, Object> notification = new HashMap<>();
+                                        notification.put("userId", Login.getUserId());
+                                        notification.put("notificationType", "New Activity");
+                                        notification.put("postId", success.getId());
+
+                                        Date mDate = new Date();
+                                        long timeInMilliseconds = mDate.getTime();
+
+                                        notification.put("createdAt", timeInMilliseconds);
+
+                                        db.collection("users" + "/" + doc.getId() + "/notifications")
+                                                .add(notification)
+                                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentReference documentReference) {
+
+                                                    }
+                                                });
+                                    }
+                                }
+                            });
                 })
                 .addOnFailureListener(fail -> {
                     Toast.makeText(this, "Failed: " + fail.getMessage(), Toast.LENGTH_SHORT).show();

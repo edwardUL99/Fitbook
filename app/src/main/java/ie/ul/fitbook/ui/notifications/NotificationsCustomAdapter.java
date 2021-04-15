@@ -50,45 +50,16 @@ public class NotificationsCustomAdapter extends RecyclerView.Adapter<Notificatio
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.notification_model_layout, parent, false);
 
-        NotificationsViewHolder viewHolder = new NotificationsViewHolder(itemView);
-
-        viewHolder.setOnClickListener(new NotificationsViewHolder.ClickListener() {
-            @Override
-            public void onItemClicked(View view, int position) {
-                //String title = friendModelList.get(position).getUserName();
-                //String post = friendModelList.get(position).getUserLocation();
-            }
-
-            @Override
-            public void onItemLongClicked(View view, int position) {
-                    String userId = notificationModelList.get(position).getUserId();
-                    String notificationType = notificationModelList.get(position).getNotificationType();
-
-                    if(notificationType.equals("Message")) {
-                        Intent intent = new Intent(notification, MessageActivity.class);
-                        intent.putExtra("userId", userId);
-                        notification.startActivity(intent);
-                    } else if(notificationType.equals("New Friend")){
-                        Intent intent = new Intent(notification, ViewProfileActivity.class);
-                        intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
-                        notification.startActivity(intent);
-                    } else if(notificationType.equals("New Post")){
-                        Intent intent = new Intent(notification, HomeActivity.class);
-                        intent.putExtra("postId", notificationModelList.get(position).getPostId());
-                        notification.startActivity(intent);
-                    }
-            }
-        });
-
-        return viewHolder;
+        return new NotificationsViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull NotificationsViewHolder holder, int position) {
+        NotificationModel model = notificationModelList.get(position);
 
-        final String[] userId = {notificationModelList.get(position).getUserId()};
+        String userId = model.getUserId();
 
-        new UserDatabase(userId[0]).getChildDocument(Profile.PROFILE_DOCUMENT)
+        new UserDatabase(userId).getChildDocument(Profile.PROFILE_DOCUMENT)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -96,14 +67,36 @@ public class NotificationsCustomAdapter extends RecyclerView.Adapter<Notificatio
                         Map<String, Object> data = snapshot.getData();
                         Profile profile = Profile.from(data);
                         holder.userId.setText(profile.getName());
-                        holder.notificationType.setText(notificationModelList.get(position).getNotificationType());
+                        holder.notificationType.setText(model.getNotificationType());
 
-                        StorageReference reference = new UserStorage(userId[0]).getChildFolder(Profile.PROFILE_IMAGE_PATH);
+                        StorageReference reference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
                         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri downloadUrl) {
                                 String uri = downloadUrl.toString();
                                 Picasso.get().load(uri).into(holder.profilePic);
+                            }
+                        });
+
+                        holder.itemView.setOnClickListener(view -> {
+                            String notificationType = model.getNotificationType();
+
+                            if(notificationType.equals("New Message")) {
+                                Intent intent = new Intent(notification, MessageActivity.class);
+                                intent.putExtra("userId", userId);
+                                notification.startActivity(intent);
+                            } else if(notificationType.equals("New Friend")){
+                                Intent intent = new Intent(notification, ViewProfileActivity.class);
+                                intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
+                                notification.startActivity(intent);
+                            } else if(notificationType.equals("New Post")){
+                                Intent intent = new Intent(notification, HomeActivity.class);
+                                intent.putExtra("postId", model.getPostId());
+                                notification.startActivity(intent);
+                            } else if(notificationType.equals("New Activity")) {
+                                Intent intent = new Intent(notification, HomeActivity.class);
+                                intent.putExtra("postId", model.getPostId());
+                                notification.startActivity(intent);
                             }
                         });
                     }

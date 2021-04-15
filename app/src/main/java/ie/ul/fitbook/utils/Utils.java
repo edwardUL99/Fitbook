@@ -10,12 +10,21 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.widget.ImageView;
 
 import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import org.threeten.bp.Duration;
 
 import java.util.Locale;
+
+import ie.ul.fitbook.R;
 
 /**
  * This class provides various utility methods
@@ -137,7 +146,7 @@ public final class Utils {
      * @return bitmap of the drawable
      * @throws android.content.res.Resources.NotFoundException if the drawable can't be found
      */
-    public  static Bitmap drawableToBitmap(Context context, int drawableId) throws Resources.NotFoundException {
+    public static Bitmap drawableToBitmap(Context context, int drawableId) throws Resources.NotFoundException {
         Drawable drawable = ContextCompat.getDrawable(context, drawableId);
 
         if (drawable == null)
@@ -163,4 +172,37 @@ public final class Utils {
         drawable.draw(canvas);
         return bitmap;
     }
+
+    /**
+     * Downloads an image into the provided image view
+     * @param reference the firebase storage reference to the image
+     * @param into the imageview to download the image into
+     */
+    public static void downloadImage(StorageReference reference, ImageView into) {
+        reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri downloadUrl) {
+                String uri = downloadUrl.toString();
+                Picasso.get()
+                        .load(uri)
+                        .placeholder(R.drawable.profile)
+                        .error(R.drawable.profile)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(into, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                // no-op
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Picasso.get()
+                                        .load(uri)
+                                        .into(into);
+                            }
+                        });
+            }
+        });
+    }
+
 }

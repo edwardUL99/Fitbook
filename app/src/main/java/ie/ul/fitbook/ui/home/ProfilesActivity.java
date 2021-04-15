@@ -61,12 +61,13 @@ public class ProfilesActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(ProfilesActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
 
-
+        adapter = new SearchAdapter(ProfilesActivity.this, friendModelList);
+        mRecyclerView.setAdapter(adapter);
 
         searchView.setOnQueryTextListener(new OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
+                adapter.clear();
                 searchData(query);
                 return false;
             }
@@ -124,14 +125,20 @@ public class ProfilesActivity extends AppCompatActivity {
                                             DocumentSnapshot snapshot = innerTask.getResult();
                                             Map<String, Object> data = snapshot.getData();
                                             Profile profile = Profile.from(data);
-                                            String substring = profile.getName().substring(0,s.length()).toLowerCase();
-                                            if(substring.equals(s.toLowerCase()) && !doc.getId().equals(Login.getUserId())){
 
-                                                FriendModel model = new FriendModel(doc.getId());
-                                                friendModelList.add(model);
-                                                adapter = new SearchAdapter(ProfilesActivity.this, friendModelList);
-                                                mRecyclerView.setAdapter(adapter);
-                                            }} });
-                        }
-                        friendModelList.clear();
-                    }});}}
+                                            String name = profile.getName();
+                                            if(s.length() <= name.length()){
+                                                String substring = name.substring(0,s.length()).toLowerCase();
+
+                                                if(substring.equals(s.toLowerCase()) && !doc.getId().equals(Login.getUserId())){
+                                                    FriendModel model = new FriendModel(doc.getId());
+                                                    adapter.addFriend(model);
+                                                }
+                                            }
+                                        }
+                                    });
+                            }
+                    }
+                });
+        }
+    }

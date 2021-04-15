@@ -9,16 +9,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -28,9 +29,11 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.recording.RecordedActivity;
+import ie.ul.fitbook.ui.custom.LoadingBar;
 import ie.ul.fitbook.ui.notifications.NotificationsActivity;
 
 public class HomeFragment extends Fragment {
@@ -42,6 +45,10 @@ public class HomeFragment extends Fragment {
     CustomAdapter adapter;
     String notificationId;
     private SwipeRefreshLayout swipeRefreshLayout;
+    /**
+     * The progress bar for saying the posts are loading
+     */
+    private LoadingBar loadingBar;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -64,6 +71,8 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
 
+        Activity activity = getActivity();
+
         FloatingActionButton ab = view.findViewById(R.id.add_fab);
         //EditText textView = view.findViewById(R.id.textView5);
         ab.setOnClickListener(new View.OnClickListener() {
@@ -71,27 +80,30 @@ public class HomeFragment extends Fragment {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), AddPost.class);
                 startActivity(intent);
-                ((Activity) getActivity()).overridePendingTransition(0, 0);
+                activity.overridePendingTransition(0, 0);
             }
         });
 
+        loadingBar = view.findViewById(R.id.loadingBar);
+        ConstraintLayout postsContainer = view.findViewById(R.id.postsContainer);
+        loadingBar.setLoadedLayout(postsContainer);
+
         mRecyclerView = view.findViewById(R.id.recyclerViewNotification);
         mRecyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(layoutManager);
-        swipeRefreshLayout = getActivity().findViewById(R.id.homeRefresh);
+        mRecyclerView.setItemAnimator(null);
+        swipeRefreshLayout = view.findViewById(R.id.homeRefresh);
         swipeRefreshLayout.setOnRefreshListener(() -> {
-
             modelList.clear();
+            //getActivity().getIntent().removeExtra("postId");
+            notificationId = null;
             showData();
-
 
             swipeRefreshLayout.setRefreshing(false);
         });
         db = FirebaseFirestore.getInstance();
         modelList = new ArrayList<>();
 
-        notificationId = getActivity().getIntent().getStringExtra("postId");
+        notificationId = activity.getIntent().getStringExtra("postId");
         //Toast.makeText(getActivity(), notificationId, Toast.LENGTH_SHORT).show();
         showData();
     }
@@ -149,8 +161,16 @@ public class HomeFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    private void onLoadFail(Exception e) {
+        if (e != null)
+            e.printStackTrace();
+        loadingBar.hideBoth();
+        Toast.makeText(getActivity(), "An error occurred loading posts", Toast.LENGTH_SHORT)
+                .show();
+    }
 
     private void showData(){
+        loadingBar.show();
 
         db.collection("posts")
                 .get()
@@ -165,68 +185,51 @@ public class HomeFragment extends Fragment {
                          }
 
                         db.collection("activities")
-                                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<QuerySnapshot> task2) {
-
+                                mRecyclerView.setAdapter(null);
 
                                 for(DocumentSnapshot doc: task2.getResult()){
-                                    //Model model = new ActivitiesModel(doc.getDouble("distance"),doc.getDouble("elevation_gain"), doc.getString("timestamp"),doc.getId());
-                                   // modelList.add(model);
+                                    Map<String, Object> data = doc.getData();
+                                  
+                                    if (data != null) {
+                                        RecordedActivity model = RecordedActivity.from(data);
 
-
-                                     Model model = RecordedActivity.from(doc.getData());
-                                     modelList.add(model);
+                                        if (model != null) {
+                                            model.setActivityPostId(doc.getId());
+                                            modelList.add(model);
+                                        }
+                                    }
                                 }
 
                                 Collections.sort(modelList);
                                 Collections.reverse(modelList);
-
+                              
+                                int scrollPosition = 0;
+                                if(notificationId != null) {
+                                    for(int i = 0; i<modelList.size()-1; i++){
+                                        if(modelList.get(i).getId().equals(notificationId)) {
+                                            scrollPosition = i;
+                                            break;
+                                        }
+                                    }
+                                }
+                              
                                 adapter = new CustomAdapter(getActivity(), modelList);
+                                mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                                 mRecyclerView.setAdapter(adapter);
-
-
-
-
+                                loadingBar.hide();
+                                if(notificationId != null) {
+                                    mRecyclerView.scrollToPosition(scrollPosition);
+                                }
+                                getActivity().getIntent().removeExtra("postId");
                             }
-                        });
-
-
-
-
-
-
-
-                        //System.out.println("hereherehere" + modelList.size());
-                        //Collections.sort(modelList);
-                        //Collections.reverse(modelList);
-//                        if(notificationId != ""){
-//
-//                        for(int i = 0; i<modelList.size()-1; i++){
-//                            if(modelList.get(i).getId().equals(notificationId)) {
-//                                position = i;
-//                                break;
-//                            }
-//                        }}
-
-//                        adapter = new CustomAdapter(HomeFragment.this, modelList);
-//                        mRecyclerView.setAdapter(adapter);
-
-//                        if(notificationId != null) {
-//                            mRecyclerView.scrollToPosition(position);
-//                        }
-                        getActivity().getIntent().removeExtra("postId");
+                        })
+                        .addOnFailureListener(fail -> onLoadFail(fail));
                     }
-
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                    }
-                });
-
-
+                .addOnFailureListener(this::onLoadFail);
     }
-
 }

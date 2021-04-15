@@ -8,15 +8,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ie.ul.fitbook.R;
@@ -45,6 +49,36 @@ public class NotificationsActivity extends AppCompatActivity {
             actionBar.setTitle("Notifications");
         }
 
+        FloatingActionButton ab = findViewById(R.id.delete_fab);
+        ab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                db.collection("users/" + Login.getUserId() +"/notifications")
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                for(DocumentSnapshot doc: task.getResult()){
+                                    db.collection("users/" + Login.getUserId() + "/notifications").document(doc.getId())
+                                            .delete()
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    notificationModelList.clear();
+                                                    showData();
+                                                }
+                                            });
+                                }
+
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                            }
+                        });
+            }
+        });
         mRecyclerView = findViewById(R.id.recyclerViewNotification);
         mRecyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(NotificationsActivity.this);
@@ -89,13 +123,15 @@ public class NotificationsActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         for(DocumentSnapshot doc: task.getResult()){
                             if(doc.getString("postId") != null){
-                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"), doc.getString("postId"));
+                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"), doc.getString("postId"), String.valueOf(doc.get("createdAt")));
                                 notificationModelList.add(model);
                             } else {
-                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"));
+                                NotificationModel model = new NotificationModel(doc.getString("notificationType"), doc.getString("userId"), String.valueOf(doc.get("createdAt")));
                                 notificationModelList.add(model);
                             }
                         }
+                        Collections.sort(notificationModelList);
+                        Collections.reverse(notificationModelList);
                         adapter = new NotificationsCustomAdapter(NotificationsActivity.this, notificationModelList);
                         mRecyclerView.setAdapter(adapter);
                     }

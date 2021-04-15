@@ -10,7 +10,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
@@ -22,11 +21,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.network.NetworkUtils;
+import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.custom.LoadingBar;
 import ie.ul.fitbook.ui.custom.TraceableScrollView;
 import ie.ul.fitbook.database.UserDatabase;
@@ -129,19 +132,6 @@ public class ViewProfileActivity extends AppCompatActivity {
      * Use this flag to determine if cache should be used
      */
     private boolean useCache;
-    /**
-     * The profile image to load when the activity is launched
-     */
-    private static Bitmap imageToLoad;
-
-    /**
-     * Sets the profile image of the user to load. This should be called along with the USER_PROFILE_EXTRA
-     * since a profile image is too large to pass in a bundle
-     * @param bitmap the bitmap to load
-     */
-    public static void setProfileImage(Bitmap bitmap) {
-        imageToLoad = bitmap;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,25 +148,33 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         if (received.hasExtra(USER_PROFILE_EXTRA)) {
             profile = received.getParcelableExtra(USER_PROFILE_EXTRA);
-            if (imageToLoad != null) {
-                profile.setProfileImage(imageToLoad);
-                imageToLoad = null;
-            }
 
             if (profile == null)
                 throw new IllegalStateException("USER_PROFILE_EXTRA used but null profile has been passed to this Activity");
+
+            userId = profile.getUserId();
         } else {
             if (received.hasExtra(USER_ID_EXTRA)) {
                 userId = received.getStringExtra(USER_ID_EXTRA);
             } else {
                 userId = Login.getUserId();
             }
-
-            if (userId == null)
-                throw new IllegalStateException("No UserID has been passed to this Activity");
         }
 
+        if (userId == null)
+            throw new IllegalStateException("No UserID has been passed to this Activity");
+
         setupActivity();
+    }
+
+    /**
+     * Download the user's profile image
+     */
+    private void downloadUserProfileImage() {
+        if (NetworkUtils.isNetworkConnected(this)) {
+            StorageReference storageReference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
+            Utils.downloadImage(storageReference, profileImage);
+        }
     }
 
     /**
@@ -185,21 +183,13 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     private Source getCacheSource() {
         if (useCache) {
-            if (ProfileCache.hasUserBeenCached(getUserId()))
+            if (ProfileCache.hasUserBeenCached(userId))
                 return Source.CACHE;
             else
                 return Source.SERVER;
         } else {
             return Source.SERVER;
         }
-    }
-
-    /**
-     * Retrieves the User ID represented by this profile activity
-     * @return the user ID of the profile
-     */
-    private String getUserId() {
-        return profile == null ? this.userId:profile.getUserId();
     }
 
     /**
@@ -231,6 +221,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         friendsView = findViewById(R.id.friends);
 
         useCache = true;
+        downloadUserProfileImage();
         setupProfileOptions();
         refreshProfile();
     }
@@ -338,7 +329,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 loadingBar.show();
 
             ProfileUtils.downloadProfile(userId, this::onProfileRefresh, this::onProfileRefreshFail,
-                    profileImage, useCache, this);
+                    profileImage, this);
         } else {
             onProfileRefresh(profile);
             profile = null; // subsequent loads should refresh the profile
@@ -355,7 +346,14 @@ public class ViewProfileActivity extends AppCompatActivity {
         if (profile == null)
             throw new IllegalStateException("A profile cannot be null on successful profile refresh");
 
+        boolean ownProfile = userId.equals(Login.getUserId());
+
+        profile.setUserId(userId);
+        if (ownProfile)
+            Login.setProfile(profile);
+
         profileImage.setImageBitmap(profile.getProfileImage());
+        profile.setProfileImage(null); // save memory
         nameView.setText(profile.getName());
         String address = profile.getCity() + ", " + profile.getState();
         addressView.setText(address);
@@ -394,7 +392,7 @@ public class ViewProfileActivity extends AppCompatActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (Login.getUserId().equals(getUserId())) {
+        if (Login.getUserId().equals(userId)) {
             getMenuInflater().inflate(R.menu.action_bar_profile, menu);
             return true;
         }
@@ -428,10 +426,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     private void onFriendsSync(Profile profile) {
         String userId = profile.getUserId();
 
-
         String ownId = Login.getUserId();
-        //boolean friends, ownProfile;
-
 
         UserDatabase userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends")
@@ -443,19 +438,16 @@ public class ViewProfileActivity extends AppCompatActivity {
                     boolean requested = false;
                     boolean exists = query.size() >0;
 
-
                     if(exists){
-
                         List<DocumentSnapshot> documents = query.getDocuments();
                         Map<String,Object> test = documents.get(0).getData();
 
                         if( test.containsKey("status")){
                             pending = test.get("status").equals("requested");
-
                         }
+
                         if( test.containsKey("status")){
                             requested = test.get("status").equals("pending");
-
                         }
                     }
                     boolean ownProfile = userId.equals(Login.getUserId());
@@ -488,7 +480,6 @@ public class ViewProfileActivity extends AppCompatActivity {
      * Sync the friends count variable in the profile
      */
     private void syncFriendsCount() {
-        String userId = getUserId();
         new UserDatabase(userId).getDatabase()
                 .get()
                 .addOnSuccessListener(success -> {
@@ -666,8 +657,23 @@ public class ViewProfileActivity extends AppCompatActivity {
         Map<String, Object> accepted = new HashMap<>();
         accepted.put("id", userId);
         accepted.put("status", "accepted");
-
-        UserDatabase userDb = new UserDatabase(ownId);
+        UserDatabase userDb = new UserDatabase(userId);
+        userDb.getChildCollection("unmessaged").document(ownId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        userDb = new UserDatabase(ownId);
+        userDb.getChildCollection("unmessaged").document(userId).set(new HashMap<>()).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ViewProfileActivity.this, "Adding friend failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        userDb = new UserDatabase(ownId);
         userDb.getChildCollection("friends")
                 .document(userId)
                 .set(accepted)
@@ -675,12 +681,12 @@ public class ViewProfileActivity extends AppCompatActivity {
                     accepted.clear();
                     accepted.put("id", ownId);
                     accepted.put("status", "accepted");
-
                     UserDatabase userDb1 = new UserDatabase(userId);
                     userDb1.getChildCollection("friends")
                             .document(ownId)
                             .set(accepted)
                             .addOnSuccessListener(success1 -> {
+
                                 buttonRemoveFriend(userId, ownId);
                                 updateFriendsCount(userId, ownId, true);
                             })
@@ -795,7 +801,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 .show();
 
         swipeRefreshLayout.setRefreshing(false);
-        ProfileCache.setUserCached(getUserId(), false);
+        ProfileCache.setUserCached(userId, false);
     }
 
     /**

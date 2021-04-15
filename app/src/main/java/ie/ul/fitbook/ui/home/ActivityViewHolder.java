@@ -1,18 +1,12 @@
 package ie.ul.fitbook.ui.home;
-
 import android.view.View;
-
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 
 import ie.ul.fitbook.R;
 
-
-
 public class ActivityViewHolder extends ViewHolder {
-
     TextView distance;
     TextView elevation;
     TextView time;
@@ -22,31 +16,9 @@ public class ActivityViewHolder extends ViewHolder {
     TextView sportType;
     ImageView profilePic;
 
-
     public ActivityViewHolder(@NonNull View itemView) {
         super(itemView);
-
         mView = itemView;
-
-//        itemView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                mClickListener.onItemClicked(v, getAdapterPosition());
-//
-//            }
-//        });
-
-//        itemView.setOnLongClickListener(new View.OnLongClickListener(){
-//
-//            @Override
-//            public boolean onLongClick(View v){
-//                mClickListener.onItemLongClicked(v, getAdapterPosition());
-//
-//
-//                return true;
-//            }});
-
         distance = itemView.findViewById(R.id.distanceRecorded);
         time = itemView.findViewById(R.id.timeRecorded);
         elevation = itemView.findViewById(R.id.elevationRecorded);
@@ -56,15 +28,12 @@ public class ActivityViewHolder extends ViewHolder {
         profilePic = itemView.findViewById(R.id.userProfilePhoto);
 
 
-
-
     }
+    
     private ActivityViewHolder.ClickListener mClickListener;
-
     public interface ClickListener{
         void onItemClicked(View view, int position);
         void onItemLongClicked(View view, int position);
-
     }
 //    public void setOnClickListener(ActivityViewHolder.ClickListener clicklistener){
 //        mClickListener = clicklistener;
