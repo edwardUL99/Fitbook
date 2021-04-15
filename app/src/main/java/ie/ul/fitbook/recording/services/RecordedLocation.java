@@ -1,7 +1,5 @@
 package ie.ul.fitbook.recording.services;
 
-// TODO add a LatLng field here and say location will be null if the speed was below the minimum speed
-
 import com.google.android.gms.maps.model.LatLng;
 
 /**

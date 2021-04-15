@@ -195,9 +195,12 @@ public class HomeFragment extends Fragment {
                                     Map<String, Object> data = doc.getData();
                                   
                                     if (data != null) {
-                                        RecordedAvtivity model = RecordedActivity.from(data);
-                                        model.setActivityPostId(doc.getId());
-                                        modelList.add(model);
+                                        RecordedActivity model = RecordedActivity.from(data);
+
+                                        if (model != null) {
+                                            model.setActivityPostId(doc.getId());
+                                            modelList.add(model);
+                                        }
                                     }
                                 }
 

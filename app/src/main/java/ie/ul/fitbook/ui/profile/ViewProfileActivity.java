@@ -353,7 +353,7 @@ public class ViewProfileActivity extends AppCompatActivity {
             Login.setProfile(profile);
 
         profileImage.setImageBitmap(profile.getProfileImage());
-        profile.setProfileImage(null); // save memory TODO make sure this doesn't cause bugs
+        profile.setProfileImage(null); // save memory
         nameView.setText(profile.getName());
         String address = profile.getCity() + ", " + profile.getState();
         addressView.setText(address);

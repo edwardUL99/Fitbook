@@ -75,4 +75,14 @@ public class SearchAdapter extends RecyclerView.Adapter<FriendsListViewHolder> {
     public int getItemCount() {
         return friendModelList.size();
     }
+
+    public void addFriend(FriendModel friendModel) {
+        friendModelList.add(friendModel);
+        notifyDataSetChanged();
+    }
+
+    public void clear() {
+        friendModelList.clear();
+        notifyDataSetChanged();
+    }
 }
