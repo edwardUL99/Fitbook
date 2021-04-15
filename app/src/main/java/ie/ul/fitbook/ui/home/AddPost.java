@@ -22,7 +22,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 
 import androidx.annotation.NonNull;
@@ -36,7 +35,6 @@ import java.util.Map;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
-import ie.ul.fitbook.ui.HomeActivity;
 
 public class AddPost extends AppCompatActivity {
 
@@ -78,13 +76,13 @@ public class AddPost extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String post = t3.getText().toString().trim();
                 String userId = Login.getUserId();
 
+                b2.setEnabled(false);
                 uploadData(userId, post);
             }
         });
@@ -94,7 +92,6 @@ public class AddPost extends AppCompatActivity {
                 openFileChooser();
             }
         });
-
 
     }
 
@@ -142,6 +139,7 @@ public class AddPost extends AppCompatActivity {
                         fail.printStackTrace();
 
                         retryPhotoUpload = true;
+                        b2.setEnabled(true);
                     });
         }
     }
@@ -197,8 +195,9 @@ public class AddPost extends AppCompatActivity {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-
-                            Toast.makeText(AddPost.this, "Error", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                            Toast.makeText(AddPost.this, "Error occurred saving post, try again", Toast.LENGTH_SHORT).show();
+                            b2.setEnabled(true);
                         }
                     });
         } else {

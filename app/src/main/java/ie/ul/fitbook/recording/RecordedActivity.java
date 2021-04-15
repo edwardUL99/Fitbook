@@ -1,6 +1,5 @@
 package ie.ul.fitbook.recording;
 
-import android.app.Activity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
