@@ -50,7 +50,6 @@
             android:id="@+id/postsPic"
             android:layout_width="250dp"
             android:layout_height="150dp"
-            android:src="@drawable/profile"
             app:layout_constraintBottom_toTopOf="@+id/post_createdAt"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

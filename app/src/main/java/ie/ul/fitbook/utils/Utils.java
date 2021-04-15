@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.view.View;
 import android.widget.ImageView;
 
 import androidx.core.content.ContextCompat;
@@ -25,6 +26,7 @@ import org.threeten.bp.Duration;
 import java.util.Locale;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.storage.Storage;
 
 /**
  * This class provides various utility methods
@@ -205,4 +207,48 @@ public final class Utils {
         });
     }
 
+    /**
+     * Downloads an image into the provided image view
+     * @param reference the firebase storage reference to the image
+     * @param into the imageview to download the image into
+     * @param hideImageOnError true to hide the image view on error
+     */
+    public static void downloadImage(StorageReference reference, ImageView into, boolean hideImageOnError) {
+        reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri downloadUrl) {
+                String uri = downloadUrl.toString();
+                Picasso.get()
+                        .load(uri)
+                        .placeholder(R.drawable.profile)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(into, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                // no-op
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Picasso.get()
+                                        .load(uri)
+                                        .error(R.drawable.fitbooklogo)
+                                        .into(into, new Callback() {
+                                            @Override
+                                            public void onSuccess() {
+                                                // no-op
+                                            }
+
+                                            @Override
+                                            public void onError(Exception e) {
+                                                if (hideImageOnError)
+                                                    into.setVisibility(View.INVISIBLE);
+                                            }
+                                        });
+                            }
+                        });
+            }
+        })
+        .addOnFailureListener(fail -> into.setVisibility(View.INVISIBLE));
+    }
 }

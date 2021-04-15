@@ -35,6 +35,7 @@ import java.util.Map;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
+import ie.ul.fitbook.ui.HomeActivity;
 
 public class AddPost extends AppCompatActivity {
 
@@ -46,7 +47,6 @@ public class AddPost extends AppCompatActivity {
     Uri imageUri;
     boolean imageSet;
     private StorageReference mStorageRef;
-
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,15 +76,7 @@ public class AddPost extends AppCompatActivity {
                 String post = t3.getText().toString().trim();
                 String userId = Login.getUserId();
 
-                if(imageSet){
                 uploadData(userId, post);
-                }
-                else{
-
-                    Toast.makeText(AddPost.this, "Must add a picture", Toast.LENGTH_SHORT).show();
-                }
-
-                finish();
             }
         });
         imageButton.setOnClickListener(new View.OnClickListener() {
@@ -114,8 +106,6 @@ public class AddPost extends AppCompatActivity {
 
         if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
             && data != null && data.getData() != null){
-
-
 
             imageUri = data.getData();
 
@@ -168,11 +158,16 @@ public class AddPost extends AppCompatActivity {
 
                                                         }
                                                     });
+                                            Intent intent = new Intent(AddPost.this, HomeActivity.class);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                            intent.putExtra(HomeActivity.FRAGMENT_ID, R.id.navigation_home);
+                                            startActivity(intent);
+                                            finish();
                                         }
                                     }
                                 });
 
-                        if(imageUri != null){
+                        if(imageSet && imageUri != null){
 
                             StorageReference fileReference =mStorageRef.child(documentReference.getId()
                                     + "." + getFileExtension(imageUri));

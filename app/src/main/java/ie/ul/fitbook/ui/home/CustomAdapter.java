@@ -74,7 +74,7 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     private void downloadPostImage(Model model, ViewHolder holder) {
         StorageReference reference = new PostsStorage(model.id).getChildFolder("jpg");
-        Utils.downloadImage(reference, holder.postsPic);
+        Utils.downloadImage(reference, holder.postsPic, true);
     }
 
     private void handlePostProfileDownload(Profile profile, ViewHolder holder) {
