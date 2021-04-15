@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
@@ -47,6 +48,14 @@ public class AddPost extends AppCompatActivity {
     Uri imageUri;
     boolean imageSet;
     private StorageReference mStorageRef;
+    /**
+     * Flag which is set to true if user has to retry photo upload
+     */
+    private boolean retryPhotoUpload;
+    /**
+     * Id of the post created if photo upload failed
+     */
+    private String postId;
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,8 +111,6 @@ public class AddPost extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-
-
         if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
             && data != null && data.getData() != null){
 
@@ -119,6 +126,26 @@ public class AddPost extends AppCompatActivity {
         return mime.getExtensionFromMimeType(cR.getType(uri));
     }
 
+    /**
+     * Uploads photo for the given user and post
+     */
+    private void uploadPhoto() {
+        if(imageSet && imageUri != null && postId != null) {
+            StorageReference fileReference = mStorageRef.child(postId
+                    + "." + getFileExtension(imageUri));
+
+            fileReference.putFile(imageUri)
+                    .addOnSuccessListener(success -> finish())
+                    .addOnFailureListener(fail -> {
+                        Toast.makeText(AddPost.this, "Failed to upload post picture, try again", Toast.LENGTH_SHORT)
+                                .show();
+                        fail.printStackTrace();
+
+                        retryPhotoUpload = true;
+                    });
+        }
+    }
+
     private void uploadData(String userId, String postText) {
 
         //Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
@@ -131,63 +158,52 @@ public class AddPost extends AppCompatActivity {
         post.put("post", postText);
         post.put("createdAt", timeInMilliseconds);
 
-        db.collection("posts")
-                .add(post)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
+        boolean imageSet = this.imageSet && imageUri != null;
 
-                        db.collection("users/" + Login.getUserId() +"/friends")
-                                .get()
-                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                        for(DocumentSnapshot doc: task.getResult()){
-                                            Map<String, Object> notification = new HashMap<>();
-                                            notification.put("userId", Login.getUserId());
-                                            notification.put("notificationType", "New Post");
-                                            notification.put("postId", documentReference.getId());
-                                            notification.put("createdAt", timeInMilliseconds);
+        if (!retryPhotoUpload) {
+            db.collection("posts")
+                    .add(post)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            postId = documentReference.getId();
 
-
-                                            db.collection("users" + "/" + doc.getId() + "/notifications")
-                                                    .add(notification)
-                                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                                        @Override
-                                                        public void onSuccess(DocumentReference documentReference) {
-
-                                                        }
-                                                    });
-                                            Intent intent = new Intent(AddPost.this, HomeActivity.class);
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                            intent.putExtra(HomeActivity.FRAGMENT_ID, R.id.navigation_home);
-                                            startActivity(intent);
-                                            finish();
-                                        }
-                                    }
-                                });
-
-                        if(imageSet && imageUri != null){
-
-                            StorageReference fileReference =mStorageRef.child(documentReference.getId()
-                                    + "." + getFileExtension(imageUri));
-
-                            fileReference.putFile(imageUri)
-                                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            db.collection("users/" + Login.getUserId() + "/friends")
+                                    .whereEqualTo("status", "accepted")
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
-                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            for (DocumentSnapshot doc : task.getResult()) {
+                                                Map<String, Object> notification = new HashMap<>();
+                                                notification.put("userId", Login.getUserId());
+                                                notification.put("notificationType", "New Post");
+                                                notification.put("postId", documentReference.getId());
+                                                notification.put("createdAt", timeInMilliseconds);
+
+
+                                                db.collection("users" + "/" + doc.getId() + "/notifications")
+                                                        .add(notification);
+                                            }
+
+                                            if (!imageSet)
+                                                finish();
                                         }
                                     });
-                        }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
 
-                        Toast.makeText(AddPost.this, "Error", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                            uploadPhoto();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            Toast.makeText(AddPost.this, "Error", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } else {
+            uploadPhoto();
+        }
 
 //        db.collection("users/" + Login.getUserId() +"/friends")
 //                .get()
@@ -213,5 +229,16 @@ public class AddPost extends AppCompatActivity {
 
 
     }
-    //Toast.makeText(AddPost.this, "Not working", Toast.LENGTH_SHORT).show();
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
 }

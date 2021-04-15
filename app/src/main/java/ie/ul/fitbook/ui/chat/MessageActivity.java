@@ -197,7 +197,6 @@ public class MessageActivity extends AppCompatActivity {
 //                    intent.putExtra("userId", userId);
 //                    startActivity(intent);
 //                    finish();
-                    adapter.notifyDataSetChanged();
                     showMessages();
                     editText.setText(null);
                 }
@@ -205,28 +204,19 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-
     public void showMessages(){
-
-
-
-
         db.collection("users/" + Login.getUserId() +"/messages" + "/" + getIntent().getStringExtra("userId") + "/message")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        modelList.clear();
 
                         for(DocumentSnapshot doc: task.getResult()){
-
-
                             MessageModel model = new MessageModel(doc.getString("sender"), doc.getString("content"),String.valueOf(doc.get("timeStamp")));
                             modelList.add(model);
 
                         }
-
-                        //Collections.sort(modelList);
-                        //Collections.reverse(modelList);
 
                         Collections.sort(modelList);
                         Collections.reverse(modelList);
