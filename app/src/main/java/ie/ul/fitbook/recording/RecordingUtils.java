@@ -1,5 +1,7 @@
 package ie.ul.fitbook.recording;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.location.Location;
 
 import com.android.volley.Request;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.interfaces.ActionHandler;
 import ie.ul.fitbook.interfaces.ActionHandlerConsumer;
 import ie.ul.fitbook.recording.services.RecordingService;
 
@@ -200,5 +203,32 @@ public final class RecordingUtils {
         } else {
             response.doAction(ELEVATION_GAIN_UNAVAILABLE);
         }
+    }
+
+    /**
+     * Open a dialog asking the user to confirm whether they want to delete the activity.
+     * An activity is deleted/lost if back button is pressed in RecordingActivity, or delete button pressed
+     * in SaveRecordingActivity
+     * @param context the context to open the dialog with
+     * @param onConfirmed the handler if the deletion is confirmed
+     * @param title the title of the dialog
+     * @param message the message for the dialog to display
+     */
+    public static void confirmRecordingDeletion(Context context, ActionHandler onConfirmed, String title, String message) {
+        new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("Yes", (alertDialog, which) -> onConfirmed.doAction())
+                .setNegativeButton("No", (alertDialog, which) -> alertDialog.dismiss())
+                .show();
+    }
+
+    /**
+     * Shows a deletion dialog for when the back key is pressed in RecordingActivity or SaveRecordingActivity
+     * @param context the context to display the dialog in
+     * @param onConfirmed the handler to handle the action to perform when confirmed
+     */
+    public static void confirmBackPressedOnRecording(Context context, ActionHandler onConfirmed) {
+        confirmRecordingDeletion(context, onConfirmed, "Back Pressed", "This action will result in the loss of this activity. Are you sure you want to continue?");
     }
 }

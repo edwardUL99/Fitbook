@@ -7,7 +7,6 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -52,6 +51,7 @@ import ie.ul.fitbook.goals.TimeGoal;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
+import ie.ul.fitbook.recording.RecordingUtils;
 import ie.ul.fitbook.sports.Sport;
 import ie.ul.fitbook.statistics.WeeklyStat;
 import ie.ul.fitbook.statistics.WeeklyStatistics;
@@ -138,19 +138,16 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
      */
     @Override
     public void onBackPressed() {
-        onDeleteClicked();
+        RecordingUtils.confirmBackPressedOnRecording(this, this::onDeleteConfirmed);
     }
 
     /**
      * Handles when delete is clicked
      */
     private void onDeleteClicked() {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Activity")
-                .setMessage("Are you sure you want to delete this activity? It cannot be reversed")
-                .setPositiveButton("Yes", (alertDialog, which) -> onDeleteConfirmed())
-                .setNegativeButton("No", (alertDialog, which) -> alertDialog.dismiss())
-                .show();
+        RecordingUtils.confirmRecordingDeletion(this, this::onDeleteConfirmed,
+                "Delete Activity",
+                "Are you sure you want to delete this activity? It cannot be reversed");
     }
 
     /**
@@ -266,7 +263,6 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
         intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, recordedActivity);
         Profile profile = Login.getProfile();
         intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
-        ViewRecordedActivity.setProfileImage(profile.getProfileImage());
         startActivity(intent);
         finish();
     }

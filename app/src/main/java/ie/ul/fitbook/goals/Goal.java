@@ -1,6 +1,5 @@
 package ie.ul.fitbook.goals;
 
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -124,18 +123,6 @@ public abstract class Goal implements Parcelable {
      */
     public void setDocumentReference(@NonNull DocumentReference documentReference) {
         this.documentReference = documentReference;
-    }
-
-    /**
-     * Retrieves the ID of this document in firebase. This may be null, unless setDocumentId has been called
-     *
-     * @return the ID of the firebase document
-     */
-    public String getDocumentId() {
-        if (documentReference != null)
-            return documentReference.getId();
-
-        return null;
     }
 
     /**
