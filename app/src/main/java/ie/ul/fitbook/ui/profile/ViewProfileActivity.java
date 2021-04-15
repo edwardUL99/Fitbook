@@ -29,6 +29,7 @@ import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -634,6 +635,9 @@ public class ViewProfileActivity extends AppCompatActivity {
                                                 Map<String, Object> notification = new HashMap<>();
                                                 notification.put("userId", Login.getUserId());
                                                 notification.put("notificationType", "New Friend");
+                                                Date mDate = new Date();
+                                                long timeInMilliseconds = mDate.getTime();
+                                                notification.put("createdAt", timeInMilliseconds);
 
                                                 FirebaseFirestore db = FirebaseFirestore.getInstance();
                                                 db.collection("users" + "/" + userId + "/notifications")

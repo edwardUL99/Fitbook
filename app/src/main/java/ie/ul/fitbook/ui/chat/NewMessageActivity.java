@@ -191,14 +191,7 @@ public class NewMessageActivity extends AppCompatActivity {
                            });
 
                    db.collection("users" + "/" + userId + "/messages/" + Login.getUserId()  + "/message")
-                           .add(message)
-                           .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                               @Override
-                               public void onSuccess(DocumentReference documentReference) {
-
-                               }
-                           });
-
+                           .add(message);
 //                   db.collection("users" + "/" + Login.getUserId() + "/messages").document(userId)
 //                           .update({"timeStamp": timeInMilliseconds; });
 
@@ -215,15 +208,10 @@ public class NewMessageActivity extends AppCompatActivity {
                    Map<String, Object> notification = new HashMap<>();
                    notification.put("userId", Login.getUserId());
                    notification.put("notificationType", "New Message");
+                   notification.put("createdAt", timeInMilliseconds);
 
                    db.collection("users" + "/" + userId + "/notifications")
-                           .add(notification)
-                           .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                               @Override
-                               public void onSuccess(DocumentReference documentReference) {
-
-                               }
-                           });
+                           .add(notification);
 
 
                    Intent intent = new Intent(NewMessageActivity.this, MessageActivity.class);
