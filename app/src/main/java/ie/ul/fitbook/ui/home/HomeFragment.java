@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.network.NetworkUtils;
 import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.ui.custom.LoadingBar;
 import ie.ul.fitbook.ui.notifications.NotificationsActivity;
@@ -103,7 +104,6 @@ public class HomeFragment extends Fragment {
         modelList = new ArrayList<>();
 
         notificationId = activity.getIntent().getStringExtra("postId");
-        //Toast.makeText(getActivity(), notificationId, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -178,66 +178,70 @@ public class HomeFragment extends Fragment {
     }
 
     private void showData() {
-        loadingBar.show();
-        modelList.clear();
+        if (NetworkUtils.isNetworkConnected(getActivity())) {
+            loadingBar.show();
+            modelList.clear();
 
-        db.collection("posts")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            db.collection("posts")
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
-                        for(DocumentSnapshot doc: task.getResult()){
-                            Model model = new Model(doc.getId(), doc.getString("userId"),doc.getString("post"), String.valueOf(doc.get("createdAt")));
-                            modelList.add(model);
-                         }
-
-                        db.collection("activities")
-                                .get()
-                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task2) {
-                                mRecyclerView.setAdapter(null);
-
-                                for(DocumentSnapshot doc: task2.getResult()){
-                                    Map<String, Object> data = doc.getData();
-                                  
-                                    if (data != null) {
-                                        RecordedActivity model = RecordedActivity.from(data);
-
-                                        if (model != null) {
-                                            model.setActivityPostId(doc.getId());
-                                            modelList.add(model);
-                                        }
-                                    }
-                                }
-
-                                Collections.sort(modelList);
-                                Collections.reverse(modelList);
-                              
-                                int scrollPosition = 0;
-                                if(notificationId != null) {
-                                    for(int i = 0; i<modelList.size()-1; i++){
-                                        if(modelList.get(i).getId().equals(notificationId)) {
-                                            scrollPosition = i;
-                                            break;
-                                        }
-                                    }
-                                }
-                              
-                                adapter = new CustomAdapter(getActivity(), modelList);
-                                mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                                mRecyclerView.setAdapter(adapter);
-                                loadingBar.hide();
-                                if(notificationId != null) {
-                                    mRecyclerView.scrollToPosition(scrollPosition);
-                                }
-                                getActivity().getIntent().removeExtra("postId");
+                            for (DocumentSnapshot doc : task.getResult()) {
+                                Model model = new Model(doc.getId(), doc.getString("userId"), doc.getString("post"), String.valueOf(doc.get("createdAt")));
+                                modelList.add(model);
                             }
-                        })
-                        .addOnFailureListener(fail -> onLoadFail(fail));
-                    }
-                })
-                .addOnFailureListener(this::onLoadFail);
+
+                            db.collection("activities")
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task2) {
+                                            mRecyclerView.setAdapter(null);
+
+                                            for (DocumentSnapshot doc : task2.getResult()) {
+                                                Map<String, Object> data = doc.getData();
+
+                                                if (data != null) {
+                                                    RecordedActivity model = RecordedActivity.from(data);
+
+                                                    if (model != null) {
+                                                        model.setActivityPostId(doc.getId());
+                                                        modelList.add(model);
+                                                    }
+                                                }
+                                            }
+
+                                            Collections.sort(modelList);
+                                            Collections.reverse(modelList);
+
+                                            int scrollPosition = 0;
+                                            if (notificationId != null) {
+                                                for (int i = 0; i < modelList.size() - 1; i++) {
+                                                    if (modelList.get(i).getId().equals(notificationId)) {
+                                                        scrollPosition = i;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            adapter = new CustomAdapter(getActivity(), modelList);
+                                            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                                            mRecyclerView.setAdapter(adapter);
+                                            loadingBar.hide();
+                                            if (notificationId != null) {
+                                                mRecyclerView.scrollToPosition(scrollPosition);
+                                            }
+                                            getActivity().getIntent().removeExtra("postId");
+                                        }
+                                    })
+                                    .addOnFailureListener(fail -> onLoadFail(fail));
+                        }
+                    })
+                    .addOnFailureListener(this::onLoadFail);
+        } else {
+            loadingBar.hideBoth();
+        }
     }
 }

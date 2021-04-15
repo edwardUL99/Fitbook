@@ -225,8 +225,6 @@ public class MessageActivity extends AppCompatActivity {
                         adapter = new MessageAdapter(MessageActivity.this, modelList);
                         mRecyclerView.setAdapter(adapter);
 
-
-
                     }
 
                 });

@@ -35,6 +35,7 @@ import java.util.Map;
 
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
+import ie.ul.fitbook.network.NetworkUtils;
 
 public class AddPost extends AppCompatActivity {
 
@@ -68,7 +69,7 @@ public class AddPost extends AppCompatActivity {
         }
 
         EditText t3 = findViewById(R.id.textView3);
-        Button b2 = findViewById(R.id.button2);
+        b2 = findViewById(R.id.button2);
         Button imageButton = findViewById(R.id.imageButton);
         imageView = findViewById(R.id.imageView);
         mStorageRef = FirebaseStorage.getInstance().getReference("posts");
@@ -128,25 +129,30 @@ public class AddPost extends AppCompatActivity {
      */
     private void uploadPhoto() {
         if(imageSet && imageUri != null && postId != null) {
-            StorageReference fileReference = mStorageRef.child(postId
-                    + "." + getFileExtension(imageUri));
+            if (NetworkUtils.isNetworkConnected(this)) {
+                StorageReference fileReference = mStorageRef.child(postId
+                        + "." + getFileExtension(imageUri));
 
-            fileReference.putFile(imageUri)
-                    .addOnSuccessListener(success -> finish())
-                    .addOnFailureListener(fail -> {
-                        Toast.makeText(AddPost.this, "Failed to upload post picture, try again", Toast.LENGTH_SHORT)
-                                .show();
-                        fail.printStackTrace();
+                fileReference.putFile(imageUri)
+                        .addOnSuccessListener(success -> finish())
+                        .addOnFailureListener(fail -> {
+                            Toast.makeText(AddPost.this, "Failed to upload post picture, try again", Toast.LENGTH_SHORT)
+                                    .show();
+                            fail.printStackTrace();
 
-                        retryPhotoUpload = true;
-                        b2.setEnabled(true);
-                    });
+                            retryPhotoUpload = true;
+                            b2.setEnabled(true);
+                        });
+            } else {
+                Toast.makeText(this, "You need to be connected to the internet to make a post", Toast.LENGTH_SHORT)
+                        .show();
+                retryPhotoUpload = true;
+                b2.setEnabled(true);
+            }
         }
     }
 
     private void uploadData(String userId, String postText) {
-
-        //Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
 
         Date mDate = new Date();
         long timeInMilliseconds = mDate.getTime();
@@ -158,75 +164,57 @@ public class AddPost extends AppCompatActivity {
 
         boolean imageSet = this.imageSet && imageUri != null;
 
-        if (!retryPhotoUpload) {
-            db.collection("posts")
-                    .add(post)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            postId = documentReference.getId();
+        if (NetworkUtils.isNetworkConnected(this)) {
+            if (!retryPhotoUpload) {
+                db.collection("posts")
+                        .add(post)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                postId = documentReference.getId();
 
-                            db.collection("users/" + Login.getUserId() + "/friends")
-                                    .whereEqualTo("status", "accepted")
-                                    .get()
-                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            for (DocumentSnapshot doc : task.getResult()) {
-                                                Map<String, Object> notification = new HashMap<>();
-                                                notification.put("userId", Login.getUserId());
-                                                notification.put("notificationType", "New Post");
-                                                notification.put("postId", documentReference.getId());
-                                                notification.put("createdAt", timeInMilliseconds);
+                                db.collection("users/" + Login.getUserId() + "/friends")
+                                        .whereEqualTo("status", "accepted")
+                                        .get()
+                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                for (DocumentSnapshot doc : task.getResult()) {
+                                                    Map<String, Object> notification = new HashMap<>();
+                                                    notification.put("userId", Login.getUserId());
+                                                    notification.put("notificationType", "New Post");
+                                                    notification.put("postId", documentReference.getId());
+                                                    notification.put("createdAt", timeInMilliseconds);
 
 
-                                                db.collection("users" + "/" + doc.getId() + "/notifications")
-                                                        .add(notification);
+                                                    db.collection("users" + "/" + doc.getId() + "/notifications")
+                                                            .add(notification);
+                                                }
+
+                                                if (!imageSet)
+                                                    finish();
                                             }
+                                        });
 
-                                            if (!imageSet)
-                                                finish();
-                                        }
-                                    });
-
-                            uploadPhoto();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(AddPost.this, "Error occurred saving post, try again", Toast.LENGTH_SHORT).show();
-                            b2.setEnabled(true);
-                        }
-                    });
+                                uploadPhoto();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(AddPost.this, "Error occurred saving post, try again", Toast.LENGTH_SHORT).show();
+                                b2.setEnabled(true);
+                            }
+                        });
+            } else {
+                uploadPhoto();
+            }
         } else {
-            uploadPhoto();
+            Toast.makeText(this, "You need to be connected to the internet to make a post", Toast.LENGTH_SHORT)
+                    .show();
+            b2.setEnabled(true);
         }
-
-//        db.collection("users/" + Login.getUserId() +"/friends")
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                        for(DocumentSnapshot doc: task.getResult()){
-//                            Map<String, Object> notification = new HashMap<>();
-//                            notification.put("userId", Login.getUserId());
-//                            notification.put("notificationType", "userPost");
-//
-//                            db.collection("users" + "/" + doc.getId() + "/notifications")
-//                                    .add(notification)
-//                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-//                                        @Override
-//                                        public void onSuccess(DocumentReference documentReference) {
-//
-//                                        }
-//                                    });
-//                        }
-//                    }
-//                });
-
-
     }
 
     @Override

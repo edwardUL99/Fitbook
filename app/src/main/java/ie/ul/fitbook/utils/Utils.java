@@ -180,30 +180,7 @@ public final class Utils {
      * @param into the imageview to download the image into
      */
     public static void downloadImage(StorageReference reference, ImageView into) {
-        reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri downloadUrl) {
-                String uri = downloadUrl.toString();
-                Picasso.get()
-                        .load(uri)
-                        .placeholder(R.drawable.profile)
-                        .error(R.drawable.profile)
-                        .networkPolicy(NetworkPolicy.OFFLINE)
-                        .into(into, new Callback() {
-                            @Override
-                            public void onSuccess() {
-                                // no-op
-                            }
-
-                            @Override
-                            public void onError(Exception e) {
-                                Picasso.get()
-                                        .load(uri)
-                                        .into(into);
-                            }
-                        });
-            }
-        });
+        downloadImage(reference, into, false);
     }
 
     /**
@@ -220,7 +197,6 @@ public final class Utils {
                 Picasso.get()
                         .load(uri)
                         .placeholder(R.drawable.profile)
-                        .networkPolicy(NetworkPolicy.OFFLINE)
                         .into(into, new Callback() {
                             @Override
                             public void onSuccess() {
