@@ -83,6 +83,8 @@ public class HomeFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(() -> {
 
             modelList.clear();
+            //getActivity().getIntent().removeExtra("postId");
+            notificationId = null;
             showData();
 
 
@@ -176,46 +178,36 @@ public class HomeFragment extends Fragment {
 
 
                                      Model model = RecordedActivity.from(doc.getData());
+
+                                    ((RecordedActivity) model).setActivityPostId(doc.getId());
+
                                      modelList.add(model);
                                 }
 
                                 Collections.sort(modelList);
                                 Collections.reverse(modelList);
 
+                                int scrollPosition = 0;
+                                if(notificationId != null){
+
+                                    System.out.println("herehere" + notificationId);
+                                    for(int i = 0; i<modelList.size()-1; i++){
+                                        if(modelList.get(i).getId().equals(notificationId)) {
+                                            scrollPosition = i;
+                                            break;
+                                        }
+                                    }}
+
+                                System.out.println("herehere" + scrollPosition);
                                 adapter = new CustomAdapter(getActivity(), modelList);
                                 mRecyclerView.setAdapter(adapter);
-
-
-
-
+                                if(notificationId != null) {
+                                    System.out.println("herehere" + notificationId);
+                                    mRecyclerView.scrollToPosition(scrollPosition);
+                                }
+                                getActivity().getIntent().removeExtra("postId");
                             }
                         });
-
-
-
-
-
-
-
-                        //System.out.println("hereherehere" + modelList.size());
-                        //Collections.sort(modelList);
-                        //Collections.reverse(modelList);
-//                        if(notificationId != ""){
-//
-//                        for(int i = 0; i<modelList.size()-1; i++){
-//                            if(modelList.get(i).getId().equals(notificationId)) {
-//                                position = i;
-//                                break;
-//                            }
-//                        }}
-
-//                        adapter = new CustomAdapter(HomeFragment.this, modelList);
-//                        mRecyclerView.setAdapter(adapter);
-
-//                        if(notificationId != null) {
-//                            mRecyclerView.scrollToPosition(position);
-//                        }
-                        getActivity().getIntent().removeExtra("postId");
                     }
 
                 })

@@ -7,6 +7,19 @@
     android:layout_height="match_parent"
     tools:context=".ui.notifications.NotificationsActivity">
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+
+        android:src="@drawable/ic_bin"
+        android:id="@+id/delete_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="76dp"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

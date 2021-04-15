@@ -1,5 +1,6 @@
 package ie.ul.fitbook.recording;
 
+import android.app.Activity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -103,6 +104,8 @@ public class RecordedActivity extends Model implements Parcelable, Comparable<Mo
      * The user that posted this activity
      */
     public static final String USER_ID_KEY = "user";
+
+    public String activityPostId;
 
     /**
      * Construct a RecordedActivity object to represent an activity that has been recorded
@@ -386,5 +389,13 @@ public class RecordedActivity extends Model implements Parcelable, Comparable<Mo
 
 
         return String.valueOf(millis);
+    }
+
+    public void setActivityPostId(String activityPostId) {
+        this.activityPostId = activityPostId;
+    }
+
+    public String getId(){
+        return activityPostId;
     }
 }

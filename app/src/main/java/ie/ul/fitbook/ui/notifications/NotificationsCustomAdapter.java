@@ -64,7 +64,7 @@ public class NotificationsCustomAdapter extends RecyclerView.Adapter<Notificatio
                     String userId = notificationModelList.get(position).getUserId();
                     String notificationType = notificationModelList.get(position).getNotificationType();
 
-                    if(notificationType.equals("Message")) {
+                    if(notificationType.equals("New Message")) {
                         Intent intent = new Intent(notification, MessageActivity.class);
                         intent.putExtra("userId", userId);
                         notification.startActivity(intent);
@@ -73,6 +73,10 @@ public class NotificationsCustomAdapter extends RecyclerView.Adapter<Notificatio
                         intent.putExtra(ViewProfileActivity.USER_ID_EXTRA, userId);
                         notification.startActivity(intent);
                     } else if(notificationType.equals("New Post")){
+                        Intent intent = new Intent(notification, HomeActivity.class);
+                        intent.putExtra("postId", notificationModelList.get(position).getPostId());
+                        notification.startActivity(intent);
+                    } else if(notificationType.equals("New Activity")) {
                         Intent intent = new Intent(notification, HomeActivity.class);
                         intent.putExtra("postId", notificationModelList.get(position).getPostId());
                         notification.startActivity(intent);

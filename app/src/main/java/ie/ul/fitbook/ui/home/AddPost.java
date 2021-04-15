@@ -146,8 +146,6 @@ public class AddPost extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        Toast.makeText(AddPost.this, "DocumentSnapshot written with ID: "
-                                + documentReference.getId(), Toast.LENGTH_SHORT).show();
 
                         db.collection("users/" + Login.getUserId() +"/friends")
                                 .get()
@@ -159,6 +157,8 @@ public class AddPost extends AppCompatActivity {
                                             notification.put("userId", Login.getUserId());
                                             notification.put("notificationType", "New Post");
                                             notification.put("postId", documentReference.getId());
+                                            notification.put("createdAt", timeInMilliseconds);
+
 
                                             db.collection("users" + "/" + doc.getId() + "/notifications")
                                                     .add(notification)
