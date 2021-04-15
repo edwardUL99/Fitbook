@@ -193,7 +193,7 @@ public class HomeFragment extends Fragment {
 
                                 for(DocumentSnapshot doc: task2.getResult()){
                                     Map<String, Object> data = doc.getData();
-
+                                  
                                     if (data != null) {
                                         RecordedAvtivity model = RecordedActivity.from(data);
                                         model.setActivityPostId(doc.getId());
