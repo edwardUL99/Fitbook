@@ -6,14 +6,14 @@ import java.util.Date;
 
 public class Model implements Comparable<Model>{
 
-    String id, tile, post, timeStamp;
+    String id, userId, post, timeStamp;
 
     public Model(){
 }
-    public Model(String id, String tile, String post, String timeStamp){
+    public Model(String id, String userId, String post, String timeStamp){
 
         this.id = id;
-        this.tile = tile;
+        this.userId = userId;
         this.post = post;
         this.timeStamp = timeStamp;
         //this.profileImage = profileImage;
@@ -53,12 +53,12 @@ public class Model implements Comparable<Model>{
 }
 
 
-    public String getTile() {
-        return tile;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setTile(String tile) {
-        this.tile = tile;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getPost() {

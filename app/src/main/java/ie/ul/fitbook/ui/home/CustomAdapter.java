@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 
 
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
 
 import org.threeten.bp.format.DateTimeFormatter;
 
@@ -80,33 +74,10 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     private void downloadPostImage(Model model, ViewHolder holder) {
         StorageReference reference = new PostsStorage(model.id).getChildFolder("jpg");
-        reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri downloadUrl) {
-                String uri = downloadUrl.toString();
-                Picasso.get()
-                        .load(uri)
-                        .networkPolicy(NetworkPolicy.OFFLINE)
-                        .into(holder.postsPic, new Callback() {
-                            @Override
-                            public void onSuccess() {
-                                // no-op
-                            }
-
-                            @Override
-                            public void onError(Exception e) {
-                                Picasso.get()
-                                        .load(uri)
-                                        .into(holder.postsPic);
-                            }
-                        });
-            }
-        });
+        Utils.downloadImage(reference, holder.postsPic);
     }
 
     private void handlePostProfileDownload(Profile profile, ViewHolder holder) {
-        Bitmap profileImage = profile.getProfileImage();
-        holder.profilePic.setImageBitmap(profileImage);
         holder.userId.setText(profile.getName());
 
         holder.profilePic.setOnClickListener(new View.OnClickListener(){
@@ -114,14 +85,12 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
             public void onClick(View v) {
                 Intent intent = new Intent(context, ViewProfileActivity.class);
                 intent.putExtra(ViewProfileActivity.USER_PROFILE_EXTRA, profile);
-                ViewProfileActivity.setProfileImage(profileImage);
                 context.startActivity(intent);
             }
         });
     }
 
     private void handleActivityProfileDownload(Profile profile, RecordedActivity activity, ActivityViewHolder viewHolder){
-        viewHolder.profilePic.setImageBitmap(profile.getProfileImage());
         viewHolder.nameView.setText(profile.getName());
         viewHolder.dateView.setText(activity.getTimestamp().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm")));
         viewHolder.sportType.setText(Utils.capitalise(activity.getSport().toString()));
@@ -131,7 +100,6 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
                 Intent intent = new Intent(context, ViewRecordedActivity.class);
                 intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
                 intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, activity);
-                ViewRecordedActivity.setProfileImage(profile.getProfileImage());
                 context.startActivity(intent);
             }
         });
@@ -143,23 +111,22 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
         Model model = modelList.get(position);
         
         if(getItemViewType(position)==0){
-            final String userId = model.getTile();
+            final String userId = model.getUserId();
             String id = model.getId();
         
             if (profile == null || !id.equals(profile.getUserId())) {
                 ProfileUtils.downloadProfile(userId, profile -> handlePostProfileDownload(profile, holder),
                         () -> Toast.makeText(context, "Failed to download post", Toast.LENGTH_SHORT).show(),
-                        null, context, false);
+                        holder.profilePic, context, true, false);
                 holder.postContent.setText(model.getPost());
                 holder.createdAt.setText(model.getDate());
-                downloadPostImage(model, holder);
             } else {
                 holder.userId.setText(profile.getName());
                 holder.postContent.setText(model.getPost());
                 holder.createdAt.setText(model.getDate());
                 holder.profilePic.setImageBitmap(profile.getProfileImage());
-                downloadPostImage(model, holder);
             }
+            downloadPostImage(model, holder);
         }
         else{
             RecordedActivity activity = (RecordedActivity)model;
@@ -172,7 +139,7 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
             holder2.time.setText(Utils.durationToHoursMinutesSeconds(activity.getRecordedDuration()));
             String id = activity.getUserId();
             ProfileUtils.downloadProfile(id, profile -> handleActivityProfileDownload(profile, activity, holder2),() -> Toast.makeText(context, "Failed to download activity", Toast.LENGTH_SHORT).show(),
-                    null, context, false);
+                    holder2.profilePic, context, true, false);
         }
 
     }

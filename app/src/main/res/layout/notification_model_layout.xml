@@ -23,7 +23,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/userId"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/bike" />
+            app:srcCompat="@drawable/fitbooklogo" />
 
         <TextView
             android:id="@+id/userId"
