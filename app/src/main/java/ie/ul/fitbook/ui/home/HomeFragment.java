@@ -94,6 +94,8 @@ public class HomeFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.homeRefresh);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             modelList.clear();
+            //getActivity().getIntent().removeExtra("postId");
+            notificationId = null;
             showData();
 
             swipeRefreshLayout.setRefreshing(false);
@@ -193,28 +195,38 @@ public class HomeFragment extends Fragment {
                                     Map<String, Object> data = doc.getData();
 
                                     if (data != null) {
-                                        Model model = RecordedActivity.from(data);
+                                        RecordedAvtivity model = RecordedActivity.from(data);
+                                        model.setActivityPostId(doc.getId());
                                         modelList.add(model);
                                     }
                                 }
 
                                 Collections.sort(modelList);
                                 Collections.reverse(modelList);
-
+                              
+                                int scrollPosition = 0;
+                                if(notificationId != null) {
+                                    for(int i = 0; i<modelList.size()-1; i++){
+                                        if(modelList.get(i).getId().equals(notificationId)) {
+                                            scrollPosition = i;
+                                            break;
+                                        }
+                                    }
+                                }
+                              
                                 adapter = new CustomAdapter(getActivity(), modelList);
                                 mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                                 mRecyclerView.setAdapter(adapter);
                                 loadingBar.hide();
+                                if(notificationId != null) {
+                                    mRecyclerView.scrollToPosition(scrollPosition);
+                                }
+                                getActivity().getIntent().removeExtra("postId");
                             }
                         })
                         .addOnFailureListener(fail -> onLoadFail(fail));
-                        getActivity().getIntent().removeExtra("postId");
                     }
-
                 })
                 .addOnFailureListener(this::onLoadFail);
-
-
     }
-
 }

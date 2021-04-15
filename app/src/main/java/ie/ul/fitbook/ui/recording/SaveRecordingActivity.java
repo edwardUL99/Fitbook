@@ -24,10 +24,18 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -326,6 +334,34 @@ public class SaveRecordingActivity extends AppCompatActivity implements OnMapRea
                     } else {
                         setStatistics(profile, recordedActivity);
                     }
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    db.collection("users/" + Login.getUserId() +"/friends")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    for(DocumentSnapshot doc: task.getResult()){
+                                        Map<String, Object> notification = new HashMap<>();
+                                        notification.put("userId", Login.getUserId());
+                                        notification.put("notificationType", "New Activity");
+                                        notification.put("postId", success.getId());
+
+                                        Date mDate = new Date();
+                                        long timeInMilliseconds = mDate.getTime();
+
+                                        notification.put("createdAt", timeInMilliseconds);
+
+                                        db.collection("users" + "/" + doc.getId() + "/notifications")
+                                                .add(notification)
+                                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentReference documentReference) {
+
+                                                    }
+                                                });
+                                    }
+                                }
+                            });
                 })
                 .addOnFailureListener(fail -> {
                     Toast.makeText(this, "Failed: " + fail.getMessage(), Toast.LENGTH_SHORT).show();
