@@ -144,6 +144,7 @@
         android:id="@+id/speedView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="3dp"
         android:layout_marginBottom="65dp"
         android:text="0.0"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
@@ -235,10 +236,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="3dp"
-        android:layout_marginTop="42dp"
-        android:layout_marginEnd="38dp"
+        android:layout_marginTop="43dp"
         android:text="km/h"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/avgSpeedView"
         app:layout_constraintTop_toBottomOf="@+id/textView14" />
 

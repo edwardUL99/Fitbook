@@ -196,7 +196,6 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Vi
         Intent intent = new Intent(context, ViewRecordedActivity.class);
         intent.putExtra(ViewRecordedActivity.ACTIVITY_PROFILE, profile);
         intent.putExtra(ViewRecordedActivity.RECORDED_ACTIVITY, recordedActivity);
-        ViewRecordedActivity.setProfileImage(profile.getProfileImage());
         context.startActivity(intent);
     }
 

@@ -10,7 +10,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
@@ -28,6 +27,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +35,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import ie.ul.fitbook.R;
+import ie.ul.fitbook.network.NetworkUtils;
+import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.custom.LoadingBar;
 import ie.ul.fitbook.ui.custom.TraceableScrollView;
 import ie.ul.fitbook.database.UserDatabase;
@@ -130,19 +132,6 @@ public class ViewProfileActivity extends AppCompatActivity {
      * Use this flag to determine if cache should be used
      */
     private boolean useCache;
-    /**
-     * The profile image to load when the activity is launched
-     */
-    private static Bitmap imageToLoad;
-
-    /**
-     * Sets the profile image of the user to load. This should be called along with the USER_PROFILE_EXTRA
-     * since a profile image is too large to pass in a bundle
-     * @param bitmap the bitmap to load
-     */
-    public static void setProfileImage(Bitmap bitmap) {
-        imageToLoad = bitmap;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,10 +148,6 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         if (received.hasExtra(USER_PROFILE_EXTRA)) {
             profile = received.getParcelableExtra(USER_PROFILE_EXTRA);
-            if (imageToLoad != null) {
-                profile.setProfileImage(imageToLoad);
-                imageToLoad = null;
-            }
 
             if (profile == null)
                 throw new IllegalStateException("USER_PROFILE_EXTRA used but null profile has been passed to this Activity");
@@ -180,6 +165,16 @@ public class ViewProfileActivity extends AppCompatActivity {
             throw new IllegalStateException("No UserID has been passed to this Activity");
 
         setupActivity();
+    }
+
+    /**
+     * Download the user's profile image
+     */
+    private void downloadUserProfileImage() {
+        if (NetworkUtils.isNetworkConnected(this)) {
+            StorageReference storageReference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
+            Utils.downloadImage(storageReference, profileImage);
+        }
     }
 
     /**
@@ -226,6 +221,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         friendsView = findViewById(R.id.friends);
 
         useCache = true;
+        downloadUserProfileImage();
         setupProfileOptions();
         refreshProfile();
     }
@@ -357,6 +353,7 @@ public class ViewProfileActivity extends AppCompatActivity {
             Login.setProfile(profile);
 
         profileImage.setImageBitmap(profile.getProfileImage());
+        profile.setProfileImage(null); // save memory TODO make sure this doesn't cause bugs
         nameView.setText(profile.getName());
         String address = profile.getCity() + ", " + profile.getState();
         addressView.setText(address);
@@ -430,7 +427,6 @@ public class ViewProfileActivity extends AppCompatActivity {
         String userId = profile.getUserId();
 
         String ownId = Login.getUserId();
-        //boolean friends, ownProfile;
 
         UserDatabase userDb = new UserDatabase(userId);
         userDb.getChildCollection("friends")
