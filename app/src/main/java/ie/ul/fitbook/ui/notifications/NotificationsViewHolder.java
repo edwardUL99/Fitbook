@@ -25,12 +25,6 @@ public class NotificationsViewHolder extends RecyclerView.ViewHolder{
                 mClickListener.onItemClicked(v, getAdapterPosition());
             }
         });
-        itemView.setOnLongClickListener(new View.OnLongClickListener(){
-            @Override
-            public boolean onLongClick(View v){
-                mClickListener.onItemLongClicked(v, getAdapterPosition());
-                return true;
-            }});
 
         userId = itemView.findViewById(R.id.userId);
         notificationType = itemView.findViewById(R.id.notificationType);

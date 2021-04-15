@@ -108,9 +108,6 @@ public class HomeFragment extends Fragment {
 
     /**
      * Called when the fragment is visible to the user and actively running.
-     * This is generally
-     * tied to {@link Activity#onResume() Activity.onResume} of the containing
-     * Activity's lifecycle.
      */
     @Override
     public void onResume() {
@@ -156,13 +153,14 @@ public class HomeFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
+        Activity activity = requireActivity();
         if (id == R.id.notifications) {
-            Intent intent = new Intent(requireActivity(), NotificationsActivity.class);
+            Intent intent = new Intent(activity, NotificationsActivity.class);
             startActivity(intent);
 
             return true;
         } else if (id == R.id.profiles) {
-            Intent intent = new Intent(requireActivity(), ProfilesActivity.class);
+            Intent intent = new Intent(activity, ProfilesActivity.class);
             startActivity(intent);
 
             return true;

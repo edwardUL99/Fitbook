@@ -26,7 +26,6 @@ import org.threeten.bp.Duration;
 import java.util.Locale;
 
 import ie.ul.fitbook.R;
-import ie.ul.fitbook.storage.Storage;
 
 /**
  * This class provides various utility methods
@@ -230,21 +229,8 @@ public final class Utils {
 
                             @Override
                             public void onError(Exception e) {
-                                Picasso.get()
-                                        .load(uri)
-                                        .error(R.drawable.fitbooklogo)
-                                        .into(into, new Callback() {
-                                            @Override
-                                            public void onSuccess() {
-                                                // no-op
-                                            }
-
-                                            @Override
-                                            public void onError(Exception e) {
-                                                if (hideImageOnError)
-                                                    into.setVisibility(View.INVISIBLE);
-                                            }
-                                        });
+                                if (hideImageOnError)
+                                    into.setVisibility(View.INVISIBLE);
                             }
                         });
             }
