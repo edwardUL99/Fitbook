@@ -242,7 +242,9 @@ public class BasicDetailsFragment extends Fragment implements PersistentEditFrag
      * This method fills the fields with information from the logged in profile
      */
     private void fillFieldsWithProfile() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String name = profile.getName();
+        name = name == null && currentUser != null ? currentUser.getDisplayName():name;
         nameField.setText(Utils.capitalise(name == null ? "" : name));
         String city = profile.getCity();
         cityField.setText(Utils.capitalise(city == null ? "" : city));
@@ -251,7 +253,6 @@ public class BasicDetailsFragment extends Fragment implements PersistentEditFrag
         String country = profile.getCountry();
         countryField.setText(Utils.capitalise(country == null ? "" : country));
     }
-
 
     /**
      * Restores any uploads that were in progress

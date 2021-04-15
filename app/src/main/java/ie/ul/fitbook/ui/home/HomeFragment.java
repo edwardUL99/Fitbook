@@ -93,7 +93,6 @@ public class HomeFragment extends Fragment {
         mRecyclerView.setItemAnimator(null);
         swipeRefreshLayout = view.findViewById(R.id.homeRefresh);
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            modelList.clear();
             //getActivity().getIntent().removeExtra("postId");
             notificationId = null;
             showData();
@@ -105,6 +104,17 @@ public class HomeFragment extends Fragment {
 
         notificationId = activity.getIntent().getStringExtra("postId");
         //Toast.makeText(getActivity(), notificationId, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Called when the fragment is visible to the user and actively running.
+     * This is generally
+     * tied to {@link Activity#onResume() Activity.onResume} of the containing
+     * Activity's lifecycle.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
         showData();
     }
 
@@ -169,8 +179,9 @@ public class HomeFragment extends Fragment {
                 .show();
     }
 
-    private void showData(){
+    private void showData() {
         loadingBar.show();
+        modelList.clear();
 
         db.collection("posts")
                 .get()
@@ -181,7 +192,6 @@ public class HomeFragment extends Fragment {
                         for(DocumentSnapshot doc: task.getResult()){
                             Model model = new Model(doc.getId(), doc.getString("userId"),doc.getString("post"), String.valueOf(doc.get("createdAt")));
                             modelList.add(model);
-
                          }
 
                         db.collection("activities")
