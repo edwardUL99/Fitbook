@@ -174,7 +174,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     private void downloadUserProfileImage() {
         if (NetworkUtils.isNetworkConnected(this)) {
             StorageReference storageReference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
-            Utils.downloadImage(storageReference, profileImage);
+            Utils.downloadImage(storageReference, profileImage, this);
         }
     }
 

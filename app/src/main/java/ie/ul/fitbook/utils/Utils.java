@@ -1,6 +1,7 @@
 package ie.ul.fitbook.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -20,6 +21,8 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Request;
+import com.squareup.picasso.RequestCreator;
 
 import org.threeten.bp.Duration;
 
@@ -35,6 +38,10 @@ public final class Utils {
      * The name of our shared preferences file. This is where any key-value preferences will be stored
      */
     public static final String SHARED_PREFERENCES_FILE = "FitbookPrefs";
+    /**
+     * The key used to store the value to save cache
+     */
+    private static final String IMAGES_CACHE = "ie.ul.fitbook.DOWNLOAD_IMAGE_CACHE";
 
     private Utils() {
         // prevent instantiation
@@ -178,9 +185,10 @@ public final class Utils {
      * Downloads an image into the provided image view
      * @param reference the firebase storage reference to the image
      * @param into the imageview to download the image into
+     * @param context the context to download the photo with
      */
-    public static void downloadImage(StorageReference reference, ImageView into) {
-        downloadImage(reference, into, false);
+    public static void downloadImage(StorageReference reference, ImageView into, Context context) {
+        downloadImage(reference, into, false, context);
     }
 
     /**
@@ -188,15 +196,23 @@ public final class Utils {
      * @param reference the firebase storage reference to the image
      * @param into the imageview to download the image into
      * @param hideImageOnError true to hide the image view on error
+     * @param context the context to download the photo with
      */
-    public static void downloadImage(StorageReference reference, ImageView into, boolean hideImageOnError) {
+    public static void downloadImage(StorageReference reference, ImageView into, boolean hideImageOnError, Context context) {
         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri downloadUrl) {
                 String uri = downloadUrl.toString();
-                Picasso.get()
-                        .load(uri)
-                        .placeholder(R.drawable.profile)
+                Picasso picasso = Picasso.get();
+                RequestCreator requestCreator = picasso.load(uri)
+                        .placeholder(R.drawable.profile);
+
+                boolean useImageCache = useImageCache(context);
+
+                if (useImageCache)
+                    requestCreator = requestCreator.networkPolicy(NetworkPolicy.OFFLINE);
+
+                requestCreator
                         .into(into, new Callback() {
                             @Override
                             public void onSuccess() {
@@ -205,12 +221,65 @@ public final class Utils {
 
                             @Override
                             public void onError(Exception e) {
-                                if (hideImageOnError)
-                                    into.setVisibility(View.INVISIBLE);
+                                if (!useImageCache) {
+                                    if (hideImageOnError)
+                                        into.setVisibility(View.INVISIBLE);
+                                } else {
+                                    picasso.load(uri)
+                                            .placeholder(R.drawable.profile)
+                                            .into(into, new Callback() {
+                                                @Override
+                                                public void onSuccess() {
+                                                    // no-op
+                                                }
+
+                                                @Override
+                                                public void onError(Exception e) {
+                                                    if (hideImageOnError)
+                                                        into.setVisibility(View.INVISIBLE);
+                                                }
+                                            });
+                                }
                             }
                         });
             }
         })
-        .addOnFailureListener(fail -> into.setVisibility(View.INVISIBLE));
+        .addOnFailureListener(fail -> {
+            if (hideImageOnError)
+                into.setVisibility(View.INVISIBLE);
+            else {
+                into.setImageResource(R.drawable.profile);
+            }
+        });
+    }
+
+    /**
+     * Retrieve the shared preferences image cache value
+     * @param context the context to read from shared preferences
+     * @return true if to use image cache false if not
+     */
+    private static boolean useImageCache(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(IMAGES_CACHE, false);
+    }
+
+    /**
+     * Invalidate the image cache that is used by downloadImage
+     * @param context the context to use
+     */
+    public static void invalidateImageCache(Context context) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE).edit();
+        editor.putBoolean(IMAGES_CACHE, false);
+        editor.apply();
+    }
+
+    /**
+     * Sets the use cache value to true
+     * @param context the context to set the cache
+     */
+    public static void setUseImageCache(Context context) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE).edit();
+        editor.putBoolean(IMAGES_CACHE, true);
+        editor.apply();
     }
 }

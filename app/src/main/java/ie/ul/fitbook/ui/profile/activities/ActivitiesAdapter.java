@@ -20,6 +20,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.recording.RecordedActivity;
+import ie.ul.fitbook.storage.UserStorage;
 import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
 import ie.ul.fitbook.utils.Utils;
 
@@ -173,8 +174,11 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Vi
         Profile profile = context.profile;
         if (profile != null) {
             Bitmap bitmap = profile.getProfileImage();
-            if (bitmap != null)
+            if (bitmap != null) {
                 holder.profilePhoto.setImageBitmap(bitmap);
+            } else {
+                Utils.downloadImage(new UserStorage(activity.getUserId()).getChildFolder(Profile.PROFILE_IMAGE_PATH), holder.profilePhoto, context);
+            }
             holder.nameView.setText(profile.getName());
             holder.dateView.setText(activity.getTimestamp().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm")));
             holder.sportType.setText(Utils.capitalise(activity.getSport().toString()));

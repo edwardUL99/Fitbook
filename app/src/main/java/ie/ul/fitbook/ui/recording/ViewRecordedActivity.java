@@ -172,7 +172,7 @@ public class ViewRecordedActivity extends AppCompatActivity implements OnMapRead
     private void downloadUserProfileImage() {
         if (NetworkUtils.isNetworkConnected(this)) {
             StorageReference storageReference = new UserStorage(userID).getChildFolder(Profile.PROFILE_IMAGE_PATH);
-            Utils.downloadImage(storageReference, profileImage);
+            Utils.downloadImage(storageReference, profileImage, this);
         }
     }
 

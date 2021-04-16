@@ -373,6 +373,7 @@ public class BasicDetailsFragment extends Fragment implements PersistentEditFrag
 
         StorageReference childReference = userStorage.getChildFolder(Profile.PROFILE_IMAGE_PATH);
         childReference.putFile(imageURI)
+                .addOnSuccessListener(success -> Utils.invalidateImageCache(activity))
                 .addOnFailureListener(activity, e -> onUploadError());
 
         setProfileImage(imageURI);

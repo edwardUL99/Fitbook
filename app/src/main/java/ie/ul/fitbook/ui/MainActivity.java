@@ -19,6 +19,7 @@ import ie.ul.fitbook.network.NetworkUtils;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.ui.profile.ProfileCreationActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
+import ie.ul.fitbook.utils.Utils;
 
 /**
  * The MainActivity launching this application. It basically acts as an intermediary checking status of login,
@@ -39,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        Utils.invalidateImageCache(this); // relaunch the app without using cache
 
         if (!Login.checkLogin(this)) {
             Intent intent = new Intent(this, LoginActivity.class);
