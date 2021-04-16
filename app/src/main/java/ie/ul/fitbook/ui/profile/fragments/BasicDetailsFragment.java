@@ -227,7 +227,7 @@ public class BasicDetailsFragment extends Fragment implements PersistentEditFrag
         profileImage = view.findViewById(R.id.profileImage);
 
         if (editing) {
-            profileImage.setImageBitmap(profile.getProfileImage());
+            Utils.downloadImage(new UserStorage().getChildFolder(Profile.PROFILE_IMAGE_PATH), profileImage, activity);
         } else {
             if (imageURI != null)
                 setProfileImage(Uri.parse(imageURI));
