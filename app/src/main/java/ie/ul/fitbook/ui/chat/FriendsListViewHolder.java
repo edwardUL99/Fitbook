@@ -9,11 +9,21 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import ie.ul.fitbook.R;
 
-
+/**
+ * A FriendsListViewHolder for the chat folder. This ViewHolder is used by
+ * both the FriendsListCustomAdapter and the FriendsMessagedAdapter
+ */
 
 public class FriendsListViewHolder extends RecyclerView.ViewHolder {
 
+    /**
+     * Text fields of userName and userLocation, these are taken from a profile object
+     * and are the top bar of the message screen alongside the user profile image
+     */
     TextView userName, userLocation;
+    /**
+     * User profile image. Again, top bar of the message activity
+     */
 
     ImageView profilePic2;
     View mView;

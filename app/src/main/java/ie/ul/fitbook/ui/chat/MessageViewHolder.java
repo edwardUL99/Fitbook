@@ -8,10 +8,19 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import ie.ul.fitbook.R;
 
-
+/**
+ * A message viewholder by which the adapter can inflate the message layout
+ */
 
 public class MessageViewHolder extends RecyclerView.ViewHolder {
 
+    /**
+     * TextView fields of
+     * senderId
+     * messageContent
+     * createdAt
+     *
+     */
     TextView senderId, messageContent, createdAt;
     View mView;
 

@@ -32,10 +32,33 @@ import ie.ul.fitbook.ui.recording.ViewRecordedActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 import ie.ul.fitbook.utils.Utils;
 
+/**
+ * A custom adapter for the home fragment recycler view
+ * Here layouts are inflated for both posts and activites depending on
+ * itemview type. Different onclicklisteners are also set for different itemviews
+ */
+
 public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
+    /**
+     * Takes a Context context
+     *
+     */
+
     Context context;
+
+    /**
+     * Takes an array list of type Model
+     */
     List<Model> modelList;
+
+    /**
+     * A firestore db instacne
+     */
     FirebaseFirestore db;
+
+    /**
+     * A profile object
+     */
     Profile profile;
     /**
      * A cache of all downloaded profiles
@@ -85,16 +108,31 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
         return viewHolder;
     }
 
+    /**
+     * Downloads the post image
+     * @param model
+     * @param holder
+     */
     private void downloadPostImage(Model model, ViewHolder holder) {
         StorageReference reference = new PostsStorage(model.id).getChildFolder("jpg");
         Utils.downloadImage(reference, holder.postsPic, true, context);
     }
 
+    /**
+     * Handles profile download for the post
+     * @param profile
+     * @param holder
+     */
     private void handlePostProfileDownload(Profile profile, ViewHolder holder, Model model) {
         setPost(profile, model, holder);
         cachedProfiles.put(profile.getUserId(), profile);
     }
 
+     /* Handles profile download and sets onclicklistener
+     * @param profile
+     * @param activity
+     * @param viewHolder
+     */
     private void handleActivityProfileDownload(Profile profile, RecordedActivity activity, ActivityViewHolder viewHolder){
         setActivity(profile, activity, viewHolder);
         cachedProfiles.put(profile.getUserId(), profile);
@@ -217,6 +255,12 @@ public class CustomAdapter extends RecyclerView.Adapter<ViewHolder> {
             Utils.setUseImageCache(context);
         }
     }
+
+    /**
+     * Gets itemview type for onBindViewHolder
+     * @param position
+     * @return
+     */
 
     @Override
     public int getItemViewType(int position) {

@@ -23,22 +23,53 @@ import java.util.List;
 import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
 
-public class CreateMessageActivity extends AppCompatActivity {
 
+/**
+ * This activity runs when a user clicks the whatsappy like thing in the messages fragment.
+ * The purpose of this activity is to display a recycler view of friends belonging to the user but
+ * that the user has not messaged before. If a user sends a message to one of these friends, they will
+ * be removed from this recycler view and inserted into the one corresponding to the message fragment recycler.
+ */
+public class CreateMessageActivity extends AppCompatActivity {
+    /**
+     * An list of friends for this particular user
+     */
     List<FriendModel> friendModelList;
 
+    /**
+     * A recycler view belonging to this activity
+     */
+
     RecyclerView mRecyclerView;
+    /**
+     * A layout manager belong to this activity
+     */
     RecyclerView.LayoutManager layoutManager;
+    /**
+     * An instance of FirebaseFirestore belong to this activity
+     */
     FirebaseFirestore db;
+    /**
+     * An adapter belonging to this activity
+     */
     FriendsListCustomAdapter adapter;
 
-
+    /**
+     *
+     * @param savedInstanceState
+     * The onCreate call for this activity
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_message);
-
+/**
+ * An ActionBar belonging to this activity
+ */
         ActionBar actionBar = getSupportActionBar();
+        /**
+         * Sets the title for this action bar title for this activity
+         */
 
         if (actionBar != null) {
             actionBar.setTitle("Select Contact");
@@ -56,6 +87,23 @@ public class CreateMessageActivity extends AppCompatActivity {
         showData();
     }
 
+    /**
+     * This hook is called whenever an item in your options menu is selected.
+     * The default implementation simply returns false to have the normal
+     * processing happen (calling the item's Runnable or sending a message to
+     * its Handler as appropriate).  You can use this method for any items
+     * for which you would like to do processing without those other
+     * facilities.
+     *
+     * <p>Derived classes should call through to the base class for it to
+     * perform the default menu handling.</p>
+     *
+     * @param item The menu item that was selected.
+     * @return boolean Return false to allow normal menu processing to
+     * proceed, true to consume it here.
+     * @see #onCreateOptionsMenu
+     */
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -68,6 +116,13 @@ public class CreateMessageActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * This method generates the friendModelList with calls to the firestore database
+     * Friends who exist in the collection "unmessaged" are added to the list before it
+     * is given to the adapater.
+     *
+     * Probably could have sorted friends alphabetically here or something, but just forgot to do it
+     */
     private void showData(){
 
 

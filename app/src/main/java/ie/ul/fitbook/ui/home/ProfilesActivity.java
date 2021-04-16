@@ -28,15 +28,41 @@ import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 
 /**
- * This activity provides an activity for displaying and sarching profiles
+ * This activity provides an activity for displaying and searching profiles
+ * Honestly this acitivity again could have been a bit more fleshed out and if I had more time, I would have
  */
 public class ProfilesActivity extends AppCompatActivity {
 
+    /**
+     * A SearchView searchView
+     */
+
+
     SearchView searchView;
+
+    /**
+     * An instance of firestore db
+     */
     FirebaseFirestore db;
+
+    /**
+     * An array lsit of type FriendModel
+     */
     List<FriendModel> friendModelList;
+
+    /**
+     * A SearchAdapter adapter
+     */
     SearchAdapter adapter;
+
+    /**
+     * A RecyclerView mRecyclerView
+     */
     RecyclerView mRecyclerView;
+
+    /**
+     * A LayoutManager layoutManager
+     */
     RecyclerView.LayoutManager layoutManager;
     
 
@@ -106,6 +132,13 @@ public class ProfilesActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * This method searches the db using our string from SearchView
+     * Honestly I did not implement this correctly, I was at this point in time
+     * unaware of the whereEqualTo query. It works fine though. Again, I would have changed this if I had time
+     * @param s
+     */
 
     private void searchData(String s){
 

@@ -10,11 +10,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import ie.ul.fitbook.R;
 
 
-
+/**
+ * A viewHolder for the posts
+ */
 public class ViewHolder extends RecyclerView.ViewHolder {
-
+    /**
+     *
+     * TextViews of userId, postContent, createdAt
+     */
     TextView userId, postContent, createdAt;
+
+    /**
+     * ImageView of postsPic
+     */
     ImageView postsPic;
+
+    /**
+     * ImageView of profilePic
+     */
     ImageView profilePic;
     View mView;
 
@@ -22,26 +35,6 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
 
         mView = itemView;
-
-//        itemView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                mClickListener.onItemClicked(v, getAdapterPosition());
-//
-//            }
-//        });
-//
-//        itemView.setOnLongClickListener(new View.OnLongClickListener(){
-
-//            @Override
-//            public boolean onLongClick(View v){
-//                mClickListener.onItemLongClicked(v, getAdapterPosition());
-//
-//
-//                return true;
-//            }});
-
         userId = itemView.findViewById(R.id.post_userId);
         postContent = itemView.findViewById(R.id.post_userPost);
         createdAt = itemView.findViewById(R.id.post_createdAt);
@@ -58,7 +51,4 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         void onItemLongClicked(View view, int position);
 
     }
-//    public void setOnClickListener(ViewHolder.ClickListener clicklistener){
-//        mClickListener = clicklistener;
-//    }
 }

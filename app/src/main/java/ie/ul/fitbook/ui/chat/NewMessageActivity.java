@@ -31,13 +31,41 @@ import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
 
+/**
+ * A NewMessageActivity for creating new messages. This class is almost a duplicate of the MessageActivity
+ * except for that it is concerned only with the initial message. I would re-do this if I had more time. I don't
+ * think it was necessary at all
+ */
 public class NewMessageActivity extends AppCompatActivity {
 
+
+    /**
+     * A ImageView profilePic
+     */
     ImageView profilePic;
+
+    /**
+     * TextViews name and address. Error here I think, TextView name
+     * and address are redeclared below. Would fix this if I had time
+     */
     TextView name, address;
+
+    /**
+     * A string userId
+     */
     String userId;
+
+    /**
+     * An EditText editText, same as above
+     */
     EditText editText;
+    /**
+     * A Button button;
+     */
     Button button;
+    /**
+     * An instance of Firestore db
+     */
     FirebaseFirestore db;
 
     @Override
@@ -54,8 +82,9 @@ public class NewMessageActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
 
-
-
+        /**
+         * Sets the profile pic for the person we are messaging
+         */
 
         new UserDatabase(userId).getChildDocument(Profile.PROFILE_DOCUMENT)
                 .get()
@@ -72,20 +101,27 @@ public class NewMessageActivity extends AppCompatActivity {
 
                         StorageReference reference = new UserStorage(userId).getChildFolder(Profile.PROFILE_IMAGE_PATH);
 
-                        //StorageReference reference2 = new PostsStorage(id).getChildFolder("jpg");
-
-
                         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri downloadUrl) {
                                 String uri = downloadUrl.toString();
-                                //Picasso.get().load(uri).into(holder.postsPic);
                                 Picasso.get().load(uri).into(profilePic);
 
                             }
                         });
                     }
                 });
+
+        /**
+         *
+         * Sends a message. On clicking send we have the save the message in both sender and receivers appropriate collections
+         * Message is saved with values of sender, content, and timeStamp. Below we have two .add(message) which saves
+         * the message in the databases of both users. We also have two .set(recent) which grabs the timeStamp of the message
+         * and sets the timeStamp value of the main document to it. This is used for sorting messages. We also send a notification
+         * to the recipient that they have received a message. Here also we have to remove ourselves from the unmessaged collection
+         * of the user we have just messaged, and the user from our unmessaged collection.
+         *
+         */
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,24 +199,6 @@ public class NewMessageActivity extends AppCompatActivity {
 
                    System.out.println("here here" + userId + Login.getUserId());
 
-
-//                   db.collection("users").document( Login.getUserId() + "/messages/" + userId  + "/message" + "/" + id)
-//                           .set(message)
-//                           .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                               @Override
-//                               public void onSuccess(Void aVoid) {
-//
-//                               }
-//                           });
-//
-//                   db.collection("users").document( userId + "/messages/" + Login.getUserId()  + "/message"+ "/" + id)
-//                           .set(message)
-//                           .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                               @Override
-//                               public void onSuccess(Void aVoid) {
-//
-//                               }
-//                           });
                    db.collection("users" + "/" + Login.getUserId() + "/messages/" + userId  + "/message")
                            .add(message)
                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -192,18 +210,7 @@ public class NewMessageActivity extends AppCompatActivity {
 
                    db.collection("users" + "/" + userId + "/messages/" + Login.getUserId()  + "/message")
                            .add(message);
-//                   db.collection("users" + "/" + Login.getUserId() + "/messages").document(userId)
-//                           .update({"timeStamp": timeInMilliseconds; });
 
-
-//                   db.collection("users" + "/" + userId + "/messages/" + Login.getUserId()  + "/rece t")
-//                           .add(recent)
-//                           .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-//                               @Override
-//                               public void onSuccess(DocumentReference documentReference) {
-//
-//                               }
-//                           });
 
                    Map<String, Object> notification = new HashMap<>();
                    notification.put("userId", Login.getUserId());
