@@ -47,7 +47,7 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
     }
 
     /**
-     * Handles the download of a profile in the friends list
+     * Handles the download of a profile in the friends listF
      * @param profile the profile downloaded
      * @param holder the holder to download into
      */

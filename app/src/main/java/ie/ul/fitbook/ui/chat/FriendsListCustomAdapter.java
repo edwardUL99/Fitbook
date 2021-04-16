@@ -26,14 +26,31 @@ import ie.ul.fitbook.database.UserDatabase;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
 
+/**
+ * CustomerAdapter for the "Select Contact" recycler view. This inflates the
+ * friends_model_layout for users you are friends with but have no yet messaged
+ */
+
 
 public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListViewHolder> {
 
+    /**
+     * Takes a CreateMessageActivity object
+     */
     CreateMessageActivity friendsList;
+
+    /**
+     * Takes an array list of FriendModels
+     */
     List<FriendModel> friendModelList;
+    /**
+     * Takes a context
+     */
     Context context;
+    /**
+     * A FirebaseFirestor db instance
+     */
     FirebaseFirestore db;
-    Profile profile;
 
     public FriendsListCustomAdapter(CreateMessageActivity friendsList, List<FriendModel> friendModelList) {
         this.friendsList = friendsList;
@@ -53,35 +70,16 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
         FriendsListViewHolder viewHolder = new FriendsListViewHolder(itemView);
 
         viewHolder.setOnClickListener(new FriendsListViewHolder.ClickListener() {
+
+            /**
+             * When an item in the recycler view is clicked a NewMessageActivity with a putExtra of "userId", userId is started
+             * @param view
+             * @param position
+             */
             @Override
             public void onItemClicked(View view, int position) {
 
-                //String title = friendModelList.get(position).getUserName();
-                //String post = friendModelList.get(position).getUserLocation();
-
                 String userId = friendModelList.get(position).getUserId();
-//                db.collection("users/" + Login.getUserId() + "/unmessaged").document(userId)
-//                        .delete()
-//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                            @Override
-//                            public void onSuccess(Void aVoid) {
-//
-//
-//                            }
-//
-//                        });
-//                db.collection("users").document( Login.getUserId() + "/messages/" + userId)
-//                        .set(new HashMap<String, Object>())
-//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                            @Override
-//                            public void onSuccess(Void aVoid) {
-//
-//                            }
-//                        });
-//
-//                friendsList.finish();
-
-
                 Intent intent = new Intent(friendsList, NewMessageActivity.class);
                 intent.putExtra("userId", userId );
                 friendsList.startActivity(intent);
@@ -93,36 +91,6 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
             @Override
             public void onItemLongClicked(View view, int position) {
 
-                //String userId = friendModelList.get(position).getUserId();
-//                db.collection("users/" + Login.getUserId() + "/unmessaged").document(userId)
-//                        .delete()
-//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                            @Override
-//                            public void onSuccess(Void aVoid) {
-//
-//
-//                            }
-//
-//                        });
-//                db.collection("users").document( Login.getUserId() + "/messages/" + userId)
-//                        .set(new HashMap<String, Object>())
-//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                            @Override
-//                            public void onSuccess(Void aVoid) {
-//
-//                            }
-//                        });
-//
-//                friendsList.finish();
-
-
-//                Intent intent = new Intent(friendsList, NewMessageActivity.class);
-//                intent.putExtra("userId", userId );
-//                friendsList.startActivity(intent);
-//                friendsList.finish();
-
-
-
             }
         });
 
@@ -133,16 +101,6 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
     public void onBindViewHolder(@NonNull FriendsListViewHolder holder, int position) {
 
         final String[] userId = {friendModelList.get(position).getUserId()};
-        //String id = modelList.get(position).getId();
-
-
-
-
-
-
-
-
-
         new UserDatabase(userId[0]).getChildDocument(Profile.PROFILE_DOCUMENT)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -160,32 +118,16 @@ public class FriendsListCustomAdapter extends RecyclerView.Adapter<FriendsListVi
 
 
                         StorageReference reference = new UserStorage(userId[0]).getChildFolder(Profile.PROFILE_IMAGE_PATH);
-
-                        //StorageReference reference2 = new PostsStorage(id).getChildFolder("jpg");
-
-
                         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
                         {
                             @Override
                             public void onSuccess(Uri downloadUrl)
                             {
                                 String uri = downloadUrl.toString();
-                                //Picasso.get().load(uri).into(holder.postsPic);
                                 Picasso.get().load(uri).into(holder.profilePic2);
 
                             }
                         });
-
-
-
-                        //Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/fitbook-35d87.appspot.com/o/posts%2FL6xu9qTB1DenfIjHIcgC.jpg?alt=media&token=47fd9876-1b76-40d4-a0e2-2b2795e85b20").into(holder.postsPic);
-
-
-
-
-
-
-
                     }});
 
 

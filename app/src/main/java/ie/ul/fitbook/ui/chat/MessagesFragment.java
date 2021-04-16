@@ -30,17 +30,38 @@ import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
 
 /**
- * Fragment for displaying messages
+ * The main messages fragment. Friends messaged are displayed in a recycler view here.
+ * A floating action button brings us to a "Select Contact" screen where we might message
+ * a friend that we have not messaged before
  */
 public class MessagesFragment extends Fragment {
 
-
+    /**
+     * We create an array list of type FriendModel to send to the adapter here
+     */
     List<FriendModel> friendModelList;
 
+    /**
+     * A RecyclerView mRecyclerView
+     */
     RecyclerView mRecyclerView;
+    /**
+     *A LayoutManager layoutManager
+     */
     RecyclerView.LayoutManager layoutManager;
+    /**
+     * An instance of Firestore db
+     */
     FirebaseFirestore db;
+    /**
+     * FriendsMessagedAdapter adapter
+     */
+
     FriendsMessagedAdapter adapter;
+
+    /**
+     * A FloatingActionButton ab, actually this looks like a bug but I'm afraid to touch it right now haha. It works!
+     */
 
     FloatingActionButton ab;
 
@@ -64,6 +85,10 @@ public class MessagesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
+
+        /**
+         * Porbably should just be "ab = view.findViewById(R.id.add_fab2);"
+         */
         FloatingActionButton ab = view.findViewById(R.id.add_fab2);
 
         mRecyclerView = view.findViewById(R.id.recyclerView21);
@@ -72,6 +97,10 @@ public class MessagesFragment extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         db = FirebaseFirestore.getInstance();
         friendModelList = new ArrayList<>();
+
+        /**
+         * Brings you to the "Select Contact" screen
+         */
 
         ab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,13 +113,14 @@ public class MessagesFragment extends Fragment {
             }
         });
 
-
-
-        //showData();
 }
 
 
-
+    /**
+     * This onResume clears the friends and calls show data. This is is that the sort is always correct.
+     * New messages by the logged in user will change it, and new messages in the db from another user
+     *
+     */
 
     @Override
     public void onResume(){
@@ -100,6 +130,10 @@ public class MessagesFragment extends Fragment {
 
         showData();
     }
+
+    /**
+     * This grabs a list of the friends you have messaged from the database and sends it to one of the adapters
+     */
     private void showData(){
 
 

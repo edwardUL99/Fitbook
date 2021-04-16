@@ -37,15 +37,47 @@ import ie.ul.fitbook.R;
 import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.network.NetworkUtils;
 
+/**
+ * The AddPost class, here we can add posts to the database for a user
+ */
 public class AddPost extends AppCompatActivity {
 
     private static final int  PICK_IMAGE_REQUEST = 1;
+    /**
+     * An EditText t3, error here again, redeclared below. Would fix
+     * this easily if I had time but I'm a little bit scared to touch the
+     * code again
+     */
+
     EditText t3;
+
+    /**
+     * Buttons b2 and imageButton
+     */
     Button b2, imageButton;
+
+    /**
+     * An instance of Firestore db
+     */
     FirebaseFirestore db;
+    /**
+     * ImageView imageView
+     */
     ImageView imageView;
+
+    /**
+     * Uri imageUri
+     */
     Uri imageUri;
+
+    /**
+     * boolean Imageset, not sure if still used tbh
+     */
     boolean imageSet;
+
+    /**
+     * A StorageReference mStorageRef
+     */
     private StorageReference mStorageRef;
     /**
      * Flag which is set to true if user has to retry photo upload
@@ -96,6 +128,10 @@ public class AddPost extends AppCompatActivity {
 
     }
 
+    /**
+     * Opens the file chooser to grab an image from the user's documents
+     */
+
     private void openFileChooser(){
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -104,6 +140,13 @@ public class AddPost extends AppCompatActivity {
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
 
     }
+
+    /**
+     * The onActivityResult for the file chooser, grabs and sets the image after choosing it from docs
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -118,6 +161,12 @@ public class AddPost extends AppCompatActivity {
         }
     }
 
+    /**
+     * Gets the file extension as string
+     * @param uri
+     * @return
+     */
+
     private String getFileExtension(Uri uri){
         ContentResolver cR = getContentResolver();
         MimeTypeMap mime = MimeTypeMap.getSingleton();
@@ -125,7 +174,8 @@ public class AddPost extends AppCompatActivity {
     }
 
     /**
-     * Uploads photo for the given user and post
+     * Uploads photo for the given user and post. A lot of error handling here also
+     * b2 is disabled while the async upload occurs
      */
     private void uploadPhoto() {
         if(imageSet && imageUri != null && postId != null) {
@@ -151,6 +201,12 @@ public class AddPost extends AppCompatActivity {
             }
         }
     }
+
+    /**
+     * Upload the post and piture to firestore and firebase storage
+     * @param userId
+     * @param postText
+     */
 
     private void uploadData(String userId, String postText) {
 

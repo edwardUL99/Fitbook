@@ -21,6 +21,11 @@ import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.ui.profile.ViewProfileActivity;
 import ie.ul.fitbook.utils.ProfileUtils;
 
+/**
+ *
+ * An adapter for the ProfilesActivity recycler view
+ */
+
 
 public class SearchAdapter extends RecyclerView.Adapter<FriendsListViewHolder> {
 
@@ -71,10 +76,13 @@ public class SearchAdapter extends RecyclerView.Adapter<FriendsListViewHolder> {
                 holder.profilePic2, context, true, false);
     }
 
+
+
     @Override
     public int getItemCount() {
         return friendModelList.size();
     }
+
 
     public void addFriend(FriendModel friendModel) {
         friendModelList.add(friendModel);

@@ -35,7 +35,4 @@ public class ActivityViewHolder extends ViewHolder {
         void onItemClicked(View view, int position);
         void onItemLongClicked(View view, int position);
     }
-//    public void setOnClickListener(ActivityViewHolder.ClickListener clicklistener){
-//        mClickListener = clicklistener;
-//    }
 }

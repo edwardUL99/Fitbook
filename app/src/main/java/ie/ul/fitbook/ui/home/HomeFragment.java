@@ -37,14 +37,44 @@ import ie.ul.fitbook.recording.RecordedActivity;
 import ie.ul.fitbook.ui.custom.LoadingBar;
 import ie.ul.fitbook.ui.notifications.NotificationsActivity;
 
+/**
+ * HomeFragment displays a feed of activities and posts. If a user navigates
+ * to HomeFragment via notification, a scrollToPosition is implemented. A swipeRefresh and
+ * onResume are implemented. The showData() method grabs posts and activities from the database
+ * and saves them in an array list to send to the adapter
+ */
 public class HomeFragment extends Fragment {
 
+    /**
+     * We created an array list of type Model here
+     */
+
     List<Model> modelList;
+
+    /**
+     * A RecyclerView mRecyclerView
+     */
     RecyclerView mRecyclerView;
+    /**
+     * A LayoutManager layoutManager
+     */
     RecyclerView.LayoutManager layoutManager;
+    /**
+     * A Firestore db instance
+     */
     FirebaseFirestore db;
+    /**
+     * A CustomAdapter adapter
+     */
     CustomAdapter adapter;
+    /**
+     * A string notificationId. This is only ever set if someone navigates to the home fragment via a notification
+     */
     String notificationId;
+
+    /**
+     * A SwipeRefreshLayout swipeRefreshLayout
+     */
     private SwipeRefreshLayout swipeRefreshLayout;
     /**
      * The progress bar for saying the posts are loading
@@ -176,6 +206,14 @@ public class HomeFragment extends Fragment {
         Toast.makeText(getActivity(), "An error occurred loading posts", Toast.LENGTH_SHORT)
                 .show();
     }
+
+    /**
+     * This method grabs all activities and posts from the database and saves them to modelList. RecordedActivity extends model.
+     * RecordedActivity and Model objects are created from the document snapshots. After this, a sort is carried out and if notificationId is
+     * set here we grab our position for the paritcular post or activity id the notification id refers to. The array list is then sent to the adapter
+     * and after this our scorllToPosition is called
+     *
+     */
 
     private void showData() {
         if (NetworkUtils.isNetworkConnected(getActivity())) {

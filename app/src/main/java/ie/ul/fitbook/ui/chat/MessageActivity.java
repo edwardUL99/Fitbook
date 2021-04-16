@@ -38,19 +38,48 @@ import ie.ul.fitbook.login.Login;
 import ie.ul.fitbook.profile.Profile;
 import ie.ul.fitbook.storage.UserStorage;
 
+/**
+ * This is the main message activity. The layouts are inflated here and overlaid
+ *
+ */
+
 public class MessageActivity extends AppCompatActivity {
 
+    /**
+     * We create a array list of type MessageModel here to send to the adapter
+     */
 
     List<MessageModel> modelList;
+    /**
+     * A profile image for the user
+     */
     ImageView profilePic;
     TextView name, address;
+    /**
+     * A user id for the user
+     */
     String userId;
     EditText editText;
+    /**
+     * The send button
+     */
     Button button;
+    /**
+     * A recvclerview mRecyclerView
+     */
 
     RecyclerView mRecyclerView;
+    /**
+     * A layout manager layoutManager
+     */
     RecyclerView.LayoutManager layoutManager;
+    /**
+     * A instance of Firestore db
+     */
     FirebaseFirestore db;
+    /**
+     * A adapter for the messages
+     */
     MessageAdapter adapter;
 
 
@@ -73,6 +102,9 @@ public class MessageActivity extends AppCompatActivity {
         EditText editText = findViewById(R.id.textView18);
         button = findViewById(R.id.button18);
 
+        /**
+         * Gets the users profile image and loads it into profilePic
+         */
         new UserDatabase(userId).getChildDocument(Profile.PROFILE_DOCUMENT)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -89,7 +121,6 @@ public class MessageActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Uri downloadUrl) {
                                 String uri = downloadUrl.toString();
-                                //Picasso.get().load(uri).into(holder.postsPic);
                                 Picasso.get().load(uri).into(profilePic);
 
                             }
@@ -98,6 +129,16 @@ public class MessageActivity extends AppCompatActivity {
                 });
 
         showMessages();
+
+        /**
+         *
+         * On clicking send we have the save the message in both sender and receivers appropriate collections
+         * Message is saved with values of sender, content, and timeStamp. Below we have two .add(message) which saves
+         * the message in the databases of both users. We also have two .set(recent) which grabs the timeStamp of the message
+         * and sets the timeStamp value of the main document to it. This is used for sorting messages. We also send a notification
+         * to the recipient that they have received a message
+         *
+         */
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,27 +194,7 @@ public class MessageActivity extends AppCompatActivity {
                         }
                     });
 
-                    System.out.println("here here" + userId + Login.getUserId());
 
-
-
-//                    db.collection("users" + "/" + Login.getUserId() + "/messages/" + userId  + "/recent")
-//                            .add(recent)
-//                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-//                                @Override
-//                                public void onSuccess(DocumentReference documentReference) {
-//
-//                                }
-//                            });
-//
-//                    db.collection("users" + "/" + userId + "/messages/" + Login.getUserId()  + "/recent")
-//                            .add(recent)
-//                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-//                                @Override
-//                                public void onSuccess(DocumentReference documentReference) {
-//
-//                                }
-//                            });
 
                     Map<String, Object> notification = new HashMap<>();
                     notification.put("userId", Login.getUserId());
@@ -193,16 +214,17 @@ public class MessageActivity extends AppCompatActivity {
                                 }
                             });
 
-//                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
-//                    intent.putExtra("userId", userId);
-//                    startActivity(intent);
-//                    finish();
+
                     showMessages();
                     editText.setText(null);
                 }
             }
         });
     }
+
+    /**
+     * showMessages method gets messages from the database for a given friend. These are then sorted by timeStamp and sent to the adapter
+     */
 
     public void showMessages(){
         db.collection("users/" + Login.getUserId() +"/messages" + "/" + getIntent().getStringExtra("userId") + "/message")
